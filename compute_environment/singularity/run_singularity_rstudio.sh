@@ -10,16 +10,22 @@ export SINGULARITY_PULLFOLDER
 # SINGULARITY_IMAGE="shub://granek/mar1_rnaseq:rstudio"
 SINGULARITY_IMAGE="${1:-$SINGULARITY_DIR/mar1_rstudio.simg}"
 
-WORKSPACE="/home/crypto2/josh"
-H99_GENOME="/home/crypto1"
-
-if [ -d "${WORKSPACE}" ]; then
-    BIND_ARGS="--bind ${WORKSPACE}:${WORKSPACE}"
+DATA="/mnt/hts_scratch/Members/josh/hst2018"
+ 
+if [ -d "${DATA}" ]; then
+  BIND_ARGS="--bind ${DATA}:/data"
 fi
 
-if [ -d "${H99_GENOME}" ]; then
-    BIND_ARGS="$BIND_ARGS --bind ${H99_GENOME}:${H99_GENOME}"
-fi
+# WORKSPACE="/home/crypto2/josh"
+# H99_GENOME="/home/crypto1"
+# 
+# if [ -d "${WORKSPACE}" ]; then
+#     BIND_ARGS="--bind ${WORKSPACE}:${WORKSPACE}"
+# fi
+# 
+# if [ -d "${H99_GENOME}" ]; then
+#     BIND_ARGS="$BIND_ARGS --bind ${H99_GENOME}:${H99_GENOME}"
+# fi
 
 mkdir -p $SINGULARITY_PULLFOLDER $SINGULARITY_CACHEDIR
 #--------------------------------------------------------------------------------
