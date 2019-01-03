@@ -79,6 +79,7 @@ $CONDA_DIR/bin/conda install -c bioconda biopython gatk sra-tools samtools bwaki
     $CONDA_DIR/bin/conda clean -tipsy
 #--------------------------------------------------------------------------------
 mkdir -p /data
+mkdir -p /workspace
 
 # Helpful:
 #------------------
