@@ -42,16 +42,22 @@ do
         ss -lpn | grep -q ":$RSTUDIO_PORT " || break
 done
 
-SESSION_INFO_FILE="session_info_$(basename $SINGULARITY_IMAGE)_${RSTUDIO_PORT}.txt"
+SESSION_BASEDIR="/tmp/$(basename $SINGULARITY_IMAGE)_${RSTUDIO_PORT}"
+SESSION_INFO_FILE="$SESSION_BASEDIR/session_info_$(basename $SINGULARITY_IMAGE)_${RSTUDIO_PORT}.txt"
+SESSION_TMP_DIR="$SESSION_BASEDIR/tmp"
+SESSION_RSTUDIO_DIR="$SESSION_BASEDIR/rstudio"
+mkdir -p $SESSION_TMP_DIR $SESSION_RSTUDIO_DIR
+BIND_ARGS="$BIND_ARGS --bind ${SESSION_TMP_DIR}:/tmp --bind ${SESSION_RSTUDIO_DIR}:${HOME}/.rstudio"
 echo $SESSION_INFO_FILE
 export RSTUDIO_PASSWORD="`openssl rand -base64 16 | colrm 20`"
-printf "\n\nRStudio URL:\t\thttp://`hostname -A | cut -f1 -d' '`:${RSTUDIO_PORT}/\n" > $SESSION_INFO_FILE
+printf "Image:\t$SINGULARITY_IMAGE\n" > $SESSION_INFO_FILE
+printf "\n\nRStudio URL:\t\thttp://`hostname -A | cut -f1 -d' '`:${RSTUDIO_PORT}/\n" >> $SESSION_INFO_FILE
 printf "\nRStudio Username:\t$USER\n"  >> $SESSION_INFO_FILE
 printf "RStudio Password:\t$RSTUDIO_PASSWORD\n" >> $SESSION_INFO_FILE
 
 cat $SESSION_INFO_FILE
-trap "{ rm -f $SESSION_INFO_FILE; }" EXIT
+trap "{ rm -rf $SESSION_INFO_FILE $SESSION_BASEDIR; }" EXIT
 
-singularity run  --app rstudio $BIND_ARGS $SINGULARITY_IMAGE --auth-none 0 --auth-pam-helper rstudio_auth --www-port $RSTUDIO_PORT
+singularity run  --app rstudio $BIND_ARGS $SINGULARITY_IMAGE --auth-none 0 --auth-pam-helper rstudio_auth --www-port $RSTUDIO_PORT --server-working-dir $HOME/mar1_rnaseq
 
 
