@@ -1,13 +1,15 @@
 BootStrap: shub
-From: nickjer/singularity-rstudio:3.5.1
+From: granek/singularity-rstudio-tidyverse:3.5.2
 
 %labels
     Maintainer Josh Granek
-    Image_Version 0001
+    Image_Version 0002
 
 ##------------------------------------------------------------
 ## Build example:
-## sudo singularity build mar1_rstudio_v0001.simg Singularity.mar1
+## sudo singularity build mar1_rstudio_v0002.simg Singularity.mar1
+## sudo singularity build ~/container_images/mar1_rstudio_v0002.simg Singularity.mar1
+
 ##
 ## Run example:
 ## singularity run canu_rstudio.simg ls
@@ -57,9 +59,10 @@ From: nickjer/singularity-rstudio:3.5.1
    rm -rf /var/lib/apt/lists/*
 
 #--------------------------------------------------------------------------------
-Rscript -e "install.packages(pkgs = c('argparse','tidyverse','R.utils','caTools','fs','here'), \
+Rscript -e "install.packages(pkgs = c('argparse','R.utils','fs','here'), \
     repos='https://cran.revolutionanalytics.com/', \
-    dependencies=TRUE)"   
+    dependencies=TRUE, \
+    clean = TRUE)"
 
 Rscript -e "if (!requireNamespace('BiocManager')){install.packages('BiocManager')}; \
     BiocManager::install(); \
