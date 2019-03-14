@@ -85,6 +85,9 @@ $CONDA_DIR/bin/conda install -c bioconda mosdepth && \
     $CONDA_DIR/bin/conda clean -tipsy
 
 #--------------------------------------------------------------------------------
+pip install DukeDSClient
+#--------------------------------------------------------------------------------
+
 mkdir -p /data
 mkdir -p /workspace
 
