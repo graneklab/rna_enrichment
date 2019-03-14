@@ -25,7 +25,7 @@ From: granek/singularity-rstudio-tidyverse:3.5.2
 %environment
   export PATH=/usr/lib/rstudio-server/bin:${PATH}
   export CONDA_DIR=/opt/conda
-  export PATH=$CONDA_DIR/bin:$PATH
+  export PATH=$PATH:$CONDA_DIR/bin
   export SHELL=/bin/bash
   export LC_ALL=en_US.UTF-8
   export LANG=en_US.UTF-8
