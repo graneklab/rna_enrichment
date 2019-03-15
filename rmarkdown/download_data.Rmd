@@ -1,0 +1,37 @@
+---
+title: "Download Data"
+  html_document:
+    toc: false
+---
+
+
+```{bash}
+ddsclient list -p HTS_course | grep hts2018_pilot_rawdata | grep -v .fastq
+```
+
+```{bash}
+ddsclient list -p HTS_course | grep TOT 
+```
+
+
+```{bash}
+ddsclient download -p HTS_course \
+  --include hts_2018_data/hts2018_pilot_rawdata/md5_checksum.txt \
+  --include hts_2018_data/hts2018_pilot_rawdata/2018_pilot_metadata.md \
+  --include hts_2018_data/hts2018_pilot_rawdata/2018_pilot_metadata.tsv \
+  --include hts_2018_data/hts2018_pilot_rawdata/4_TOT_P_S51_L002_R1_001.fastq.gz \
+  --include hts_2018_data/hts2018_pilot_rawdata/3_TOT_J_S34_L004_R1_001.fastq.gz \
+  --include hts_2018_data/hts2018_pilot_rawdata/3_TOT_J_S34_L002_R1_001.fastq.gz \
+  --include hts_2018_data/hts2018_pilot_rawdata/2_TOT_C_S17_L001_R1_001.fastq.gz \
+  --include hts_2018_data/hts2018_pilot_rawdata/2_TOT_C_S17_L004_R1_001.fastq.gz \
+  --include hts_2018_data/hts2018_pilot_rawdata/2_TOT_C_S17_L003_R1_001.fastq.gz \
+  --include hts_2018_data/hts2018_pilot_rawdata/4_TOT_P_S51_L003_R1_001.fastq.gz \
+  --include hts_2018_data/hts2018_pilot_rawdata/4_TOT_P_S51_L001_R1_001.fastq.gz \
+  --include hts_2018_data/hts2018_pilot_rawdata/3_TOT_J_S34_L001_R1_001.fastq.gz \
+  --include hts_2018_data/hts2018_pilot_rawdata/4_TOT_P_S51_L004_R1_001.fastq.gz \
+  --include hts_2018_data/hts2018_pilot_rawdata/2_TOT_C_S17_L002_R1_001.fastq.gz \
+  --include hts_2018_data/hts2018_pilot_rawdata/3_TOT_J_S34_L003_R1_001.fastq.gz \
+  /data
+
+chmod -R a-w /data
+```
