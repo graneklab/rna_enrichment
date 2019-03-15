@@ -1,5 +1,6 @@
 #!/bin/bash
 
+set -u
 # SINGULARITY_IMAGE="singularity run shub://granek/crne_transposon:rstudio --app rstudio"
 SINGULARITY_DIR="$HOME/container_images"
 SINGULARITY_CACHEDIR="$SINGULARITY_DIR/cachedir"
@@ -10,25 +11,25 @@ export SINGULARITY_PULLFOLDER
 # SINGULARITY_IMAGE="shub://granek/mar1_rnaseq:rstudio"
 SINGULARITY_IMAGE="${1:-$SINGULARITY_DIR/mar1_rstudio.simg}"
 
-DATA="/mnt/hts_scratch/Members/josh/hst2018/rawdata"
-WORKSPACE="/mnt/hts_scratch/Members/josh/hst2018/workspace"
+# DATA_BASE_DIR="${DATA_BASE_DIR:-$HOME}"
+# WORKSPACE_BASE_DIR="${WORKSPACE_BASE_DIR:-$HOME}"
+
+DATA="$DATA_BASE_DIR/hts2018/rawdata"
+WORKSPACE="$WORKSPACE_BASE_DIR/hts2018/workspace"
 
  
 if [ -d "${DATA}" ]; then
     # BIND_ARGS="--bind ${DATA}:/data:ro"
     BIND_ARGS="--bind ${DATA}:/data"
+else
+    echo "Make sure DATA exists: $DATA"
 fi
 
-# mkdir -p $WORKSPACE
 if [ -d "${WORKSPACE}" ]; then
     BIND_ARGS="$BIND_ARGS --bind ${WORKSPACE}:/workspace"
 else
     echo "Make sure WORKSPACE exists: $WORKSPACE"
 fi
-# 
-# if [ -d "${H99_GENOME}" ]; then
-#     BIND_ARGS="$BIND_ARGS --bind ${H99_GENOME}:${H99_GENOME}"
-# fi
 
 mkdir -p $SINGULARITY_PULLFOLDER $SINGULARITY_CACHEDIR
 #--------------------------------------------------------------------------------
