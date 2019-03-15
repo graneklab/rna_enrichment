@@ -5,8 +5,7 @@ export THREADS=2
 export MAX_JOBS=10
 
 # Input
-export DATA_BASE="/data/hts2018_pilot"
-export RAW_FASTQS="$DATA_BASE/Granek_4837_180427A5"
+export RAW_FASTQS="/data/hts_2018_data/hts2018_pilot_rawdata"
 
 # Output
 export CUROUT=/workspace/2018_tot_samples
@@ -15,7 +14,7 @@ export ADAPTERS="$INFO/neb_E7600_adapters_withrc.fasta"
 export TRIMMED=$CUROUT/trimmed_fastqs
 export GENOME_DIR=$CUROUT/genome
 export STAR_OUT=$CUROUT/star_out
-export FINAL_COUNTS=$DATA_BASE/star_counts
+# export FINAL_COUNTS=$DATA_BASE/star_counts
 
 # Genome
 SHARED_URL="ftp://ftp.ensemblgenomes.org/pub/release-39/fungi"

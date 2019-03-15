@@ -45,3 +45,82 @@ STAR \
     --genomeSAindexNbases 11
 # --genomeSAindexNbases 6
 ```
+
+```{bash}
+
+```
+
+```{r}
+list.files("/data/hts_2018_data/hts2018_pilot_rawdata/")
+```
+
+
+```{bash}
+source run_star_config.sh
+ls $RAW_FASTQS/*.fastq.gz
+STAR --genomeDir $GENOME_DIR \
+    --outFileNamePrefix ${STAR_OUT}/genomeload_ \
+    --genomeLoad LoadAndExit 
+```
+
+
+```{bash}
+source run_star_config.sh
+mkdir -p ${STAR_OUT}
+trim_and_star_func() {
+    FASTQ=$1
+    FASTQ_BASE=${FASTQ##*/} # strip directory from file path
+    SAMPLE="${FASTQ_BASE%_R1_001.fastq.gz}" # strip .fq.gz file extension
+    echo $SAMPLE
+    echo $FASTQ
+    echo $FASTQ_BASE
+    # exit 1
+
+
+    # make a pipe for trimmed fastq
+    CUR_PIPE=`mktemp --dry-run`_${SAMPLE}_pipe.fq
+    mkfifo $CUR_PIPE
+
+    # Run fastq-mcf
+    fastq-mcf \
+        $ADAPTERS \
+        $FASTQ \
+        -o $CUR_PIPE \
+        -q 20 -x 0.5 &
+        
+    STAR \
+    --runMode alignReads \
+    --runThreadN $THREADS \
+    --genomeDir $GENOME_DIR \
+    --outSAMtype None \
+    --quantMode GeneCounts \
+    --genomeLoad LoadAndKeep \
+    --twopassMode None \
+    --limitBAMsortRAM 1280000000 \
+    --outFileNamePrefix ${STAR_OUT}/${SAMPLE}_ \
+    --outFilterScoreMinOverLread 0 --outFilterMatchNminOverLread 0 \
+    --outFilterMatchNmin 0 --outFilterMismatchNmax 2 \
+    --readFilesIn $CUR_PIPE        
+        
+    rm -f $CUR_PIPE
+}
+export -f trim_and_star_func
+
+STAR --genomeDir $GENOME_DIR \
+    --outFileNamePrefix ${STAR_OUT}/genomeload_ \
+    --genomeLoad LoadAndExit 
+
+# parallel --jobs $MAX_JOBS trim_and_star_func ::: $RAW_FASTQS/35_MA_*_L001_R1_001.fastq.gz
+# parallel --jobs $MAX_JOBS trim_and_star_func ::: $RAW_FASTQS/*_L001_R1_001.fastq.gz
+# parallel --jobs $MAX_JOBS trim_and_star_func ::: $RAW_FASTQS/[3-4]_RZ_*_L001_R1_001.fastq.gz
+# parallel --jobs $MAX_JOBS trim_and_star_func ::: $RAW_FASTQS/4_RZ_P_S43_L003_R1_001.fastq.gz $RAW_FASTQS/3_TOT_J_S34_L003_R1_001.fastq.gz
+# parallel --jobs $MAX_JOBS trim_and_star_func ::: $RAW_FASTQS/35_MA_P_S39_L002_R1_001.fastq.gz
+# parallel --jobs $MAX_JOBS trim_and_star_func ::: $RAW_FASTQS/*.fastq.gz
+parallel --jobs 1 trim_and_star_func ::: $RAW_FASTQS/*.fastq.gz
+
+
+STAR --genomeDir $GENOME_DIR \
+    --outFileNamePrefix ${STAR_OUT}/genomeremove_ \
+    --genomeLoad Remove
+```
+
