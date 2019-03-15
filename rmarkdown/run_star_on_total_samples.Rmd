@@ -46,23 +46,6 @@ STAR \
 # --genomeSAindexNbases 6
 ```
 
-```{bash}
-
-```
-
-```{r}
-list.files("/data/hts_2018_data/hts2018_pilot_rawdata/")
-```
-
-
-```{bash}
-source run_star_config.sh
-ls $RAW_FASTQS/*.fastq.gz
-STAR --genomeDir $GENOME_DIR \
-    --outFileNamePrefix ${STAR_OUT}/genomeload_ \
-    --genomeLoad LoadAndExit 
-```
-
 
 ```{bash}
 source run_star_config.sh
