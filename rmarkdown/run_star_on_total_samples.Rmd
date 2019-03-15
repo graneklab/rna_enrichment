@@ -1,0 +1,47 @@
+---
+title: "Run STAR on TOTAL samples"
+  html_document:
+    toc: false
+---
+
+
+# Make adapter file
+```{bash}
+source run_star_config.sh
+mkdir -p $INFO
+echo ">Adapter
+AGATCGGAAGAGCACACGTCTGAACTCCAGTCA
+>AdapterRead2
+AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT
+>Adapter_rc
+TGACTGGAGTTCAGACGTGTGCTCTTCCGATCT
+>AdapterRead2_rc
+ACACTCTTTCCCTACACGACGCTCTTCCGATCT" >  $INFO/neb_e7600_adapters.fasta
+head $INFO/neb_e7600_adapters.fasta
+```
+
+# Download and Index Genome
+```{bash}
+source run_star_config.sh
+mkdir -p $GENOME_DIR
+wget --no-verbose --directory-prefix ${GENOME_DIR} ${FA_URL} 
+wget --no-verbose --directory-prefix ${GENOME_DIR} ${GTF_URL}
+gunzip -f ${FA}.gz
+gunzip -f ${GTF}.gz
+
+ls ${GENOME_DIR}
+```
+
+
+```{bash}
+source run_star_config.sh
+mkdir -p ${STAR_OUT}
+STAR \
+    --runMode genomeGenerate \
+    --genomeDir $GENOME_DIR \
+    --genomeFastaFiles ${FA} \
+    --sjdbGTFfile ${GTF} \
+    --outFileNamePrefix ${STAR_OUT}/genome_ \
+    --genomeSAindexNbases 11
+# --genomeSAindexNbases 6
+```
