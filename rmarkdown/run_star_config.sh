@@ -14,6 +14,7 @@ export ADAPTERS="$INFO/neb_E7600_adapters_withrc.fasta"
 export TRIMMED=$CUROUT/trimmed_fastqs
 export GENOME_DIR=$CUROUT/genome
 export STAR_OUT=$CUROUT/star_out
+export MOSDEPTH_OUT=$CUROUT/mosdepth
 # export FINAL_COUNTS=$DATA_BASE/star_counts
 
 # Genome

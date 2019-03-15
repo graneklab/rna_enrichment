@@ -1,0 +1,53 @@
+---
+title: "Run Mosdepth"
+output:
+  html_document:
+    toc: false
+---
+
+
+```{bash}
+mosdepth -h
+
+
+```
+
+
+```{bash}
+source run_star_config.sh
+rm -rf $MOSDEPTH_OUT
+mkdir -p $MOSDEPTH_OUT
+mosdepth --chrom Mt --quantize 0:1:10:100:500:1000:2000:3000:4000: \
+  $MOSDEPTH_OUT/test $STAR_OUT/2_TOT_C_S17_L001_Aligned.sortedByCoord.out.bam
+```
+
+
+```{bash}
+source run_star_config.sh
+ls $STAR_OUT/*.bam
+```
+
+# Index BAMs
+```{bash}
+source run_star_config.sh
+mkdir -p ${STAR_OUT}
+trim_and_star_func() {
+    FASTQ=$1
+    FASTQ_BASE=${FASTQ##*/} # strip directory from file path
+    SAMPLE="${FASTQ_BASE%_R1_001.fastq.gz}" # strip .fq.gz file extension
+    echo $SAMPLE
+    echo $FASTQ
+    echo $FASTQ_BASE
+    # exit 1
+    samtools index ${STAR_OUT}/${SAMPLE}_Aligned.sortedByCoord.out.bam
+}
+export -f trim_and_star_func
+
+parallel --jobs $MAX_JOBS trim_and_star_func ::: $RAW_FASTQS/*.fastq.gz
+# parallel --jobs 1 trim_and_star_func ::: $RAW_FASTQS/2_TOT*L00[12]*.fastq.gz
+
+```
+
+
+
+
