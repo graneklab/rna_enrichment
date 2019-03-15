@@ -98,21 +98,9 @@ autoplot(tot_L1_bams, which = cur_range) +
   xlim(cur_range) +
   scale_x_continuous(breaks = scales::pretty_breaks(n = 20))
 ```
-End looks like 9326
+Right end looks like 9326
 
 ## Check Strand
-Just swap the strand in your GRanges object and then use
-ignore.strand=FALSE with summarizeOverlaps. Something like:
-
-strand(gr) <- ifelse(strand(gr)=="+", "-", "+")
-
-fl <- system.file("extdata", "ex1.bam", package="Rsamtools", mustWork=TRUE)
-rngs <- GRanges(c("seq1", "seq2"), IRanges(1, c(1575, 1584)))
-samp <- DataFrame(info="test", row.names="ex1")
-view <- BamViews(fl, bamSamples=samp, bamRanges=rngs)
-se <- summarizeOverlaps(view, mode=Union, ignore.strand=TRUE)
-colData(se)
-metadata(se)
 
 ```{r}
 region_21s_plus = GRanges(seqnames = "Mt", 
@@ -135,6 +123,114 @@ gene_21s = GRanges(seqnames = "Mt",
                    IRanges(6710, 9326), strand = "-")
 gene_21s
 ```
+
+
+
+
+
+
+# 15s rRNA region
+```{r}
+range_15s_region = GRanges(seqnames = "Mt", 
+                              IRanges(16950, 18500), strand = "*")
+
+autoplot(tot_L1_bams, which = range_15s_region) +
+  xlim(range_15s_region)
+```
+
+## 15s rRNA Left End
+
+```{r}
+range_15s_region = GRanges(seqnames = "Mt", 
+                              IRanges(17000, 17175), strand = "*")
+
+autoplot(tot_L1_bams, which = range_15s_region) +
+  xlim(range_15s_region)
+```
+
+```{r}
+range_15s_region = GRanges(seqnames = "Mt", 
+                              IRanges(17000, 17100), strand = "*")
+
+autoplot(tot_L1_bams, which = range_15s_region) +
+  xlim(range_15s_region)
+```
+
+```{r}
+range_15s_region = GRanges(seqnames = "Mt", 
+                              IRanges(16940, 16980), strand = "*")
+
+autoplot(tot_L1_bams, which = range_15s_region) +
+  xlim(range_15s_region)  +
+  scale_x_continuous(breaks = scales::pretty_breaks(n = 20))
+```
+
+left end looks like 16948?
+
+
+## 15s rRNA Right End
+```{r}
+cur_range = GRanges(seqnames = "Mt", 
+                              IRanges(18000, 18500), strand = "*")
+
+autoplot(tot_L1_bams, which = cur_range) +
+  xlim(cur_range)
+```
+
+
+```{r}
+cur_range = GRanges(seqnames = "Mt", 
+                              IRanges(18290, 18315), strand = "*")
+
+autoplot(tot_L1_bams, which = cur_range) +
+  xlim(cur_range)
+```
+
+```{r}
+cur_range = GRanges(seqnames = "Mt", 
+                              IRanges(18310, 18315), strand = "*")
+
+autoplot(tot_L1_bams, which = cur_range) +
+  xlim(cur_range)
+```
+
+```{r}
+cur_range = GRanges(seqnames = "Mt", 
+                              IRanges(18314, 18317), strand = "*")
+
+autoplot(tot_L1_bams, which = cur_range) +
+  xlim(cur_range)
+```
+Right end looks like 18316
+
+## Check Strand
+left end looks like 16948?
+Right end looks like 18316
+
+```{r}
+region_15s_plus = GRanges(seqnames = "Mt", 
+                              IRanges(16948, 18316), strand = "+")
+region_15s_plus.overlaps = summarizeOverlaps(region_15s_plus, tot_L1_bams)
+assay(region_15s_plus.overlaps)
+```
+
+```{r}
+region_15s_minus = GRanges(seqnames = "Mt", 
+                              IRanges(16948, 18316), strand = "-")
+region_15s_minus.overlaps = summarizeOverlaps(region_15s_minus, tot_L1_bams)
+assay(region_15s_minus.overlaps)
+```
+Vast majoring of reads are - strand, so 15s rRNA gene must be + strand
+
+## 15s rRNA annotation
+```{r}
+gene_15s = GRanges(seqnames = "Mt", 
+                   IRanges(16948, 18316), strand = "+")
+gene_15s
+```
+
+
+
 
 
 
