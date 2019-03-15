@@ -1,0 +1,89 @@
+---
+title: "Mito coverage plots"
+output:
+  html_document:
+    toc: false
+---
+
+
+
+
+```{r}
+library(Rsamtools)
+library(ggbio)
+library(fs)
+library(dplyr)
+bam_dir = "/workspace/2018_tot_samples/star_out"
+```
+```{r}
+dir_ls(bam_dir,glob = "*TOT*L00*.bam") 
+```
+
+```{r}
+bam_files = dir_ls(bam_dir,glob = "*TOT*L001*.bam") 
+bams = BamFileList(bam_files, paste0(bam_files, ".bai"))
+bam_files
+```
+
+```{r}
+cur_range = GRanges(seqnames = "Mt", 
+                              IRanges(1, 26000), strand = "*")
+
+autoplot(bams, which = cur_range) +
+  xlim(cur_range)
+```
+
+```{r}
+cur_range = GRanges(seqnames = "Mt", 
+                              IRanges(6500, 9500), strand = "*")
+
+autoplot(bams, which = cur_range) +
+  xlim(cur_range)
+```
+
+```{r}
+
+bam_file1 = file.path(bam_dir,"2_TOT_C_S17_L002_Aligned.sortedByCoord.out.bam")
+bam1<-BamFile(bam_file1, paste0(bam_file1, ".bai"))
+
+bam_file2 = file.path(bam_dir,"3_TOT_J_S34_L002_Aligned.sortedByCoord.out.bam")
+bam2<-BamFile(bam_file2, paste0(bam_file2, ".bai"))
+```
+
+```{r}
+autoplot(bam1, which = GRanges(seqnames = "Mt", 
+                              IRanges(5000, 20000), strand = "*"))
+```
+
+
+```{r}
+cur_range = GRanges(seqnames = "Mt", 
+                              IRanges(6500, 9500), strand = "*")
+
+autoplot(bam1, which = cur_range, color="red") +
+  xlim(cur_range)
+autoplot(bam2, which = cur_range, color="red") +
+  xlim(cur_range)
+```
+
+
+```{r}
+ggplot() + 
+  stat_coverage(bam1, geom = 'line', col = 'red', alpha = 0.2) + 
+  stat_coverage(bam2, geom = 'line', col = 'blue', alpha = 0.2)
+
+
+
+```
+
+```{r}
+ggplot() + 
+  stat_coverage(bam1, geom = 'line', col = 'red', alpha = 0.2)
+```
+
+```{r}
+cnt <- scanBam(bam1, param=ScanBamParam(which=cur_range))
+ggplot() + 
+  stat_coverage(cnt, geom = 'line', col = 'red', alpha = 0.2)
+```
+
