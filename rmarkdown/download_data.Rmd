@@ -36,3 +36,58 @@ ddsclient download -p HTS_course \
 
 chmod -R a-w /data
 ```
+
+# Get polyA and Ribozero libraries that match TOT samples
+
+```{bash}
+ddsclient list -p HTS_course | grep -e "rawdata/[234]_"
+```
+
+
+```{bash}
+chmod -R u+w /data/hts_2018_data/hts2018_pilot_rawdata
+
+ddsclient download -p HTS_course \
+  --include hts_2018_data/hts2018_pilot_rawdata/md5_checksum.txt \
+  --include hts_2018_data/hts2018_pilot_rawdata/2018_pilot_metadata.md \
+  --include hts_2018_data/hts2018_pilot_rawdata/2018_pilot_metadata.tsv \
+  --include hts_2018_data/hts2018_pilot_rawdata/3_RZ_J_S27_L004_R1_001.fastq.gz \
+  --include hts_2018_data/hts2018_pilot_rawdata/4_TOT_P_S51_L002_R1_001.fastq.gz \
+  --include hts_2018_data/hts2018_pilot_rawdata/3_TOT_J_S34_L004_R1_001.fastq.gz \
+  --include hts_2018_data/hts2018_pilot_rawdata/2_MA_C_S1_L004_R1_001.fastq.gz \
+  --include hts_2018_data/hts2018_pilot_rawdata/3_TOT_J_S34_L002_R1_001.fastq.gz \
+  --include hts_2018_data/hts2018_pilot_rawdata/4_MA_P_S35_L003_R1_001.fastq.gz \
+  --include hts_2018_data/hts2018_pilot_rawdata/2_TOT_C_S17_L001_R1_001.fastq.gz \
+  --include hts_2018_data/hts2018_pilot_rawdata/4_MA_P_S35_L001_R1_001.fastq.gz \
+  --include hts_2018_data/hts2018_pilot_rawdata/2_RZ_C_S9_L004_R1_001.fastq.gz \
+  --include hts_2018_data/hts2018_pilot_rawdata/4_MA_P_S35_L004_R1_001.fastq.gz \
+  --include hts_2018_data/hts2018_pilot_rawdata/4_RZ_P_S43_L002_R1_001.fastq.gz \
+  --include hts_2018_data/hts2018_pilot_rawdata/2_TOT_C_S17_L004_R1_001.fastq.gz \
+  --include hts_2018_data/hts2018_pilot_rawdata/2_TOT_C_S17_L003_R1_001.fastq.gz \
+  --include hts_2018_data/hts2018_pilot_rawdata/2_RZ_C_S9_L003_R1_001.fastq.gz \
+  --include hts_2018_data/hts2018_pilot_rawdata/4_TOT_P_S51_L003_R1_001.fastq.gz \
+  --include hts_2018_data/hts2018_pilot_rawdata/2_RZ_C_S9_L001_R1_001.fastq.gz \
+  --include hts_2018_data/hts2018_pilot_rawdata/4_RZ_P_S43_L003_R1_001.fastq.gz \
+  --include hts_2018_data/hts2018_pilot_rawdata/4_MA_P_S35_L002_R1_001.fastq.gz \
+  --include hts_2018_data/hts2018_pilot_rawdata/4_RZ_P_S43_L001_R1_001.fastq.gz \
+  --include hts_2018_data/hts2018_pilot_rawdata/4_TOT_P_S51_L001_R1_001.fastq.gz \
+  --include hts_2018_data/hts2018_pilot_rawdata/2_MA_C_S1_L003_R1_001.fastq.gz \
+  --include hts_2018_data/hts2018_pilot_rawdata/3_TOT_J_S34_L001_R1_001.fastq.gz \
+  --include hts_2018_data/hts2018_pilot_rawdata/3_RZ_J_S27_L003_R1_001.fastq.gz \
+  --include hts_2018_data/hts2018_pilot_rawdata/2_RZ_C_S9_L002_R1_001.fastq.gz \
+  --include hts_2018_data/hts2018_pilot_rawdata/2_MA_C_S1_L002_R1_001.fastq.gz \
+  --include hts_2018_data/hts2018_pilot_rawdata/3_RZ_J_S27_L001_R1_001.fastq.gz \
+  --include hts_2018_data/hts2018_pilot_rawdata/4_RZ_P_S43_L004_R1_001.fastq.gz \
+  --include hts_2018_data/hts2018_pilot_rawdata/4_TOT_P_S51_L004_R1_001.fastq.gz \
+  --include hts_2018_data/hts2018_pilot_rawdata/2_TOT_C_S17_L002_R1_001.fastq.gz \
+  --include hts_2018_data/hts2018_pilot_rawdata/3_TOT_J_S34_L003_R1_001.fastq.gz \
+  --include hts_2018_data/hts2018_pilot_rawdata/2_MA_C_S1_L001_R1_001.fastq.gz \
+  --include hts_2018_data/hts2018_pilot_rawdata/3_RZ_J_S27_L002_R1_001.fastq.gz \
+  --include hts_2018_data/hts2018_pilot_rawdata/3_MA_J_S19_L002_R1_001.fastq.gz \
+  --include hts_2018_data/hts2018_pilot_rawdata/3_MA_J_S19_L004_R1_001.fastq.gz \
+  --include hts_2018_data/hts2018_pilot_rawdata/3_MA_J_S19_L001_R1_001.fastq.gz \
+  --include hts_2018_data/hts2018_pilot_rawdata/3_MA_J_S19_L003_R1_001.fastq.gz \
+  /data
+
+chmod -R a-w /data/hts_2018_data/hts2018_pilot_rawdata
+```
