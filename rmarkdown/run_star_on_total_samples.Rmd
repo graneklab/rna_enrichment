@@ -16,8 +16,8 @@ AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT
 >Adapter_rc
 TGACTGGAGTTCAGACGTGTGCTCTTCCGATCT
 >AdapterRead2_rc
-ACACTCTTTCCCTACACGACGCTCTTCCGATCT" >  $INFO/neb_e7600_adapters.fasta
-head $INFO/neb_e7600_adapters.fasta
+ACACTCTTTCCCTACACGACGCTCTTCCGATCT" >  $ADAPTERS
+head $ADAPTERS
 ```
 
 # Download and Index Genome
@@ -116,7 +116,7 @@ STAR --genomeDir $GENOME_DIR \
 # parallel --jobs $MAX_JOBS trim_and_star_func ::: $RAW_FASTQS/4_RZ_P_S43_L003_R1_001.fastq.gz $RAW_FASTQS/3_TOT_J_S34_L003_R1_001.fastq.gz
 # parallel --jobs $MAX_JOBS trim_and_star_func ::: $RAW_FASTQS/35_MA_P_S39_L002_R1_001.fastq.gz
 # parallel --jobs $MAX_JOBS trim_and_star_func ::: $RAW_FASTQS/*.fastq.gz
-parallel --jobs 1 trim_and_star_func ::: $RAW_FASTQS/*.fastq.gz
+parallel --jobs $MAX_JOBS trim_and_star_func ::: $RAW_FASTQS/*.fastq.gz
 
 
 STAR --genomeDir $GENOME_DIR \
