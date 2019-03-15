@@ -1,9 +1,9 @@
 ---
 title: "Run STAR on TOTAL samples"
+output:
   html_document:
     toc: false
 ---
-
 
 # Make adapter file
 ```{bash}
