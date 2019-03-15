@@ -86,6 +86,7 @@ trim_and_star_func() {
     --readFilesIn $CUR_PIPE        
         
     rm -f $CUR_PIPE
+    samtools index ${STAR_OUT}/${SAMPLE}_Aligned.sortedByCoord.out.bam
 }
 export -f trim_and_star_func
 
