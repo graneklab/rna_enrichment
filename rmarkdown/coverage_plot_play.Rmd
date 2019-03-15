@@ -10,6 +10,8 @@ library(Rsamtools)
 library(ggbio)
 library(fs)
 library(dplyr)
+library(GenomicAlignments)
+
 bam_dir = "/workspace/2018_tot_samples/star_out"
 ```
 
@@ -24,7 +26,7 @@ tot_L1_bam_files = dir_ls(bam_dir,glob = "*TOT*L001*.bam")
 tot_L1_bams = BamFileList(tot_L1_bam_files, paste0(tot_L1_bam_files, ".bai"))
 tot_L1_bam_files
 ```
-
+# Whole Genome
 ```{r}
 cur_range = GRanges(seqnames = "Mt", 
                               IRanges(1, 26000), strand = "*")
@@ -33,19 +35,111 @@ autoplot(tot_L1_bams, which = cur_range) +
   xlim(cur_range)
 ```
 
+
+# 21s rRNA region
+```{r}
+range_21s_region = GRanges(seqnames = "Mt", 
+                              IRanges(6500, 9500), strand = "*")
+
+autoplot(tot_L1_bams, which = range_21s_region) +
+  xlim(range_21s_region)
+```
+
+## 21s rRNA Left End
+
 ```{r}
 cur_range = GRanges(seqnames = "Mt", 
-                              IRanges(6500, 9500), strand = "*")
+                              IRanges(6705, 6740), strand = "*")
 
 autoplot(tot_L1_bams, which = cur_range) +
   xlim(cur_range)
 ```
 
+```{r}
+cur_range = GRanges(seqnames = "Mt", 
+                              IRanges(6705, 6712), strand = "*")
 
+autoplot(tot_L1_bams, which = cur_range) +
+  xlim(cur_range)
+```
 
 ```{r}
-tot_bams[[1]]$path
+cur_range = GRanges(seqnames = "Mt", 
+                              IRanges(6705, 6710), strand = "*")
+
+autoplot(tot_L1_bams, which = cur_range) +
+  xlim(cur_range)
 ```
+
+```{r}
+cur_range = GRanges(seqnames = "Mt", 
+                              IRanges(6705, 6711), strand = "*")
+
+autoplot(tot_L1_bams, which = cur_range) +
+  xlim(cur_range)
+```
+left end looks like 6710
+
+
+## 21s rRNA Right End
+```{r}
+cur_range = GRanges(seqnames = "Mt", 
+                              IRanges(9000, 9500), strand = "*")
+
+autoplot(tot_L1_bams, which = cur_range) +
+  xlim(cur_range)
+```
+
+```{r}
+cur_range = GRanges(seqnames = "Mt", 
+                              IRanges(9300, 9329), strand = "*")
+
+autoplot(tot_L1_bams, which = cur_range) +
+  xlim(cur_range) +
+  scale_x_continuous(breaks = scales::pretty_breaks(n = 20))
+```
+End looks like 9326
+
+## Check Strand
+Just swap the strand in your GRanges object and then use
+ignore.strand=FALSE with summarizeOverlaps. Something like:
+
+strand(gr) <- ifelse(strand(gr)=="+", "-", "+")
+
+fl <- system.file("extdata", "ex1.bam", package="Rsamtools", mustWork=TRUE)
+rngs <- GRanges(c("seq1", "seq2"), IRanges(1, c(1575, 1584)))
+samp <- DataFrame(info="test", row.names="ex1")
+view <- BamViews(fl, bamSamples=samp, bamRanges=rngs)
+se <- summarizeOverlaps(view, mode=Union, ignore.strand=TRUE)
+colData(se)
+metadata(se)
+
+```{r}
+region_21s_plus = GRanges(seqnames = "Mt", 
+                              IRanges(6500, 9500), strand = "+")
+region_21s_plus.overlaps = summarizeOverlaps(region_21s_plus, tot_L1_bams)
+assay(region_21s_plus.overlaps)
+```
+
+```{r}
+region_21s_minus = GRanges(seqnames = "Mt", 
+                              IRanges(6500, 9500), strand = "-")
+region_21s_minus.overlaps = summarizeOverlaps(region_21s_minus, tot_L1_bams)
+assay(region_21s_minus.overlaps)
+```
+Vast majoring of reads are + strand, so 21s rRNA gene must be - strand
+
+## 21s rRNA annotation
+```{r}
+gene_21s = GRanges(seqnames = "Mt", 
+                   IRanges(6710, 9326), strand = "-")
+gene_21s
+```
+
+
+
+
+# Play
 
 ```{r}
 cur_range = GRanges(seqnames = "Mt", 
