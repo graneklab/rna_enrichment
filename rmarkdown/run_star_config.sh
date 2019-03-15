@@ -2,7 +2,7 @@ set -u
 
 # Run Configs
 export THREADS=2
-export MAX_JOBS=9
+export MAX_JOBS=5
 
 # Input
 export RAW_FASTQS="/data/hts_2018_data/hts2018_pilot_rawdata"

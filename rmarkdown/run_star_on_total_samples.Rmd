@@ -75,9 +75,9 @@ trim_and_star_func() {
     --runMode alignReads \
     --runThreadN $THREADS \
     --genomeDir $GENOME_DIR \
-    --outSAMtype None \
+    --outSAMtype BAM SortedByCoordinate \
     --quantMode GeneCounts \
-    --genomeLoad LoadAndKeep \
+    --genomeLoad NoSharedMemory \
     --twopassMode None \
     --limitBAMsortRAM 1280000000 \
     --outFileNamePrefix ${STAR_OUT}/${SAMPLE}_ \
@@ -89,21 +89,11 @@ trim_and_star_func() {
 }
 export -f trim_and_star_func
 
-STAR --genomeDir $GENOME_DIR \
-    --outFileNamePrefix ${STAR_OUT}/genomeload_ \
-    --genomeLoad LoadAndExit 
-
-# parallel --jobs $MAX_JOBS trim_and_star_func ::: $RAW_FASTQS/35_MA_*_L001_R1_001.fastq.gz
-# parallel --jobs $MAX_JOBS trim_and_star_func ::: $RAW_FASTQS/*_L001_R1_001.fastq.gz
-# parallel --jobs $MAX_JOBS trim_and_star_func ::: $RAW_FASTQS/[3-4]_RZ_*_L001_R1_001.fastq.gz
-# parallel --jobs $MAX_JOBS trim_and_star_func ::: $RAW_FASTQS/4_RZ_P_S43_L003_R1_001.fastq.gz $RAW_FASTQS/3_TOT_J_S34_L003_R1_001.fastq.gz
-# parallel --jobs $MAX_JOBS trim_and_star_func ::: $RAW_FASTQS/35_MA_P_S39_L002_R1_001.fastq.gz
-# parallel --jobs $MAX_JOBS trim_and_star_func ::: $RAW_FASTQS/*.fastq.gz
 parallel --jobs $MAX_JOBS trim_and_star_func ::: $RAW_FASTQS/*.fastq.gz
+# parallel --jobs 1 trim_and_star_func ::: $RAW_FASTQS/2_TOT*L00[12]*.fastq.gz
 
-
-STAR --genomeDir $GENOME_DIR \
-    --outFileNamePrefix ${STAR_OUT}/genomeremove_ \
-    --genomeLoad Remove
 ```
+
+
+
 
