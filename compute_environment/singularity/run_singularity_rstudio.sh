@@ -15,7 +15,8 @@ WORKSPACE="/mnt/hts_scratch/Members/josh/hst2018/workspace"
 
  
 if [ -d "${DATA}" ]; then
-  BIND_ARGS="--bind ${DATA}:/data:ro"
+    # BIND_ARGS="--bind ${DATA}:/data:ro"
+    BIND_ARGS="--bind ${DATA}:/data"
 fi
 
 # mkdir -p $WORKSPACE
