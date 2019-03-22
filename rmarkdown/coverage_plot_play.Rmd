@@ -14,6 +14,8 @@ library(GenomicAlignments)
 # library(stringr)
 library(rtracklayer)
 library(tidyverse)
+library(plyr)
+
 
 
 bam_dir = "/workspace/2018_tot_samples/star_out"
@@ -23,6 +25,8 @@ dir.create(seq_dir)
 # get paths from source run_star_config.sh?
 genome_fasta = ("/workspace/2018_tot_samples/genome/Cryptococcus_neoformans_var_grubii_h99.CNA3.dna.toplevel.fa")
 h99_genome = readDNAStringSet(genome_fasta)
+
+# Strip descriptions from chrom names
 h99_genome %>%
   names %>%
   str_extract("\\w+") ->
@@ -30,16 +34,12 @@ h99_genome %>%
 
 # full_mito_name = str_subset(names(h99_genome), "Mt") # pull the full name of the mito sequence from fasta
 # short_mito_name = str_extract(full_mito_name, "\\w+")
-short_mito_name = str_extract("Mt")
-```
-
-```{r}
-h99_genome %>%
-  names %>%
-  str_extract("\\w+") ->
-  names(h99_genome)
+short_mito_name = "Mt"
+small_mito_rrna_id = "15s_mito_rrna"
+large_mito_rrna_id = "21s_mito_rrna"
 
 ```
+
 
 
 ```{r}
@@ -146,9 +146,11 @@ Vast majoring of reads are + strand, so 21s rRNA gene must be - strand
 
 ## 21s rRNA annotation
 ```{r}
-gene_21s = GRanges(seqnames = full_mito_name, 
+gene_21s = GRanges(seqnames = short_mito_name, 
                    IRanges(6710, 9326), strand = "-")
 gene_21s
+names(gene_21s) = "large_mito_rRNA"
+
 ```
 
 
@@ -251,9 +253,9 @@ Vast majoring of reads are - strand, so 15s rRNA gene must be + strand
 
 ## 15s rRNA annotation
 ```{r}
-gene_15s = GRanges(seqnames = full_mito_name, 
+gene_15s = GRanges(seqnames = short_mito_name, 
                    ranges=IRanges(16948, 18316), strand = "+")
-names(gene_15s)
+names(gene_15s) = "small_mito_rRNA"
 ```
 
 # Extract and output 15s and 21s rRNA sequences
@@ -264,28 +266,22 @@ names(gene_15s)
 seqnames(gene_15s)
 # seq_15s = getSeq(h99_genome, mito_name)
 seq_15s = getSeq(h99_genome, gene_15s)
-names(seq_15s) = "15s_rRNA__CNA3"
+names(seq_15s) = "small_mito_rRNA__CNA3"
 seq_21s = getSeq(h99_genome, gene_21s)
-names(seq_21s) = "21s_rRNA__CNA3"
+names(seq_21s) = "large_mito_rRNA__CNA3"
 
-writeXStringSet(seq_15s, file.path(seq_dir, "15s_rRNA__CNA3.fasta"), format="fasta")
-writeXStringSet(seq_21s, file.path(seq_dir, "21s_rRNA__CNA3.fasta"), format="fasta")
+writeXStringSet(seq_15s, file.path(seq_dir, "small_mito_rRNA__CNA3.fasta"), format="fasta")
+writeXStringSet(seq_21s, file.path(seq_dir, "large_mito_rRNA__CNA3.fasta"), format="fasta")
 ```
 
 Fred's h99 mito anotation: https://www.ncbi.nlm.nih.gov/nucleotide/AY101381.1
 
 # Export rRNA gene coordinates as GTF
 https://support.bioconductor.org/p/70054/
-```{r}
-GRanges(gene_15s, seqnames=short_mito_name)
-```
-
 
 ```{r}
 # ? export.gff
 mito_rrna_gtf.file = file.path(seq_dir, "mito_rrna.gtf")
-seqnames(gene_15s) = short_mito_name
-seqnames(gene_21s) = short_mito_name
 
 export(GRangesList(gene_15s, gene_21s), 
        con = mito_rrna_gtf.file,
@@ -293,6 +289,7 @@ export(GRangesList(gene_15s, gene_21s),
 
 read_lines(mito_rrna_gtf.file)
 ```
+
 ```{r}
 h99_gtf.file = "/workspace/2018_tot_samples/genome/Cryptococcus_neoformans_var_grubii_h99.CNA3.39.gtf"
 h99_gtf = read_tsv(h99_gtf.file,
@@ -330,9 +327,71 @@ mito_rrna_gtf = read_tsv(mito_rrna_gtf.file,
 
 ```{r}
 h99_gtf %>%
-  filter(str_detect(attributes, "CNAG_10500")) %>%
-  head
+  filter(str_detect(attributes, "CNAG_10500")) 
 ```
+
+```{r}
+h99_gtf %>%
+  filter(str_detect(attributes, 'gene_biotype "rRNA"')) %>%
+  filter(feature=="exon")
+```
+
+```{r}
+h99_gtf %>%
+  filter(str_detect(attributes, 'gene_biotype "rRNA"')) %>%
+  filter(feature=="exon") %>%
+  select(attributes) ->
+  x
+x[[1]]
+```
+```{r}
+getwd()
+```
+
+
+```{r}
+df <- data.frame(chr="chr1", start=11:15, end=12:16,
+                 strand=c("+","-","+","*","."), score=".", feature="exon", source=)
+df
+gr <- makeGRangesFromDataFrame(df, keep.extra.columns=TRUE)
+export(gr, 
+       con = "test.gff2",
+       format="gff2", 
+       source="JAG")
+
+as.data.frame(gr) %>%
+  select(seqname", "source", "feature", "start", "end", "score", 
+                       "strand", "frame", "attributes")
+```
+
+```{r}
+GRangesList(gene_15s, gene_21s) %>%
+  as.data.frame()
+```
+```{r}
+# as.data.frame(gene_15s)
+
+make_df_from_gr = function(gr_vec){
+  attr_template = 'gene_id "XGENEIDX"; transcript_id "XGENEIDX-1"; exon_number "1"; gene_name "XGENEIDX"; gene_source "JAG"; gene_biotype "rRNA"; transcript_name "XGENEIDX"; transcript_source "JAG"; transcript_biotype "rRNA"; exon_id "XGENEIDX-1-1";'
+  attr = str_replace_all(attr_template, fixed("XGENEIDX"), names(gr_vec))
+  
+  names(gr_vec)
+  print(attr_template)
+  print(attr)
+  gr_vec %>%
+    as.tibble %>%
+    add_column(attributes=attr, source="JAG", feature="exon", score=".", frame=".") %>%
+    select(seqname=seqnames, source, feature, start, end, score, 
+                       strand, frame, attributes)
+    
+}
+
+# GRangesList(gene_15s, gene_21s) %>%
+#   map()
+# make_df_from_gr(gene_15s)
+ldply(GRangesList(gene_15s, gene_21s), make_df_from_gr)
+```
+
 
 ```{r}
 mito_rrna_gtf
