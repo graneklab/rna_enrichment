@@ -9,10 +9,11 @@ output:
 library(Rsamtools)
 library(ggbio)
 library(fs)
-library(dplyr)
+# library(dplyr)
 library(GenomicAlignments)
-library(stringr)
+# library(stringr)
 library(rtracklayer)
+library(tidyverse)
 
 
 bam_dir = "/workspace/2018_tot_samples/star_out"
@@ -22,11 +23,24 @@ dir.create(seq_dir)
 # get paths from source run_star_config.sh?
 genome_fasta = ("/workspace/2018_tot_samples/genome/Cryptococcus_neoformans_var_grubii_h99.CNA3.dna.toplevel.fa")
 h99_genome = readDNAStringSet(genome_fasta)
+h99_genome %>%
+  names %>%
+  str_extract("\\w+") ->
+  names(h99_genome)
 
-
-full_mito_name = str_subset(names(h99_genome), "Mt") # pull the full name of the mito sequence from fasta
-short_mito_name = str_extract(full_mito_name, "\\w+")
+# full_mito_name = str_subset(names(h99_genome), "Mt") # pull the full name of the mito sequence from fasta
+# short_mito_name = str_extract(full_mito_name, "\\w+")
+short_mito_name = str_extract("Mt")
 ```
+
+```{r}
+h99_genome %>%
+  names %>%
+  str_extract("\\w+") ->
+  names(h99_genome)
+
+```
+
 
 ```{r}
 tot_bam_files = dir_ls(bam_dir,glob = "*TOT*L00*.bam") 
@@ -239,7 +253,7 @@ Vast majoring of reads are - strand, so 15s rRNA gene must be + strand
 ```{r}
 gene_15s = GRanges(seqnames = full_mito_name, 
                    ranges=IRanges(16948, 18316), strand = "+")
-gene_15s
+names(gene_15s)
 ```
 
 # Extract and output 15s and 21s rRNA sequences
@@ -258,19 +272,77 @@ writeXStringSet(seq_15s, file.path(seq_dir, "15s_rRNA__CNA3.fasta"), format="fas
 writeXStringSet(seq_21s, file.path(seq_dir, "21s_rRNA__CNA3.fasta"), format="fasta")
 ```
 
-https://www.ncbi.nlm.nih.gov/nucleotide/AY101381.1?report=genbank&log$=nucltop&blast_rank=3&RID=8Y4N4142014
+Fred's h99 mito anotation: https://www.ncbi.nlm.nih.gov/nucleotide/AY101381.1
 
 # Export rRNA gene coordinates as GTF
 https://support.bioconductor.org/p/70054/
 ```{r}
-# ? export.gff
-export(GRangesList(gene_15s, gene_21s), 
-       con = file.path(seq_dir, "mito_rrna.gtf"),
-       format="gff2")
+GRanges(gene_15s, seqnames=short_mito_name)
 ```
 
+
+```{r}
+# ? export.gff
+mito_rrna_gtf.file = file.path(seq_dir, "mito_rrna.gtf")
+seqnames(gene_15s) = short_mito_name
+seqnames(gene_21s) = short_mito_name
+
+export(GRangesList(gene_15s, gene_21s), 
+       con = mito_rrna_gtf.file,
+       format="gff2")
+
+read_lines(mito_rrna_gtf.file)
+```
+```{r}
+h99_gtf.file = "/workspace/2018_tot_samples/genome/Cryptococcus_neoformans_var_grubii_h99.CNA3.39.gtf"
+h99_gtf = read_tsv(h99_gtf.file,
+                   col_names = c("seqname", "source", "feature", "start", "end", "score", 
+                       "strand", "frame", "attributes"),
+                   cols(seqname = col_character(),
+                        source = col_character(),
+                        feature = col_character(),
+                        start = col_double(),
+                        end = col_double(),
+                        score = col_character(),
+                        strand = col_character(),
+                        frame = col_character(),
+                        attributes = col_character()
+                        ),
+                   comment = "#"
+         )
+
+mito_rrna_gtf = read_tsv(mito_rrna_gtf.file,
+                   col_names = c("seqname", "source", "feature", "start", "end", "score", 
+                       "strand", "frame", "attributes"),
+                   cols(seqname = col_character(),
+                        source = col_character(),
+                        feature = col_character(),
+                        start = col_double(),
+                        end = col_double(),
+                        score = col_character(),
+                        strand = col_character(),
+                        frame = col_character(),
+                        attributes = col_character()
+                        ),
+                   comment = "#"
+         )
+```
+
+```{r}
+h99_gtf %>%
+  filter(str_detect(attributes, "CNAG_10500")) %>%
+  head
+```
+
+```{r}
+mito_rrna_gtf
+```
+
+
 ```{bash}
+# head /workspace/2018_tot_samples/genome/Cryptococcus_neoformans_var_grubii_h99.CNA3.39.gtf
 grep -i rRNA /workspace/2018_tot_samples/genome/Cryptococcus_neoformans_var_grubii_h99.CNA3.39.gtf
+
 ```
 
 ```{bash}
