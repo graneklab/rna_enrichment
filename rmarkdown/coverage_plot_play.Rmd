@@ -344,32 +344,8 @@ h99_gtf %>%
   x
 x[[1]]
 ```
-```{r}
-getwd()
-```
-
 
 ```{r}
-df <- data.frame(chr="chr1", start=11:15, end=12:16,
-                 strand=c("+","-","+","*","."), score=".", feature="exon", source=)
-df
-gr <- makeGRangesFromDataFrame(df, keep.extra.columns=TRUE)
-export(gr, 
-       con = "test.gff2",
-       format="gff2", 
-       source="JAG")
-
-as.data.frame(gr) %>%
-  select(seqname", "source", "feature", "start", "end", "score", 
-                       "strand", "frame", "attributes")
-```
-
-```{r}
-GRangesList(gene_15s, gene_21s) %>%
-  as.data.frame()
-```
-```{r}
-# as.data.frame(gene_15s)
 
 make_df_from_gr = function(gr_vec){
   attr_template = 'gene_id "XGENEIDX"; transcript_id "XGENEIDX-1"; exon_number "1"; gene_name "XGENEIDX"; gene_source "JAG"; gene_biotype "rRNA"; transcript_name "XGENEIDX"; transcript_source "JAG"; transcript_biotype "rRNA"; exon_id "XGENEIDX-1-1";'
@@ -386,16 +362,9 @@ make_df_from_gr = function(gr_vec){
     
 }
 
-# GRangesList(gene_15s, gene_21s) %>%
-#   map()
-# make_df_from_gr(gene_15s)
 ldply(GRangesList(gene_15s, gene_21s), make_df_from_gr)
 ```
 
-
-```{r}
-mito_rrna_gtf
-```
 
 
 ```{bash}
