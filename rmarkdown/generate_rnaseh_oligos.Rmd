@@ -1,0 +1,52 @@
+---
+title: "Generate Oligos"
+output:
+  html_document:
+    toc: false
+---
+
+```{r}
+seq_dir = "/workspace/2018_tot_samples/seq_out"
+h99_gtf.file = "/workspace/2018_tot_samples/genome/Cryptococcus_neoformans_var_grubii_h99.CNA3.39.gtf"
+
+
+h99_gtf.file %>%
+  path_file %>%
+  path_ext_remove %>%
+  paste0("__with_mito_rrna.gtf") %>%
+  file.path(seq_dir, .) ->
+  new_gtf.file
+```
+
+```{r}
+library(rtracklayer)
+rtrack = import.gff2(new_gtf.file)
+rtrack = rtrack[ rtrack$gene_biotype=="rRNA" ]
+rtrack = rtrack[ rtrack$type=="exon" ]
+rtrack
+```
+
+
+
+```{r}
+###################################################
+### code chunk number 27: makeTxDbFromGFF_1
+###################################################
+library(GenomicFeatures)
+gtf_file <- new_gtf.file
+txdb <- makeTxDbFromGFF(gtf_file, format="gtf")
+txdb
+
+
+###################################################
+### code chunk number 28: makeTxDbFromGFF_2
+###################################################
+exonsBy(txdb, by="gene")
+
+```
+
+```{r}
+keytypes(txdb)
+columns(txdb)
+```
+
