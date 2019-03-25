@@ -29,34 +29,9 @@ h99_genome %>%
   names %>%
   str_extract("\\w+") ->
   names(h99_genome)
-
-# 
-# seq_dir = "/workspace/2018_tot_samples/seq_out"
-# genome_dir = "/workspace/2018_tot_samples/genome/"
-# h99_gtf.file = "/workspace/2018_tot_samples/genome/Cryptococcus_neoformans_var_grubii_h99.CNA3.39.gtf"
-# 
-# 
-# 
-# 
-# h99_gtf.file %>%
-#   path_file %>%
-#   path_ext_remove %>%
-#   paste0("__with_mito_rrna.gtf") %>%
-#   file.path(seq_dir, .) ->
-#   new_gtf.file
-```
-
-```{r eval=FALSE, include=FALSE}
-rtrack = import.gff2(gtf_with_mito_rrna.file)
-rtrack = rtrack[ rtrack$gene_biotype=="rRNA" ]
-rtrack = rtrack[ rtrack$type=="exon" ]
-rtrack
 ```
 
 ## Subset rRNA granges
-
-
-
 ```{r}
 import.gff2(gtf_with_mito_rrna.file) %>%
   .[.$gene_biotype=="rRNA" ] %>%
@@ -72,56 +47,14 @@ rrna.gr
 rrna.seq1 = getSeq(h99_genome, rrna.gr[1]) %>%
   reverseComplement
 
-# rrna.seq1 = getSeq(h99_genome, rrna.gr["small_mito_rRNA"])
 rrna.seq1
 ```
 
 ## Reverse Complement rRNA Sequences
 
 ## Partition Sequences into oligos
-```{r}
-oligo_length = 50
+### Generate Oligo IRanges
 
-cur_rrna.seq = getSeq(h99_genome, rrna.gr[4]) %>%
-  reverseComplement
-
-cat("rRNA gene Length:", width(cur_rrna.seq), fill = TRUE)
-# account for the fact that most sequences will not be divisible by oligo_length by gapping some oligos by 1 base
-
-cat("------ Gapped oligo iranges --------", fill = TRUE)
-gapped_oligo_count = (width(cur_rrna.seq) %% oligo_length) + 1
-
-
-
-
-gapped.ir = successiveIRanges(rep(oligo_length, gapped_oligo_count), gapwidth = 1)
-gapped.ir.end = max(end(gapped.ir))
-
-if (gapped.ir.end <= width(cur_rrna.seq)){
-  cat("Number of gapped oligos:", gapped_oligo_count, fill = TRUE)
-
-  # (width(cur_rrna.seq) - ungapped.ir.start)
-  gapped.ir
-
-  cat("------ UNgapped oligo iranges --------", fill = TRUE)
-  ungapped.ir.start = gapped.ir.end + 1
-
-  ungapped_oligo_count = (((width(cur_rrna.seq) - ungapped.ir.start) + 1) / oligo_length)
-
-  cat("Number of UNgapped oligos:", ungapped_oligo_count, fill = TRUE)
-  ungapped.ir = successiveIRanges(rep(oligo_length, ungapped_oligo_count), gapwidth = 0, from=ungapped.ir.start)
-  ungapped.ir
-
-  combined.ir = c(gapped.ir, ungapped.ir)
-  combined.ir
-} else {
-  # if the rRNA fragment isn't large enough to accomodate all of the gapped oligos
-  # 
-  stop("Gotta figure something else out!")
-}
-
-
-```
 ```{r}
 oligo_length = 50
 
@@ -169,7 +102,6 @@ generateGappedIRanges = function(sequence, oligo_length, gapwidth=1) {
 }
 ```
 
-
 ```{r}
 cur_rrna.seq = getSeq(h99_genome, rrna.gr[3]) %>%
   reverseComplement
@@ -179,19 +111,12 @@ x = generateGappedIRanges(cur_rrna.seq, oligo_length)
 ```
 
 ```{r}
-
 rrna.gr[4]
 cur_rrna.seq = getSeq(h99_genome, rrna.gr[4]) %>%
   reverseComplement
 x = generateGappedIRanges(cur_rrna.seq, oligo_length, gapwidth = 6)
 
 cat("For CNAG_10503 we use a gap of 6bp, which leaves 5bp uncovered at the 3' end, since it is too short for gap adjustment with gapwidth=1", fill = TRUE)
-```
-
-
-
-```{r}
-max(end(gapped.ir))
 ```
 
 
