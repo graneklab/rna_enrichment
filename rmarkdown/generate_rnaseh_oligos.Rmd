@@ -14,7 +14,9 @@ output:
 # library(GenomicAlignments)
 # library(tidyverse)
 # library(plyr)
+library(BSgenome)
 library(rtracklayer)
+library(Biostrings)
 ```
 
 ## Load Data
@@ -219,7 +221,7 @@ as.data.frame(x)
 # Cruft
 
 
-```{r}
+```{r eval=FALSE, include=FALSE}
 ###################################################
 ### code chunk number 27: makeTxDbFromGFF_1
 ###################################################
@@ -236,7 +238,7 @@ exonsBy(txdb, by="gene")
 
 ```
 
-```{r}
+```{r eval=FALSE, include=FALSE}
 keytypes(txdb)
 columns(txdb)
 ```
