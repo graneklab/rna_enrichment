@@ -51,7 +51,95 @@ rtrack = rtrack[ rtrack$type=="exon" ]
 rtrack
 ```
 
+## Subset rRNA granges
 
+
+
+```{r}
+import.gff2(gtf_with_mito_rrna.file) %>%
+  .[.$gene_biotype=="rRNA" ] %>%
+  .[.$type=="exon" ] ->
+  rrna.gr
+rrna.gr
+```
+
+
+## Extract rRNA Sequences
+```{r}
+# rrna.gr[1] 
+rrna.seq1 = getSeq(h99_genome, rrna.gr[1]) %>%
+  reverseComplement
+
+# rrna.seq1 = getSeq(h99_genome, rrna.gr["small_mito_rRNA"])
+rrna.seq1
+```
+
+## Reverse Complement rRNA Sequences
+
+## Partition Sequences into oligos
+```{r}
+oligo_length = 50
+
+cur_rrna.seq = getSeq(h99_genome, rrna.gr[4]) %>%
+  reverseComplement
+
+cat("rRNA gene Length:", width(cur_rrna.seq), fill = TRUE)
+# account for the fact that most sequences will not be divisible by oligo_length by gapping some oligos by 1 base
+
+cat("------ Gapped oligo iranges --------", fill = TRUE)
+gapped_oligo_count = (width(cur_rrna.seq) %% oligo_length) + 1
+cat("Number of gapped oligos:", gapped_oligo_count, fill = TRUE)
+
+gapped.ir = successiveIRanges(rep(oligo_length, gapped_oligo_count), gapwidth = 1)
+
+# (width(cur_rrna.seq) - ungapped.ir.start)
+gapped.ir
+
+cat("------ UNgapped oligo iranges --------", fill = TRUE)
+gapped.ir.end = max(end(gapped.ir))
+ungapped.ir.start = gapped.ir.end + 1
+
+ungapped_oligo_count = (((width(cur_rrna.seq) - ungapped.ir.start) + 1) / oligo_length)
+
+cat("Number of UNgapped oligos:", ungapped_oligo_count, fill = TRUE)
+ungapped.ir = successiveIRanges(rep(oligo_length, ungapped_oligo_count), gapwidth = 0, from=ungapped.ir.start)
+ungapped.ir
+
+
+
+combined.ir = c(gapped.ir, ungapped.ir)
+combined.ir
+```
+
+```{r}
+max(end(gapped.ir))
+```
+
+
+```{r}
+breakInChunks(1001, chunksize=50)
+```
+
+
+```{r}
+successiveIRanges(rep(50, 1000))
+length(rrna.seq1)
+extractAt(rrna.seq1, successiveIRanges(rep(50, 10))) ->
+  x
+x
+# 
+# %>%
+#   writeXStringSet("test.fasta")
+as.data.frame(x)
+```
+
+## Name Oligos
+
+## Output Oligos
+
+
+
+# Cruft
 
 
 ```{r}
