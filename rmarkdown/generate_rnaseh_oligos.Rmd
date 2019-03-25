@@ -5,26 +5,52 @@ output:
     toc: false
 ---
 
+# Setup
+## Load Libraries
 ```{r}
-seq_dir = "/workspace/2018_tot_samples/seq_out"
-h99_gtf.file = "/workspace/2018_tot_samples/genome/Cryptococcus_neoformans_var_grubii_h99.CNA3.39.gtf"
-
-
-h99_gtf.file %>%
-  path_file %>%
-  path_ext_remove %>%
-  paste0("__with_mito_rrna.gtf") %>%
-  file.path(seq_dir, .) ->
-  new_gtf.file
+# library(Rsamtools)
+# library(ggbio)
+# library(fs)
+# library(GenomicAlignments)
+# library(tidyverse)
+# library(plyr)
+library(rtracklayer)
 ```
 
+## Load Data
 ```{r}
-library(rtracklayer)
-rtrack = import.gff2(new_gtf.file)
+source("run_config.R")
+
+h99_genome = readDNAStringSet(fa.file)
+# Strip descriptions from chrom names
+h99_genome %>%
+  names %>%
+  str_extract("\\w+") ->
+  names(h99_genome)
+
+# 
+# seq_dir = "/workspace/2018_tot_samples/seq_out"
+# genome_dir = "/workspace/2018_tot_samples/genome/"
+# h99_gtf.file = "/workspace/2018_tot_samples/genome/Cryptococcus_neoformans_var_grubii_h99.CNA3.39.gtf"
+# 
+# 
+# 
+# 
+# h99_gtf.file %>%
+#   path_file %>%
+#   path_ext_remove %>%
+#   paste0("__with_mito_rrna.gtf") %>%
+#   file.path(seq_dir, .) ->
+#   new_gtf.file
+```
+
+```{r eval=FALSE, include=FALSE}
+rtrack = import.gff2(gtf_with_mito_rrna.file)
 rtrack = rtrack[ rtrack$gene_biotype=="rRNA" ]
 rtrack = rtrack[ rtrack$type=="exon" ]
 rtrack
 ```
+
 
 
 
