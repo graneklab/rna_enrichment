@@ -88,28 +88,105 @@ cat("rRNA gene Length:", width(cur_rrna.seq), fill = TRUE)
 
 cat("------ Gapped oligo iranges --------", fill = TRUE)
 gapped_oligo_count = (width(cur_rrna.seq) %% oligo_length) + 1
-cat("Number of gapped oligos:", gapped_oligo_count, fill = TRUE)
+
+
+
 
 gapped.ir = successiveIRanges(rep(oligo_length, gapped_oligo_count), gapwidth = 1)
-
-# (width(cur_rrna.seq) - ungapped.ir.start)
-gapped.ir
-
-cat("------ UNgapped oligo iranges --------", fill = TRUE)
 gapped.ir.end = max(end(gapped.ir))
-ungapped.ir.start = gapped.ir.end + 1
 
-ungapped_oligo_count = (((width(cur_rrna.seq) - ungapped.ir.start) + 1) / oligo_length)
+if (gapped.ir.end <= width(cur_rrna.seq)){
+  cat("Number of gapped oligos:", gapped_oligo_count, fill = TRUE)
 
-cat("Number of UNgapped oligos:", ungapped_oligo_count, fill = TRUE)
-ungapped.ir = successiveIRanges(rep(oligo_length, ungapped_oligo_count), gapwidth = 0, from=ungapped.ir.start)
-ungapped.ir
+  # (width(cur_rrna.seq) - ungapped.ir.start)
+  gapped.ir
+
+  cat("------ UNgapped oligo iranges --------", fill = TRUE)
+  ungapped.ir.start = gapped.ir.end + 1
+
+  ungapped_oligo_count = (((width(cur_rrna.seq) - ungapped.ir.start) + 1) / oligo_length)
+
+  cat("Number of UNgapped oligos:", ungapped_oligo_count, fill = TRUE)
+  ungapped.ir = successiveIRanges(rep(oligo_length, ungapped_oligo_count), gapwidth = 0, from=ungapped.ir.start)
+  ungapped.ir
+
+  combined.ir = c(gapped.ir, ungapped.ir)
+  combined.ir
+} else {
+  # if the rRNA fragment isn't large enough to accomodate all of the gapped oligos
+  # 
+  stop("Gotta figure something else out!")
+}
 
 
-
-combined.ir = c(gapped.ir, ungapped.ir)
-combined.ir
 ```
+```{r}
+oligo_length = 50
+
+
+generateGappedIRanges = function(sequence, oligo_length, gapwidth=1) {
+  # seqeunce can be a BioString or an integer representing the sequence length
+  if (is.numeric(sequence)){
+    cur_seqlen = sequence
+  } else {
+    cur_seqlen = width(sequence)
+  }
+  cat("rRNA gene Length:", cur_seqlen, fill = TRUE)
+  
+  # account for the fact that most sequences will not be divisible by oligo_length by gapping some oligos by 1 base
+  cat("------ Gapped oligo iranges --------", fill = TRUE)
+  gapped_oligo_count = (cur_seqlen %% oligo_length) + 1
+  if ((gapped_oligo_count * oligo_length) > cur_seqlen){
+    gapped_oligo_count = cur_seqlen %/% oligo_length
+  }
+
+  gapped.ir = successiveIRanges(rep(oligo_length, gapped_oligo_count), gapwidth = gapwidth)
+  gapped.ir.end = max(end(gapped.ir))
+  
+  cat("Number of gapped oligos:", gapped_oligo_count, fill = TRUE)
+
+  # (cur_seqlen - ungapped.ir.start)
+  print(gapped.ir)
+
+  cat("------ UNgapped oligo iranges --------", fill = TRUE)
+  ungapped.ir.start = gapped.ir.end + 1
+
+  ungapped_oligo_count = (((cur_seqlen - ungapped.ir.start) + 1) %/% oligo_length)
+
+  cat("Number of UNgapped oligos:", ungapped_oligo_count, fill = TRUE)
+  ungapped.ir = successiveIRanges(rep(oligo_length, ungapped_oligo_count), gapwidth = 0, from=ungapped.ir.start)
+  print(ungapped.ir)
+
+  combined.ir = c(gapped.ir, ungapped.ir)
+  combined.ir.end = max(end(combined.ir))
+  uncovered_3_prime = cur_seqlen - combined.ir.end
+    
+  print(combined.ir)
+  cat("Number of Uncovered 3' bases:", uncovered_3_prime)
+  return(combined.ir)
+}
+```
+
+
+```{r}
+cur_rrna.seq = getSeq(h99_genome, rrna.gr[3]) %>%
+  reverseComplement
+x = generateGappedIRanges(cur_rrna.seq, oligo_length)
+
+# generateGappedIRanges(111, oligo_length, gapwidth = 1)
+```
+
+```{r}
+
+rrna.gr[4]
+cur_rrna.seq = getSeq(h99_genome, rrna.gr[4]) %>%
+  reverseComplement
+x = generateGappedIRanges(cur_rrna.seq, oligo_length, gapwidth = 6)
+
+cat("For CNAG_10503 we use a gap of 6bp, which leaves 5bp uncovered at the 3' end, since it is too short for gap adjustment with gapwidth=1", fill = TRUE)
+```
+
+
 
 ```{r}
 max(end(gapped.ir))
