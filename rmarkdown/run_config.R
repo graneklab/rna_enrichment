@@ -1,0 +1,70 @@
+# Libraries
+library(fs)
+library(tidyverse)
+
+# Setup R variables
+threads=2
+max_jobs=5
+
+# input
+raw_fastq.dir="/data/hts_2018_data/hts2018_pilot_rawdata"
+
+# output
+out.dir="/workspace/2018_tot_samples"
+info.dir=file.path(out.dir, "info")
+adapters.file= file.path(info.dir, "neb_e7600_adapters_withrc.fasta")
+trimmed.dir=file.path(out.dir, "trimmed_fastqs")
+genome.dir=file.path(out.dir, "genome")
+starout.dir=file.path(out.dir, "star_out")
+mosdepth.dir=file.path(out.dir, "mosdepth")
+seq.dir = file.path(out.dir, "seq_out"); dir.create(seq.dir)
+# export final_counts=$data_base/star_counts
+
+# genome
+shared_url = "ftp://ftp.ensemblgenomes.org/pub/release-39/fungi/"
+fa_url = paste0(shared_url,"fasta/fungi_basidiomycota1_collection/cryptococcus_neoformans_var_grubii_h99/dna/Cryptococcus_neoformans_var_grubii_h99.CNA3.dna.toplevel.fa.gz")
+gtf_url = paste0(shared_url,"gtf/fungi_basidiomycota1_collection/cryptococcus_neoformans_var_grubii_h99/Cryptococcus_neoformans_var_grubii_h99.CNA3.39.gtf.gz")
+
+gtf_url %>% 
+  basename %>%
+  path_ext_remove %>%
+  file.path(genome.dir, .) ->
+  gtf.file
+
+fa_url %>% 
+  basename %>%
+  path_ext_remove %>%
+  file.path(genome.dir, .) ->
+  fa.file
+
+
+gtf.file %>%
+  path_file %>%
+  path_ext_remove %>%
+  paste0("__with_mito_rrna.gtf") %>%
+  file.path(seq.dir, .) ->
+  gtf_with_mito_rrna.file
+
+# Setup Bash variables
+
+Sys.setenv(THREADS = "threads")
+Sys.setenv(MAX_JOBS = "max_jobs")
+
+# Input
+Sys.setenv(RAW_FASTQS = "raw_fastq.dir")
+
+# Output
+Sys.setenv(CUROUT = "out.dir")
+Sys.setenv(INFO = "info.dir")
+Sys.setenv(ADAPTERS = "adapters.file")
+Sys.setenv(TRIMMED = "trimmed.dir")
+Sys.setenv(GENOME_DIR = "genome.dir")
+Sys.setenv(STAR_OUT = "starout.dir")
+Sys.setenv(MOSDEPTH_OUT = "mosdepth.dir")
+
+Sys.setenv(FA_URL = "fa_url")
+Sys.setenv(GTF_URL = "gtf_url")
+
+
+Sys.setenv(GTF = "gtf.file")
+Sys.setenv(FA = "fa.file")
