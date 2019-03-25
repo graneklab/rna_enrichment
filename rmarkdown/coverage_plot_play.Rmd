@@ -5,28 +5,24 @@ output:
     toc: false
 ---
 
+# Setup
+## Load Libraries
 ```{r}
 library(Rsamtools)
 library(ggbio)
 library(fs)
-# library(dplyr)
 library(GenomicAlignments)
-# library(stringr)
 library(rtracklayer)
 library(tidyverse)
 library(plyr)
+```
 
-
-
-bam_dir = "/workspace/2018_tot_samples/star_out"
-seq_dir = "/workspace/2018_tot_samples/seq_out"
-dir.create(seq_dir)
+## Load Data
+```{r}
+source("run_config.R")
 
 # get paths from source run_star_config.sh?
-genome_fasta = ("/workspace/2018_tot_samples/genome/Cryptococcus_neoformans_var_grubii_h99.CNA3.dna.toplevel.fa")
-h99_genome = readDNAStringSet(genome_fasta)
-h99_gtf.file = "/workspace/2018_tot_samples/genome/Cryptococcus_neoformans_var_grubii_h99.CNA3.39.gtf"
-
+h99_genome = readDNAStringSet(fa.file)
 
 # Strip descriptions from chrom names
 h99_genome %>%
@@ -39,19 +35,18 @@ h99_genome %>%
 short_mito_name = "Mt"
 small_mito_rrna_id = "15s_mito_rrna"
 large_mito_rrna_id = "21s_mito_rrna"
-
 ```
 
 
 
 ```{r}
-tot_bam_files = dir_ls(bam_dir,glob = "*TOT*L00*.bam") 
+tot_bam_files = dir_ls(starout.dir,glob = "*TOT*L00*.bam") 
 tot_bams = BamFileList(tot_bam_files, paste0(tot_bam_files, ".bai"))
 tot_bam_files
 ```
 
 ```{r}
-tot_L1_bam_files = dir_ls(bam_dir,glob = "*TOT*L001*.bam") 
+tot_L1_bam_files = dir_ls(starout.dir,glob = "*TOT*L001*.bam") 
 tot_L1_bams = BamFileList(tot_L1_bam_files, paste0(tot_L1_bam_files, ".bai"))
 tot_L1_bam_files
 ```
@@ -272,8 +267,8 @@ names(seq_15s) = "small_mito_rRNA__CNA3"
 seq_21s = getSeq(h99_genome, gene_21s)
 names(seq_21s) = "large_mito_rRNA__CNA3"
 
-writeXStringSet(seq_15s, file.path(seq_dir, "small_mito_rRNA__CNA3.fasta"), format="fasta")
-writeXStringSet(seq_21s, file.path(seq_dir, "large_mito_rRNA__CNA3.fasta"), format="fasta")
+writeXStringSet(seq_15s, file.path(seq.dir, "small_mito_rRNA__CNA3.fasta"), format="fasta")
+writeXStringSet(seq_21s, file.path(seq.dir, "large_mito_rRNA__CNA3.fasta"), format="fasta")
 ```
 
 Fred's h99 mito anotation: https://www.ncbi.nlm.nih.gov/nucleotide/AY101381.1
@@ -283,7 +278,7 @@ https://support.bioconductor.org/p/70054/
 
 ```{r eval=FALSE, include=FALSE}
 # ? export.gff
-mito_rrna_gtf.file = file.path(seq_dir, "mito_rrna.gtf")
+mito_rrna_gtf.file = file.path(seq.dir, "mito_rrna.gtf")
 
 export(GRangesList(gene_15s, gene_21s), 
        con = mito_rrna_gtf.file,
@@ -292,8 +287,8 @@ export(GRangesList(gene_15s, gene_21s),
 read_lines(mito_rrna_gtf.file)
 ```
 
-```{r}
-h99_gtf = read_tsv(h99_gtf.file,
+```{r eval=FALSE, include=FALSE}
+h99_gtf = read_tsv(gtf.file,
                    col_names = c("seqname", "source", "feature", "start", "end", "score", 
                        "strand", "frame", "attributes"),
                    cols(seqname = col_character(),
@@ -326,18 +321,18 @@ mito_rrna_gtf = read_tsv(mito_rrna_gtf.file,
          )
 ```
 
-```{r}
+```{r eval=FALSE, include=FALSE}
 h99_gtf %>%
   filter(str_detect(attributes, "CNAG_10500")) 
 ```
 
-```{r}
+```{r eval=FALSE, include=FALSE}
 h99_gtf %>%
   filter(str_detect(attributes, 'gene_biotype "rRNA"')) %>%
   filter(feature=="exon")
 ```
 
-```{r}
+```{r eval=FALSE, include=FALSE}
 h99_gtf %>%
   filter(str_detect(attributes, 'gene_biotype "rRNA"')) %>%
   filter(feature=="exon") %>%
@@ -347,14 +342,7 @@ x[[1]]
 ```
 
 ```{r}
-h99_gtf.file %>%
-  path_file %>%
-  path_ext_remove %>%
-  paste0("__with_mito_rrna.gtf") %>%
-  file.path(seq_dir, .) ->
-  new_gtf.file
-
-file_copy(h99_gtf.file, new_gtf.file, overwrite=TRUE)
+file_copy(gtf.file, gtf_with_mito_rrna.file, overwrite=TRUE)
 ```
 
 ```{r}
@@ -374,9 +362,9 @@ make_df_from_gr = function(gr_vec){
 }
 
 mito_rrdna_gtf.gf = ldply(GRangesList(gene_15s, gene_21s), make_df_from_gr)
-# write_tsv(mito_rrdna_gtf.gf, new_gtf.file, append = TRUE, quote_escape=FALSE)
+# write_tsv(mito_rrdna_gtf.gf, gtf_with_mito_rrna.file, append = TRUE, quote_escape=FALSE)
 write.table(mito_rrdna_gtf.gf, 
-            new_gtf.file, 
+            gtf_with_mito_rrna.file, 
             append = TRUE, 
             quote = FALSE, sep = "\t",
             row.names = FALSE,
