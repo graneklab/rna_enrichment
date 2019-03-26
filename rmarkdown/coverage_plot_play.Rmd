@@ -348,7 +348,7 @@ file_copy(gtf.file, gtf_with_mito_rrna.file, overwrite=TRUE)
 ```{r}
 make_df_from_gr = function(gr_vec){
   attr_template = 'gene_id "XGENEIDX"; transcript_id "XGENEIDX-1"; exon_number "1"; gene_name "XGENEIDX"; gene_source "JAG"; gene_biotype "rRNA"; transcript_name "XGENEIDX"; transcript_source "JAG"; transcript_biotype "rRNA"; exon_id "XGENEIDX-1-1";'
-  attr = str_replace_all(attr_template, fixed("XGENEIDX"), names(gr_vec))
+  attr = str_replace_all(attr_template, "XGENEIDX", names(gr_vec))
   
   names(gr_vec)
   print(attr_template)
