@@ -27,6 +27,15 @@ h99_genome %>%
   names(h99_genome)
 ```
 
+# Tasks
+1. Subset rRNA granges
+1. Extract rRNA Sequences
+1. Reverse Complement Sequences
+1. Partition Sequences into oligos
+    1. Generate Oligo IRanges
+    2. Name Oligos
+    3. Output Oligos
+
 ## Subset rRNA granges
 Pull out the rRNA exons only.
 ```{r}
@@ -37,19 +46,9 @@ import.gff2(gtf_with_mito_rrna.file) %>%
 rrna.gr
 ```
 
-## Extract rRNA Sequences
-```{r eval=FALSE, include=FALSE}
-# rrna.gr[1] 
-rrna.seq1 = getSeq(h99_genome, rrna.gr[1]) %>%
-  reverseComplement
-
-rrna.seq1
-```
-
 
 ## Partition Sequences into oligos
 ### Generate Oligo IRanges
-
 ```{r}
 generateGappedIRanges = function(sequence, oligo_length=50, gapwidth=1) {
   # seqeunce can be a BioString or an integer representing the sequence length
@@ -72,7 +71,6 @@ generateGappedIRanges = function(sequence, oligo_length=50, gapwidth=1) {
   
   cat("Number of gapped oligos:", gapped_oligo_count, fill = TRUE)
 
-  # (cur_seqlen - ungapped.ir.start)
   print(gapped.ir)
 
   cat("------ UNgapped oligo iranges --------", fill = TRUE)
@@ -94,31 +92,6 @@ generateGappedIRanges = function(sequence, oligo_length=50, gapwidth=1) {
 }
 ```
 
-```{r eval=FALSE, include=FALSE}
-cur_rrna.seq = getSeq(h99_genome, rrna.gr[3]) %>%
-  reverseComplement
-x = generateGappedIRanges(cur_rrna.seq, oligo_length)
-
-# generateGappedIRanges(111, oligo_length, gapwidth = 1)
-```
-
-```{r eval=FALSE, include=FALSE}
-cur.gr = rrna.gr[4]
-cur.seq = getSeq(h99_genome, cur.gr) %>%
-  reverseComplement
-cur.ir = generateGappedIRanges(cur.seq, oligo_length, gapwidth = 6)
-
-cat("For CNAG_10503 we use a gap of 6bp, which leaves 5bp uncovered at the 3' end, since it is too short for gap adjustment with gapwidth=1", fill = TRUE)
-```
-
-
-```{r eval=FALSE, include=FALSE}
-extractAt(cur.seq, cur.ir) %>%
-  as.data.frame(x) %>%
-  dplyr::mutate(ID = paste(cur.gr$gene_id, row_number(), sep="__")) %>%
-  select(ID, oligo_sequence=value)
-```
-
 ```{r}
 generateOligos = function(cur.grange, genome, oligo_length=50, gapwidth=1){
   cur.seq = getSeq(genome, cur.grange) %>%
@@ -134,27 +107,6 @@ generateOligos = function(cur.grange, genome, oligo_length=50, gapwidth=1){
 }
 ```
 
-```{r eval=FALSE, include=FALSE}
-generateOligos(rrna.gr[1], h99_genome)
-```
-```{r eval=FALSE, include=FALSE}
-length(rrna.gr)
-rrna.gr %>%
-  .[seq_along(.)[-4]]
-
-# %>%
-#   map_dfr(.x=., .f=generateOligos, genome=h99_genome)
-```
-
-```{r eval=FALSE, include=FALSE}
-do.call(cbind, 
-        lapply(rrna.gr %>%
-                 .[seq_along(.)[-4]],
-               generateOligos, 
-               genome=h99_genome)
-)
-```
-
 ```{r}
 CNAG_10503_index = which(rrna.gr$gene_id=="CNAG_10503")
 
@@ -162,95 +114,16 @@ all_oligos.df = generateOligos(rrna.gr[CNAG_10503_index], genome=h99_genome, gap
 
 cat("For CNAG_10503 we use a gap of 6bp, which leaves 5bp uncovered at the 3' end, since it is too short for gap adjustment with gapwidth=1", fill = TRUE)
 
-# others.gr = rrna.gr %>% .[]
-
-# cur.seq = getSeq(h99_genome, cur.gr) %>%
-#   reverseComplement
-# cur.ir = generateGappedIRanges(cur.seq, oligo_length, gapwidth = 6)
-
-# for (cur.gr in ){
-#     next_oligos = generateOligos(cur.gr, genome=h99_genome, gapwidth = 1)
-#     all_oligos.df = cbind(all_oligos.df, next_oligos)
-# }
-# all_oligos.df
 for (i in seq_along(rrna.gr)[-CNAG_10503_index]){
   print(i)
   next_oligos = generateOligos(rrna.gr[i], genome=h99_genome, gapwidth = 1)
   all_oligos.df = rbind(all_oligos.df, next_oligos)
-  # print(cur.gr)
 }
-# for (cur.gr in ){
-#     
-#     all_oligos.df = cbind(all_oligos.df, next_oligos)
-# }
+
 all_oligos.df
 ```
 
-
-# Play Chunks
-
-```{r eval=FALSE, include=FALSE}
-extractAt(cur.seq, cur.ir) %>%
-  as.data.frame(x) -> 
-  cur.oligos
-
-cur.oligos
-cur.gr$gene_id
-cur.oligos %>%
-  dplyr::mutate(ID = row_number())
-  # mutate(id = row_number())
-  # mutate( paste(cur.gr$gene_id, seq(nrow(.)), sep="_")
-# nrow(cur.oligos)
-```
-
-```{r eval=FALSE, include=FALSE}
-breakInChunks(1001, chunksize=50)
-```
-
-
-```{r eval=FALSE, include=FALSE}
-successiveIRanges(rep(50, 1000))
-length(rrna.seq1)
-extractAt(rrna.seq1, successiveIRanges(rep(50, 10))) ->
-  x
-x
-# 
-# %>%
-#   writeXStringSet("test.fasta")
-as.data.frame(x)
-```
-
-## Name Oligos
-
-## Output Oligos
-
-
-
-# Cruft
-
-
-```{r eval=FALSE, include=FALSE}
-###################################################
-### code chunk number 27: makeTxDbFromGFF_1
-###################################################
-library(GenomicFeatures)
-gtf_file <- new_gtf.file
-txdb <- makeTxDbFromGFF(gtf_file, format="gtf")
-txdb
-
-
-###################################################
-### code chunk number 28: makeTxDbFromGFF_2
-###################################################
-exonsBy(txdb, by="gene")
-
-```
-
-```{r eval=FALSE, include=FALSE}
-keytypes(txdb)
-columns(txdb)
 # SessionInfo
 ```{r}
 sessionInfo()
 ```
-
