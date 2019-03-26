@@ -1,0 +1,54 @@
+---
+title: "Run rRNA Analysis"
+output:
+  html_document:
+    toc: false
+---
+
+
+```{r load_libraries}
+library(here)
+library(dplyr)
+library(fs)
+library(rmarkdown)
+library(magrittr)
+```
+
+```{r set_paths}
+source("run_config.R")
+```
+
+```{r}
+if (dir_exists(out.dir)) {dir_delete(out.dir)}
+
+regression_output_dir = file.path(out.dir, "full_run_html")
+dir.create(regression_output_dir, recursive = TRUE)
+```
+
+```{r find_rmds, eval=FALSE, include=TRUE}
+list.files(".", pattern = ".Rmd", full.names = TRUE) %>%
+  paste(collapse = '", "') %>%
+  print
+```
+
+
+```{r choose_regerssion_rmds}
+regression_rmds = c(#"download_data.Rmd", 
+                    "run_star_on_total_samples.Rmd",
+                    "coverage_plot_play.Rmd" #, "generate_rnaseh_oligos.Rmd"
+                    )
+```
+
+```{r run_render, eval=FALSE, include=FALSE}
+#R -e "rmarkdown::render('run_full_lemur_data.Rmd',output_file='run_full_lemur_data.html')"
+
+for (cur_rmd in regression_rmds){
+  print(cur_rmd)
+  path_file(cur_rmd) %>%
+    path_ext_set("html") %>%
+    file.path(regression_output_dir, .) ->
+    cur_out
+  render(cur_rmd, output_file=cur_out, output_format="html_document")
+}
+```
+
