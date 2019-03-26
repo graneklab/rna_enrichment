@@ -8,6 +8,9 @@ export SINGULARITY_CACHEDIR
 SINGULARITY_PULLFOLDER="$SINGULARITY_DIR/pulldir"
 export SINGULARITY_PULLFOLDER
 
+SESSION_INFO_DIR="$SINGULARITY_DIR/session_info"
+mkdir -p $SESSION_INFO_DIR
+
 # SINGULARITY_IMAGE="shub://granek/mar1_rnaseq:rstudio"
 SINGULARITY_IMAGE="${1:-$SINGULARITY_DIR/mar1_rstudio.simg}"
 
@@ -44,10 +47,13 @@ do
         ss -lpn | grep -q ":$RSTUDIO_PORT " || break
 done
 
-SESSION_INFO_FILE="session_info_$(basename $SINGULARITY_IMAGE)_${RSTUDIO_PORT}.txt"
+SESSION_INFO_FILE="$SESSION_INFO_DIR/session_info_$(basename $SINGULARITY_IMAGE)_${RSTUDIO_PORT}.txt"
 echo $SESSION_INFO_FILE
 export RSTUDIO_PASSWORD="`openssl rand -base64 16 | colrm 20`"
-printf "\n\nRStudio URL:\t\thttp://`hostname -A | cut -f1 -d' '`:${RSTUDIO_PORT}/\n" > $SESSION_INFO_FILE
+
+# Make $SESSION_INFO_FILE only readable by owner
+rm -f $SESSION_INFO_FILE; touch $SESSION_INFO_FILE; chmod 600 $SESSION_INFO_FILE
+printf "\n\nRStudio URL:\t\thttp://`hostname -A | cut -f1 -d' '`:${RSTUDIO_PORT}/\n" >> $SESSION_INFO_FILE
 printf "\nRStudio Username:\t$USER\n"  >> $SESSION_INFO_FILE
 printf "RStudio Password:\t$RSTUDIO_PASSWORD\n" >> $SESSION_INFO_FILE
 
