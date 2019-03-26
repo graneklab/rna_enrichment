@@ -45,6 +45,7 @@ gtf.file %>%
   file.path(seq.dir, .) ->
   gtf_with_mito_rrna.file
 
+rrna_oligos.file = file.path(seq.dir, "rrna_oligos.tsv")
 # Setup Bash variables
 
 Sys.setenv(THREADS = threads)
