@@ -56,10 +56,7 @@ rrna.seq1
 ### Generate Oligo IRanges
 
 ```{r}
-oligo_length = 50
-
-
-generateGappedIRanges = function(sequence, oligo_length, gapwidth=1) {
+generateGappedIRanges = function(sequence, oligo_length=50, gapwidth=1) {
   # seqeunce can be a BioString or an integer representing the sequence length
   if (is.numeric(sequence)){
     cur_seqlen = sequence
@@ -118,7 +115,87 @@ cur.ir = generateGappedIRanges(cur.seq, oligo_length, gapwidth = 6)
 
 cat("For CNAG_10503 we use a gap of 6bp, which leaves 5bp uncovered at the 3' end, since it is too short for gap adjustment with gapwidth=1", fill = TRUE)
 ```
+
+
 ```{r}
+extractAt(cur.seq, cur.ir) %>%
+  as.data.frame(x) %>%
+  dplyr::mutate(ID = paste(cur.gr$gene_id, row_number(), sep="__")) %>%
+  select(ID, oligo_sequence=value)
+```
+
+```{r}
+generateOligos = function(cur.grange, genome, oligo_length=50, gapwidth=1){
+  cur.seq = getSeq(genome, cur.grange) %>%
+    reverseComplement
+  
+  cur.ir = generateGappedIRanges(cur.seq, oligo_length, gapwidth)
+  
+  extractAt(cur.seq, cur.ir) %>%
+    as.data.frame %>%
+    dplyr::mutate(ID = paste(cur.grange$gene_id, row_number(), sep="__")) %>%
+    select(ID, oligo_sequence=value) %>%
+    return
+}
+```
+
+```{r}
+generateOligos(rrna.gr[1], h99_genome)
+```
+```{r}
+length(rrna.gr)
+rrna.gr %>%
+  .[seq_along(.)[-4]]
+
+# %>%
+#   map_dfr(.x=., .f=generateOligos, genome=h99_genome)
+```
+
+```{r}
+do.call(cbind, 
+        lapply(rrna.gr %>%
+                 .[seq_along(.)[-4]],
+               generateOligos, 
+               genome=h99_genome)
+)
+```
+```{r}
+CNAG_10503_index = which(rrna.gr$gene_id=="CNAG_10503")
+```
+
+```{r}
+CNAG_10503_index = which(rrna.gr$gene_id=="CNAG_10503")
+
+all_oligos.df = generateOligos(rrna.gr[CNAG_10503_index], genome=h99_genome, gapwidth = 6)
+
+# others.gr = rrna.gr %>% .[]
+
+# cur.seq = getSeq(h99_genome, cur.gr) %>%
+#   reverseComplement
+# cur.ir = generateGappedIRanges(cur.seq, oligo_length, gapwidth = 6)
+
+# for (cur.gr in ){
+#     next_oligos = generateOligos(cur.gr, genome=h99_genome, gapwidth = 1)
+#     all_oligos.df = cbind(all_oligos.df, next_oligos)
+# }
+# all_oligos.df
+for (i in seq_along(rrna.gr)[-CNAG_10503_index]){
+  print(i)
+  next_oligos = generateOligos(rrna.gr[i], genome=h99_genome, gapwidth = 1)
+  all_oligos.df = rbind(all_oligos.df, next_oligos)
+  # print(cur.gr)
+}
+# for (cur.gr in ){
+#     
+#     all_oligos.df = cbind(all_oligos.df, next_oligos)
+# }
+all_oligos.df
+```
+
+
+# Play Chunks
+
+```{r eval=FALSE, include=FALSE}
 extractAt(cur.seq, cur.ir) %>%
   as.data.frame(x) -> 
   cur.oligos
@@ -132,21 +209,12 @@ cur.oligos %>%
 # nrow(cur.oligos)
 ```
 
-```{r}
-extractAt(cur.seq, cur.ir) %>%
-  as.data.frame(x) %>%
-  dplyr::mutate(ID = paste(cur.gr$gene_id, row_number(), sep="__")) %>%
-  select(ID, oligo_sequence=value)
-```
-
-
-# Play Chunks
-```{r}
+```{r eval=FALSE, include=FALSE}
 breakInChunks(1001, chunksize=50)
 ```
 
 
-```{r}
+```{r eval=FALSE, include=FALSE}
 successiveIRanges(rep(50, 1000))
 length(rrna.seq1)
 extractAt(rrna.seq1, successiveIRanges(rep(50, 10))) ->
