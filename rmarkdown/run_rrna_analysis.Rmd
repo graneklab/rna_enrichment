@@ -55,6 +55,6 @@ for (cur_rmd in regression_rmds){
 
 
 # SessionInfo
-```{r}
+```{r session_info}
 sessionInfo()
 ```
