@@ -91,3 +91,9 @@ ddsclient download -p HTS_course \
 
 chmod -R a-w /data/hts_2018_data/hts2018_pilot_rawdata
 ```
+
+
+# SessionInfo
+```{r}
+sessionInfo()
+```

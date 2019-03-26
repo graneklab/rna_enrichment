@@ -48,6 +48,7 @@ parallel --jobs $MAX_JOBS trim_and_star_func ::: $RAW_FASTQS/*.fastq.gz
 
 ```
 
-
-
-
+# SessionInfo
+```{r}
+sessionInfo()
+```

@@ -403,3 +403,7 @@ autoplot(curbam, which = cur_range, color="red") +
 ```
 
 
+# SessionInfo
+```{r}
+sessionInfo()
+```
