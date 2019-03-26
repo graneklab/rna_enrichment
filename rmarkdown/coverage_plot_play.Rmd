@@ -384,6 +384,14 @@ grep -i rRNA /workspace/2018_tot_samples/genome/Cryptococcus_neoformans_var_grub
 grep CNAG_10500 /workspace/2018_tot_samples/star_out/*_L001_ReadsPerGene.out.tab
 ```
 
+# Notes
+## BioPlots
+### Mirror Plots
+ - [Question: ggbio: mirrored coverage plots for +/- strands](https://support.bioconductor.org/p/56456/)
+
+## Gviz
+  - [Plot Sequencing Depth with Gviz](https://blog.liang2.tw/posts/2016/01/plot-seq-depth-gviz/)
+  - [The Gviz User Guide](https://bioconductor.org/packages/release/bioc/vignettes/Gviz/inst/doc/Gviz.pdf)
 
 # Play
 

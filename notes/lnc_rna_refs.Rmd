@@ -1,0 +1,15 @@
+---
+title: "LncRNA References"
+output:
+  html_document:
+    toc: false
+---
+
+# LncRNA References
+## Search
+
+- https://scholar.google.com/scholar?q=cryptococcus+neoformans+lncrna&hl=en&as_sdt=0&as_vis=1&oi=scholart
+
+## Pubs
+- https://doi.org/10.1371/journal.pgen.1005692
+    - https://www.ncbi.nlm.nih.gov/pubmed?linkname=pubmed_pubmed_citedin&from_uid=26588844  
