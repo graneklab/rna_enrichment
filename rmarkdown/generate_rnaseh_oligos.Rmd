@@ -8,18 +8,14 @@ output:
 # Setup
 ## Load Libraries
 ```{r}
-# library(Rsamtools)
-# library(ggbio)
-# library(fs)
-# library(GenomicAlignments)
 library(tidyverse)
-# library(plyr)
 library(BSgenome)
 library(rtracklayer)
 library(Biostrings)
 ```
 
 ## Load Data
+Load H99 genome and rename chromosomes to chromosome ID only. readDNAStringSet uses the whole header line, including the description text, as the sequence name, whereas STAR uses only the sequence ID (the part before the first whitespace).  We need to strip the description text (stuff after the whitespace) so that GTF identifiers match with sequence identifiers.
 ```{r}
 source("run_config.R")
 
@@ -32,6 +28,7 @@ h99_genome %>%
 ```
 
 ## Subset rRNA granges
+Pull out the rRNA exons only.
 ```{r}
 import.gff2(gtf_with_mito_rrna.file) %>%
   .[.$gene_biotype=="rRNA" ] %>%
@@ -40,9 +37,8 @@ import.gff2(gtf_with_mito_rrna.file) %>%
 rrna.gr
 ```
 
-
 ## Extract rRNA Sequences
-```{r}
+```{r eval=FALSE, include=FALSE}
 # rrna.gr[1] 
 rrna.seq1 = getSeq(h99_genome, rrna.gr[1]) %>%
   reverseComplement
@@ -50,7 +46,6 @@ rrna.seq1 = getSeq(h99_genome, rrna.gr[1]) %>%
 rrna.seq1
 ```
 
-## Reverse Complement rRNA Sequences
 
 ## Partition Sequences into oligos
 ### Generate Oligo IRanges
@@ -99,7 +94,7 @@ generateGappedIRanges = function(sequence, oligo_length=50, gapwidth=1) {
 }
 ```
 
-```{r}
+```{r eval=FALSE, include=FALSE}
 cur_rrna.seq = getSeq(h99_genome, rrna.gr[3]) %>%
   reverseComplement
 x = generateGappedIRanges(cur_rrna.seq, oligo_length)
@@ -107,7 +102,7 @@ x = generateGappedIRanges(cur_rrna.seq, oligo_length)
 # generateGappedIRanges(111, oligo_length, gapwidth = 1)
 ```
 
-```{r}
+```{r eval=FALSE, include=FALSE}
 cur.gr = rrna.gr[4]
 cur.seq = getSeq(h99_genome, cur.gr) %>%
   reverseComplement
@@ -117,7 +112,7 @@ cat("For CNAG_10503 we use a gap of 6bp, which leaves 5bp uncovered at the 3' en
 ```
 
 
-```{r}
+```{r eval=FALSE, include=FALSE}
 extractAt(cur.seq, cur.ir) %>%
   as.data.frame(x) %>%
   dplyr::mutate(ID = paste(cur.gr$gene_id, row_number(), sep="__")) %>%
@@ -139,10 +134,10 @@ generateOligos = function(cur.grange, genome, oligo_length=50, gapwidth=1){
 }
 ```
 
-```{r}
+```{r eval=FALSE, include=FALSE}
 generateOligos(rrna.gr[1], h99_genome)
 ```
-```{r}
+```{r eval=FALSE, include=FALSE}
 length(rrna.gr)
 rrna.gr %>%
   .[seq_along(.)[-4]]
@@ -151,7 +146,7 @@ rrna.gr %>%
 #   map_dfr(.x=., .f=generateOligos, genome=h99_genome)
 ```
 
-```{r}
+```{r eval=FALSE, include=FALSE}
 do.call(cbind, 
         lapply(rrna.gr %>%
                  .[seq_along(.)[-4]],
@@ -159,14 +154,13 @@ do.call(cbind,
                genome=h99_genome)
 )
 ```
-```{r}
-CNAG_10503_index = which(rrna.gr$gene_id=="CNAG_10503")
-```
 
 ```{r}
 CNAG_10503_index = which(rrna.gr$gene_id=="CNAG_10503")
 
 all_oligos.df = generateOligos(rrna.gr[CNAG_10503_index], genome=h99_genome, gapwidth = 6)
+
+cat("For CNAG_10503 we use a gap of 6bp, which leaves 5bp uncovered at the 3' end, since it is too short for gap adjustment with gapwidth=1", fill = TRUE)
 
 # others.gr = rrna.gr %>% .[]
 
