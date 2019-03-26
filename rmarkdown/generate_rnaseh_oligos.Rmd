@@ -100,8 +100,8 @@ generateOligos = function(cur.grange, genome, oligo_length=50, gapwidth=1){
   
   extractAt(cur.seq, cur.ir) %>%
     as.data.frame %>%
-    dplyr::mutate(ID = paste(cur.grange$gene_id, row_number(), sep="__")) %>%
-    select(ID, oligo_sequence=value) %>%
+    dplyr::mutate(oligo_name = paste(cur.grange$gene_id, row_number(), sep="__")) %>%
+    select(oligo_name, oligo_sequence=value) %>%
     return
 }
 ```
@@ -120,8 +120,15 @@ for (i in seq_along(rrna.gr)[-CNAG_10503_index]){
 }
 
 all_oligos.df
-write_tsv(all_oligos.df, rrna_oligos.file)
+# write_tsv(all_oligos.df, rrna_oligos.file)
+
+# Reformat oligos for eurofins form
+all_oligos.df %>%
+  mutate(five_prime_mods="", three_prime_mods="") %>%
+  select(oligo_name, five_prime_mods, oligo_sequence, three_prime_mods) %>%
+  write_tsv(rrna_oligos.file)
 ```
+
 
 # SessionInfo
 ```{r}
