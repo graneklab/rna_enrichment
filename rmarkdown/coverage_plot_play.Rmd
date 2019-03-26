@@ -146,7 +146,7 @@ Vast majoring of reads are + strand, so 21s rRNA gene must be - strand
 gene_21s = GRanges(seqnames = short_mito_name, 
                    IRanges(6710, 9326), strand = "-")
 gene_21s
-names(gene_21s) = "large_mito_rRNA"
+names(gene_21s) = "large_MTrRNA"
 
 ```
 
@@ -252,7 +252,7 @@ Vast majoring of reads are - strand, so 15s rRNA gene must be + strand
 ```{r}
 gene_15s = GRanges(seqnames = short_mito_name, 
                    ranges=IRanges(16948, 18316), strand = "+")
-names(gene_15s) = "small_mito_rRNA"
+names(gene_15s) = "small_MTrRNA"
 ```
 
 # Extract and output 15s and 21s rRNA sequences
