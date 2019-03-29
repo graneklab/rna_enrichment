@@ -46,6 +46,20 @@ gtf.file %>%
   gtf_with_mito_rrna.file
 
 rrna_oligos.file = file.path(seq.dir, "rrna_oligos.tsv")
+rrna_oligos.fastq = file.path(seq.dir, "rrna_oligos.fastq")
+rrna_oligos.fastq = file.path(seq.dir, "rrna_oligos.fastq")
+
+# Genome with mito rRNA
+genome_with_mito_rrna.dir=file.path(out.dir, "genome_with_mito_rrna")
+fa.file %>% 
+  basename %>%
+  file.path(genome_with_mito_rrna.dir, .) ->
+  fa_for_mito_rrna.file
+
+mito_rrna_star_out.dir=file.path(out.dir, "mito_rrna_star_out")
+
+
+
 # Setup Bash variables
 
 Sys.setenv(THREADS = threads)
@@ -69,3 +83,13 @@ Sys.setenv(GTF_URL = gtf_url)
 
 Sys.setenv(GTF = gtf.file)
 Sys.setenv(FA = fa.file)
+
+Sys.setenv(GTF_WITH_MITO_RRNA = gtf_with_mito_rrna.file)
+Sys.setenv(FA_WITH_MITO_RRNA = fa_for_mito_rrna.file)
+Sys.setenv(GENOME_WITH_MITO_RRNA_DIR = genome_with_mito_rrna.dir)
+Sys.setenv(RRNA_OLIGOS_FASTQ = rrna_oligos.fastq)
+Sys.setenv(MITO_RRNA_STAR_OUT = mito_rrna_star_out.dir)
+
+
+
+

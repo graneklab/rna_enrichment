@@ -1,5 +1,5 @@
 ---
-title: "Generate Oligos"
+title: "Check Oligos"
 output:
   html_document:
     toc: false
@@ -127,6 +127,12 @@ all_oligos.df %>%
   mutate(five_prime_mods="", three_prime_mods="") %>%
   select(oligo_name, five_prime_mods, oligo_sequence, three_prime_mods) %>%
   write_tsv(rrna_oligos.file)
+```
+### Make FASTQ from oligos for checking
+```{r}
+setNames(all_oligos.df$oligo_sequence, as.character(all_oligos.df$oligo_name)) %>%
+  DNAStringSet %>%
+  writeXStringSet(rrna_oligos.fastq, format="fastq")
 ```
 
 
