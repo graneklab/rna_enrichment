@@ -1,0 +1,61 @@
+---
+title: "Run STAR on TOTAL samples"
+output:
+  html_document:
+    toc: false
+---
+
+```{r}
+source("run_config.R")
+```
+
+
+# Download and Index Genome
+```{bash}
+set -u
+mkdir -p $GENOME_WITH_MITO_RRNA_DIR
+wget --no-verbose --directory-prefix ${GENOME_WITH_MITO_RRNA_DIR} ${FA_URL} 
+gunzip -f ${FA_WITH_MITO_RRNA}.gz
+```
+
+
+```{bash}
+set -u
+mkdir -p ${MITO_RRNA_STAR_OUT}
+STAR \
+    --runMode genomeGenerate \
+    --genomeDir $GENOME_WITH_MITO_RRNA_DIR \
+    --genomeFastaFiles ${FA_WITH_MITO_RRNA} \
+    --sjdbGTFfile ${GTF_WITH_MITO_RRNA} \
+    --outFileNamePrefix ${MITO_RRNA_STAR_OUT}/genome_ \
+    --genomeSAindexNbases 11
+# --genomeSAindexNbases 6
+```
+
+## Check oligos
+```{bash}
+set -u
+SAMPLE="rrna_oligos"
+mkdir -p ${MITO_RRNA_STAR_OUT}
+    STAR \
+    --runMode alignReads \
+    --runThreadN $THREADS \
+    --genomeDir $GENOME_WITH_MITO_RRNA_DIR \
+    --outSAMtype BAM SortedByCoordinate \
+    --quantMode GeneCounts \
+    --genomeLoad NoSharedMemory \
+    --twopassMode None \
+    --limitBAMsortRAM 1280000000 \
+    --outFileNamePrefix ${MITO_RRNA_STAR_OUT}/${SAMPLE}_ \
+    --outFilterScoreMinOverLread 0 --outFilterMatchNminOverLread 0 \
+    --outFilterMatchNmin 0 --outFilterMismatchNmax 2 \
+    --readFilesIn $RRNA_OLIGOS_FASTQ        
+        
+    samtools index ${MITO_RRNA_STAR_OUT}/${SAMPLE}_Aligned.sortedByCoord.out.bam
+```
+
+
+# SessionInfo
+```{r}
+sessionInfo()
+```
