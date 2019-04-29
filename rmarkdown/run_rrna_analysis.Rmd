@@ -12,6 +12,7 @@ library(dplyr)
 library(fs)
 library(rmarkdown)
 library(magrittr)
+library(utils)
 ```
 
 ```{r set_paths}
@@ -33,11 +34,13 @@ list.files(".", pattern = ".Rmd", full.names = TRUE) %>%
 
 
 ```{r choose_regerssion_rmds}
-regression_rmds = c("download_data.Rmd", 
-                    "run_star_on_total_samples.Rmd",
-                    "coverage_plot_play.Rmd", 
-                    "generate_rnaseh_oligos.Rmd"
-                    )
+regression_rmds = c(
+  "download_data.Rmd", 
+  "run_star_on_total_samples.Rmd",
+  "coverage_plot_play.Rmd", 
+  "generate_rnaseh_oligos.Rmd",
+  "check_rnaseh_oligos.Rmd"
+  )
 ```
 
 ```{r run_render}
@@ -53,6 +56,21 @@ for (cur_rmd in regression_rmds){
 }
 ```
 
+```{r}
+files_to_tar = c(gtf_with_mito_rrna.file, 
+                 fa_for_mito_rrna.file,
+                 rrna_oligos.file,
+                 list.files(mito_rrna_star_out.dir, 
+                            pattern = ".bam", 
+                            full.names = TRUE)
+                 )
+
+tar(igv_tarball, 
+    files=files_to_tar,
+    compression="gzip", 
+    tar = "/bin/tar")
+print(igv_tarball)
+```
 
 # SessionInfo
 ```{r session_info}

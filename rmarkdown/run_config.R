@@ -19,6 +19,7 @@ starout.dir=file.path(out.dir, "star_out")
 mosdepth.dir=file.path(out.dir, "mosdepth")
 seq.dir = file.path(out.dir, "seq_out"); dir.create(seq.dir, recursive = TRUE)
 # export final_counts=$data_base/star_counts
+igv_tarball = file.path(out.dir, "visualize_oligos.tgz")
 
 # genome
 shared_url = "ftp://ftp.ensemblgenomes.org/pub/release-39/fungi/"

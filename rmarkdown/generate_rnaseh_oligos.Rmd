@@ -109,7 +109,7 @@ generateOligos = function(cur.grange, genome, oligo_length=50, gapwidth=1){
 ```{r}
 CNAG_10503_index = which(rrna.gr$gene_id=="CNAG_10503")
 
-all_oligos.df = generateOligos(rrna.gr[CNAG_10503_index], genome=h99_genome, gapwidth = 6)
+all_oligos.df = generateOligos(rrna.gr[CNAG_10503_index], genome=h99_genome, oligo_length=55, gapwidth = 1)
 
 cat("For CNAG_10503 we use a gap of 6bp, which leaves 5bp uncovered at the 3' end, since it is too short for gap adjustment with gapwidth=1", fill = TRUE)
 
