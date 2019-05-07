@@ -119,6 +119,24 @@ large_MTrRNA__37	12	484119  CNAG_06164
 large_MTrRNA__36	12	484169  CNAG_06164
 large_MTrRNA__35	12	484219  CNAG_06164
 
+### Try Counting with RSamtools
+https://support.bioconductor.org/p/50774/
+
+#### Load GTF
+```{r}
+makeTxDbFromGFF(gtf_with_mito_rrna.file, format="gtf") %>%
+  genes %>%
+  subset(gene_id %in% rrna_genes) ->
+  rrna_granges
+```
+
+#### Count reads in granges
+```{r}
+oligo_bam.file = file.path(mito_rrna_star_out.dir, "rrna_oligos_Aligned.sortedByCoord.out.bam")
+countBam(oligo_bam.file,
+         param=ScanBamParam(which=rrna_granges))
+```
+
 # SessionInfo
 ```{r}
 sessionInfo()
