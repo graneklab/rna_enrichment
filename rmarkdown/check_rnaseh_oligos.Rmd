@@ -7,6 +7,9 @@ output:
 
 ```{r}
 source("run_config.R")
+
+library(GenomicFeatures)
+library(Rsamtools)
 ```
 
 
@@ -91,6 +94,30 @@ generated_oligo_counts %>%
   summarise(total = sum(total_counts))
 
 ```
+
+```{r}
+full_join(generated_oligo_counts, oligo_read_counts) %>%
+  mutate(missing=total_counts-second_strand)
+```
+
+### Look for multimappers
+```{bash}
+samtools view ${MITO_RRNA_STAR_OUT}/rrna_oligos_Aligned.sortedByCoord.out.bam | grep -v NH:i:1 | cut -f1,3-4
+```
+
+#### Promiscuos MTrRNA oligos
+oligo chrom start other_gene
+small_MTrRNA__9	5	478515 CNAG_12438
+small_MTrRNA__10	5	478566  CNAG_12438
+large_MTrRNA__32	9	71868 CNAG_04124
+large_MTrRNA__33	9	71918 CNAG_04124
+large_MTrRNA__41	12	483919  CNAG_06164
+large_MTrRNA__40	12	483969  CNAG_06164
+large_MTrRNA__39	12	484019  CNAG_06164
+large_MTrRNA__38	12	484069  CNAG_06164
+large_MTrRNA__37	12	484119  CNAG_06164
+large_MTrRNA__36	12	484169  CNAG_06164
+large_MTrRNA__35	12	484219  CNAG_06164
 
 # SessionInfo
 ```{r}
