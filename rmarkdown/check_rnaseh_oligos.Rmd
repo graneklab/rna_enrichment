@@ -54,23 +54,10 @@ mkdir -p ${MITO_RRNA_STAR_OUT}
     samtools index ${MITO_RRNA_STAR_OUT}/${SAMPLE}_Aligned.sortedByCoord.out.bam
 ```
 
-# How is STAR counting multimappers
+## How is STAR counting multimappers
 There are some reads from CNAG_10500 that map to an unannotated region between CNAG_10503 and CNAG_03595.  How does STAR count these?  I would like to know for correctly tallying the percentage of reads in total samples that map to rRNA.
 
-
-
-reads that map to 
-```{bash}
-head ${MITO_RRNA_STAR_OUT}/*.out
-ls ${MITO_RRNA_STAR_OUT}/
-
-head ${MITO_RRNA_STAR_OUT}/rrna_oligos_ReadsPerGene.out.tab
-
-```
-```{bash}
-sort -nr -k4 ${MITO_RRNA_STAR_OUT}/rrna_oligos_ReadsPerGene.out.tab | head
-```
-
+### Load STAR table of reads per gene
 ```{r}
 star_oligo_readspergene.path = file.path(mito_rrna_star_out.dir,"rrna_oligos_ReadsPerGene.out.tab")
 
@@ -86,8 +73,7 @@ oligo_read_counts %>%
   summarise_at(vars(-gene_id), sum)
 ```
 
-
-## Count number of oligos generated for each rRNA gene
+### Count number of oligos generated for each rRNA gene
 These values should be the same as the the STAR count table above
 ```{r}
 read_tsv(rrna_oligos.file) %>%
@@ -103,21 +89,8 @@ generated_oligo_counts
 
 generated_oligo_counts %>%
   summarise(total = sum(total_counts))
-#   
-#   tally() %>%
-#   dplyr::rename(total_counts=n) ->
-#   generated_oligo_counts
-# 
-# generated_oligo_counts
-# 
-# generated_oligo_counts %>%
-#   summarise_at(total_counts)
-```
 
-```{bash}
-head /workspace/2018_tot_samples/seq_out/*
 ```
-
 
 # SessionInfo
 ```{r}
