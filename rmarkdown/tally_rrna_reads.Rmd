@@ -1,0 +1,11 @@
+---
+title: "Tally rRNA Reads"
+output: html_document
+---
+
+
+# TODO
+1. Use RSamtools to count reads mapping to rRNA genes
+2. Calculate "total_reads" as sum of "second_strand" column
+3. Calculate "strand mapped reads" as sum of "second_strand" column minus "unmapped" reads from that column
+4. calculate rRNA_reads/total_reads and rRNA_reads/strand_mapped_reads for each of the 2018 Total libraries
