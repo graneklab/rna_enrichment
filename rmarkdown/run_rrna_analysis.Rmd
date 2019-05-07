@@ -56,7 +56,7 @@ for (cur_rmd in regression_rmds){
 }
 ```
 
-```{r}
+```{r make_igv_package}
 files_to_tar = c(gtf_with_mito_rrna.file, 
                  fa_for_mito_rrna.file,
                  rrna_oligos.file,
