@@ -124,10 +124,11 @@ https://support.bioconductor.org/p/50774/
 
 #### Load GTF
 ```{r}
-makeTxDbFromGFF(gtf_with_mito_rrna.file, format="gtf") %>%
-  genes %>%
-  subset(gene_id %in% rrna_genes) ->
+import(gtf_with_mito_rrna.file, format="gtf") %>%
+  subset(gene_biotype=="rRNA") %>%
+  subset(type=="exon") ->
   rrna_granges
+rrna_granges
 ```
 
 #### Count reads in granges
