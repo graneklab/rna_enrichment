@@ -110,7 +110,7 @@ countsFromBam <- function(bam_file, gene_granges) {
 summarizeStarCounts <- function(star_count_file) {
   read_tsv(star_count_file, 
          col_names = c("gene_id", "unstranded", "first_strand", "second_strand")) ->
-  # star_counts
+    star_counts
   
   star_counts %>%
     summarise(total = sum(second_strand))%>%
