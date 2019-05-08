@@ -26,7 +26,7 @@ library(rtracklayer)
 https://support.bioconductor.org/p/50774/
 
 ### Load GTF
-```{r}
+```{r eval=FALSE, include=FALSE}
 import(gtf_with_mito_rrna.file, format="gtf") %>%
   subset(gene_biotype=="rRNA") %>%
   subset(type=="exon") ->
@@ -38,7 +38,7 @@ rrna_granges
 
 
 ### Count reads in granges
-```{r}
+```{r eval=FALSE, include=FALSE}
 oligo_bam.file = file.path(mito_rrna_star_out.dir, "rrna_oligos_Aligned.sortedByCoord.out.bam")
 countBam(oligo_bam.file,
          param=ScanBamParam(which=rrna_granges)) ->
@@ -55,7 +55,7 @@ rrna_count_tab %>%
 
 ## 2. Calculate "total_reads" as sum of "second_strand" column
 
-```{r}
+```{r eval=FALSE, include=FALSE}
 read_tsv(star_oligo_readspergene.path, 
          col_names = c("gene_id", "unstranded", "first_strand", "second_strand")) ->
   star_counts
@@ -66,7 +66,7 @@ head(star_counts)
 #   pull(total)
 ```
 
-```{r}
+```{r eval=FALSE, include=FALSE}
 star_counts %>%
   summarise(total = sum(second_strand))%>%
   pull(total) ->
@@ -75,7 +75,7 @@ star_counts %>%
 
 ### 3. Calculate "strand mapped reads" as sum of "second_strand" column minus "unmapped" reads from that column
 
-```{r}
+```{r eval=FALSE, include=FALSE}
 star_counts %>%
   filter(gene_id != "N_unmapped") %>%
   summarise(total = sum(second_strand))%>%
@@ -87,7 +87,7 @@ strand_mapped_reads
 ```
 
 ### 4. calculate rRNA_reads/total_reads and rRNA_reads/strand_mapped_reads for each of the 2018 Total libraries
-```{r}
+```{r eval=FALSE, include=FALSE}
 cat("rRNA % of Total Reads:", 100 * rrna_count_total/total_reads, fill = TRUE)
 cat("rRNA % of Mapped Reads:", 100 * rrna_count_total/strand_mapped_reads, fill = TRUE)
 
