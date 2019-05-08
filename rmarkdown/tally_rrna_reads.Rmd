@@ -4,8 +4,93 @@ output: html_document
 ---
 
 
+```{r}
+source("run_config.R")
+
+library(GenomicFeatures)
+library(Rsamtools)
+library(rtracklayer)
+
+```
+
+
 # TODO
 1. Use RSamtools to count reads mapping to rRNA genes
 2. Calculate "total_reads" as sum of "second_strand" column
 3. Calculate "strand mapped reads" as sum of "second_strand" column minus "unmapped" reads from that column
 4. calculate rRNA_reads/total_reads and rRNA_reads/strand_mapped_reads for each of the 2018 Total libraries
+
+# 
+
+## 1. Use RSamtools to count reads mapping to rRNA genes
+https://support.bioconductor.org/p/50774/
+
+### Load GTF
+```{r}
+import(gtf_with_mito_rrna.file, format="gtf") %>%
+  subset(gene_biotype=="rRNA") %>%
+  subset(type=="exon") ->
+  rrna_granges
+rrna_granges
+```
+
+
+
+
+### Count reads in granges
+```{r}
+oligo_bam.file = file.path(mito_rrna_star_out.dir, "rrna_oligos_Aligned.sortedByCoord.out.bam")
+countBam(oligo_bam.file,
+         param=ScanBamParam(which=rrna_granges)) ->
+  rrna_count_tab
+rrna_count_tab
+
+# rrna_count_total = 
+rrna_count_tab %>%
+  pull(records) %>%
+  sum ->
+  rrna_count_total
+```
+
+
+## 2. Calculate "total_reads" as sum of "second_strand" column
+
+```{r}
+read_tsv(star_oligo_readspergene.path, 
+         col_names = c("gene_id", "unstranded", "first_strand", "second_strand")) ->
+  star_counts
+head(star_counts)
+
+# star_counts %>%
+#   summarise(total = sum(second_strand))%>%
+#   pull(total)
+```
+
+```{r}
+star_counts %>%
+  summarise(total = sum(second_strand))%>%
+  pull(total) ->
+  total_reads
+```
+
+### 3. Calculate "strand mapped reads" as sum of "second_strand" column minus "unmapped" reads from that column
+
+```{r}
+star_counts %>%
+  filter(gene_id != "N_unmapped") %>%
+  summarise(total = sum(second_strand))%>%
+  pull(total) ->
+  strand_mapped_reads
+
+total_reads
+strand_mapped_reads
+```
+
+### 4. calculate rRNA_reads/total_reads and rRNA_reads/strand_mapped_reads for each of the 2018 Total libraries
+```{r}
+cat("rRNA % of Total Reads:", 100 * rrna_count_total/total_reads, fill = TRUE)
+cat("rRNA % of Mapped Reads:", 100 * rrna_count_total/strand_mapped_reads, fill = TRUE)
+
+```
+
+
