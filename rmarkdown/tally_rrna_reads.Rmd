@@ -110,7 +110,7 @@ countsFromBam <- function(bam_file, gene_granges) {
 summarizeStarCounts <- function(star_count_file) {
   read_tsv(star_count_file, 
          col_names = c("gene_id", "unstranded", "first_strand", "second_strand")) ->
-  star_counts
+  # star_counts
   
   star_counts %>%
     summarise(total = sum(second_strand))%>%
@@ -125,8 +125,8 @@ summarizeStarCounts <- function(star_count_file) {
     pull(total) ->
     mapped_reads
   
-  total_reads
-  mapped_reads
+  # total_reads
+  # mapped_reads
   return(c(total_reads=total_reads, mapped_reads=mapped_reads))
 }
 
@@ -142,12 +142,9 @@ percentRRNA = function(gtf_path, star_out_dir){
   countfiles = bamfiles %>%
     str_replace(bam_suffix, count_suffix)
   #-------------------------------------
-  print(bamfiles)
-  print(countfiles)
+  # print(bamfiles)
+  # print(countfiles)
   #-------------------------------------
-  # bam_counts = sapply(bamfiles, countsFromBam, rrna_granges)
-  # star_counts = sapply(countfiles, summarizeStarCounts)
-  # sapply:  as.data.frame(sapply(iris[, 1:4], summary))
   bam_counts = as.data.frame(sapply(bamfiles, countsFromBam, rrna_granges)) %>%
     rownames_to_column  %>%
     mutate(sample=path_file(rowname)) %>%
@@ -199,28 +196,5 @@ full_data_counts %>%
 
 ```
 
-```{r}
-str_extract(full_data_counts$sample, "^\\d+_[A-Z]+_[A-Z]")
-str_extract(full_data_counts$sample, "L\\d{3}$")
-metadata.df = read_tsv(metadata.file)
-left_join(full_data_counts, metadata.df, by="Label")
-```
-
-
-```{r}
-x2 = x[[2]]
-x2[[1]]
-```
-
-## 2. Calculate "total_reads" as sum of "second_strand" column
-
-
-
-### 4. calculate rRNA_reads/total_reads and rRNA_reads/strand_mapped_reads for each of the 2018 Total libraries
-```{r}
-cat("rRNA % of Total Reads:", 100 * rrna_count_total/total_reads, fill = TRUE)
-cat("rRNA % of Mapped Reads:", 100 * rrna_count_total/strand_mapped_reads, fill = TRUE)
-
-```
 
 
