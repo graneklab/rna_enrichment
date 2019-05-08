@@ -197,5 +197,19 @@ full_data_counts %>%
 kable(full_data_counts_with_meta)
 ```
 
+```{r}
+ggplot(data=full_data_counts_with_meta, 
+       aes(x=RNA_sample_num, y=rrna_percent_total, fill=lane)) +
+  geom_bar(stat="identity", 
+           position = position_dodge(preserve = "total"),
+           color="black") +
+  facet_grid(cols = vars(enrichment_method), scale="free_x") +
+  scale_fill_brewer(guide=FALSE) +
+  theme_bw() +
+  labs(x = "Sample", y="% rRNA reads") +
+  ylim(c(0,100))
+
+#RNA_sample_num
+```
 
 
