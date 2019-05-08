@@ -59,7 +59,7 @@ From: granek/singularity-rstudio-tidyverse:3.5.2
    rm -rf /var/lib/apt/lists/*
 
 #--------------------------------------------------------------------------------
-Rscript -e "install.packages(pkgs = c('argparse','R.utils','fs','here'), \
+Rscript -e "install.packages(pkgs = c('argparse','R.utils','fs','here','foreach'), \
     repos='https://cran.revolutionanalytics.com/', \
     dependencies=TRUE, \
     clean = TRUE)"
