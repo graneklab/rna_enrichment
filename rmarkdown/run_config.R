@@ -8,6 +8,7 @@ max_jobs=5
 
 # input
 raw_fastq.dir="/data/hts_2018_data/hts2018_pilot_rawdata"
+metadata.file=file.path(raw_fastq.dir, "2018_pilot_metadata.tsv")
 
 # output
 out.dir="/workspace/2018_tot_samples"

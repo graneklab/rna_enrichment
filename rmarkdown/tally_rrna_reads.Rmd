@@ -184,9 +184,26 @@ y
 
 
 ```{r}
-x = percentRRNA(gtf_with_mito_rrna.file, starout.dir)
-x
+full_data_counts = percentRRNA(gtf_with_mito_rrna.file, starout.dir)
+```
 
+
+```{r}
+metadata.df = read_tsv(metadata.file)
+
+full_data_counts %>%
+  mutate(Label=str_extract(sample, "^\\d+_[A-Z]+_[A-Z]"), 
+         lane=str_extract(sample, "L\\d{3}$")) %>%
+  left_join(metadata.df, by="Label") ->
+  full_data_counts_with_meta
+
+```
+
+```{r}
+str_extract(full_data_counts$sample, "^\\d+_[A-Z]+_[A-Z]")
+str_extract(full_data_counts$sample, "L\\d{3}$")
+metadata.df = read_tsv(metadata.file)
+left_join(full_data_counts, metadata.df, by="Label")
 ```
 
 
