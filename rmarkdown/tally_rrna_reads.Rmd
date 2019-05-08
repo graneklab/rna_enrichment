@@ -10,7 +10,7 @@ source("run_config.R")
 library(GenomicFeatures)
 library(Rsamtools)
 library(rtracklayer)
-
+library(knitr)
 ```
 
 
@@ -175,7 +175,7 @@ percentRRNA = function(gtf_path, star_out_dir){
 
 }
 y = percentRRNA(gtf_with_mito_rrna.file, "/workspace/2018_tot_samples/tmp_star_out")
-y
+kable(y)
 ```
 
 
@@ -194,6 +194,7 @@ full_data_counts %>%
   left_join(metadata.df, by="Label") ->
   full_data_counts_with_meta
 
+kable(full_data_counts_with_meta)
 ```
 
 
