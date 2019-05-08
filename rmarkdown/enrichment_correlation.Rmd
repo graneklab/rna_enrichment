@@ -1,0 +1,72 @@
+---
+title: "Enrichment Correlation"
+output: html_document
+---
+
+```{r}
+source("run_config.R")
+library(foreach)
+```
+
+
+
+
+
+```{r}
+count_suffix = "_ReadsPerGene.out.tab"
+countfiles = list.files(starout.dir, pattern = paste0(count_suffix,"$"), full.names = TRUE)
+countfiles
+```
+
+```{r}
+countfiles %>%
+  path_file %>%
+  str_replace(count_suffix,"")
+
+```
+
+## Load STAR Count Data
+Loading code borrowed from https://gitlab.oit.duke.edu/HTS2018/HTS2018-notebooks/blob/master/pilot/01_Read_Counts.ipynb
+
+
+```{r}
+mycombine <- function(df1, df2) {
+    # Combine two data frames by gene names
+    #
+    # Args:
+    #   df1 (Dataframe): the first count data
+    #   df2 (Dataframe): the second count data
+    #
+    # Returns:
+    #   (Dataframe) The combined data frame of df1 and df2
+    full_join(df1, df2, by = "gene")
+}
+
+# Data type for each column
+coltypes <- list(col_character(), col_integer(), col_integer(), col_integer())
+
+out <- foreach(count_path = countfiles, .combine = mycombine) %do% {
+  # generate rowname (extracted from count file name)
+  count_path %>%
+    path_file %>%
+    str_replace(count_suffix,"") ->
+    readset_label 
+
+    # read in the count file
+    readr::read_tsv(count_path, col_names = FALSE, col_types = coltypes) %>%
+        dplyr::select(X1, X4) %>% # get the 1st and 4th columns (gene ids and second strand read counts)
+            dplyr::rename_(.dots=setNames(names(.), c("gene",readset_label)))
+}
+
+out[1:6,1:6]
+
+
+out %>%
+    dplyr::slice(-(1:4)) %>%
+    gather(expid, value, -gene) %>% 
+    spread(gene, value) -> genecounts
+
+genecounts[1:6,1:6]
+
+```
+

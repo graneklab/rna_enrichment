@@ -1,0 +1,11 @@
+
+# Fred's suggestions about mito rRNA annotation
+
+1. Look for conserved region of mitochondrial rRNA (should be low points in spacer regions)
+    - BLASTing MT large rRNA produces >95% coverage with Hannaella oryzae and Tremella fuciformis
+    - BLASTing MT small rRNA produces ~81% coverage with Hannaella oryzae and Tremella fuciformis
+
+2. Look into spikeyness of MT rRNA read coverage by checking coverage of other genes
+    - nuclear rRNA
+    - mt COX1
+    - tubulin
