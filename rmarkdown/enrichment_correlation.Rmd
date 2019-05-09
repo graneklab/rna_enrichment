@@ -6,6 +6,8 @@ output: html_document
 ```{r}
 source("run_config.R")
 library(foreach)
+library(tidyverse)
+library(magrittr)
 ```
 
 
@@ -96,6 +98,7 @@ genecounts_with_label[5:8,1:6]
 43+39+47+39
 ```
 
+### Combine per library counts across lanes
 
 ```{r}
 genecounts_with_label %>%
@@ -103,8 +106,49 @@ genecounts_with_label %>%
   summarise_all(funs(sum)) ->
   genecounts_lanes_combined
 
-genecounts_lanes_combined[1:6,1:6]
+# Add metadata 
+read_tsv(metadata.file) %>%
+  select(Label, enrichment_method, RNA_sample_num) ->
+  metadata.df
 
+genecounts_lanes_combined %<>%
+  left_join(metadata.df, by="Label") %>%
+  select(Label, enrichment_method, RNA_sample_num, everything())
+genecounts_lanes_combined[,1:6]
+```
+
+```{r}
+
+
+genecounts_lanes_combined[,1:6]
+```
+
+```{r}
+read_tsv(metadata.file) %>%
+  select(Label, enrichment_method, RNA_sample_num) ->
+  metadata.df
+
+genecounts_lanes_combined %<>%
+  left_join(metadata.df, by="Label") %>%
+  select(Label, enrichment_method, RNA_sample_num, everything())
+#   genecounts_with_meta
+# 
+# genecounts %>%
+#   mutate(Label=str_extract(expid, "^\\d+_[A-Z]+_[A-Z]"), 
+#          lane=str_extract(expid, "L\\d{3}$")) %>%
+#   left_join(metadata.df, by="Label") %>%
+#   select(expid, Label, lane, everything()) ->
+#   genecounts_with_meta
+# 
+# metadata.df
+# genecounts_with_meta[1:6,1:6]
+# ncol(metadata.df)
+# ncol(genecounts)
+# ncol(genecounts_with_meta)
+# 
+# ncol(genecounts_with_meta)
+# 
+genecounts_lanes_combined
 ```
 
 
