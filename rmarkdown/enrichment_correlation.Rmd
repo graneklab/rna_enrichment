@@ -3,32 +3,23 @@ title: "Enrichment Correlation"
 output: html_document
 ---
 
-```{r}
+# Load paths and libraries
+```{r include=FALSE}
 source("run_config.R")
 library(foreach)
 library(tidyverse)
 library(magrittr)
 ```
 
+## Load STAR Count Data
 ```{r}
 count_suffix = "_ReadsPerGene.out.tab"
 countfiles = list.files(starout.dir, pattern = paste0(count_suffix,"$"), full.names = TRUE)
 countfiles
 ```
 
-```{r}
-countfiles %>%
-  path_file %>%
-  str_replace(count_suffix,"")
-
-```
-
-## Load STAR Count Data
 ### Load STAR Count tables into a single dataframe
-
 Loading code borrowed from https://gitlab.oit.duke.edu/HTS2018/HTS2018-notebooks/blob/master/pilot/01_Read_Counts.ipynb
-
-
 ```{r}
 mycombine <- function(df1, df2) {
     # Combine two data frames by gene names
@@ -60,14 +51,13 @@ out <- foreach(count_path = countfiles, .combine = mycombine) %do% {
 
 out[1:6,1:6]
 
-
+# Drop STAR count statistics and rotate dataframe
 out %>%
     dplyr::slice(-(1:4)) %>%
     gather(expid, value, -gene) %>% 
     spread(gene, value) -> genecounts
 
 genecounts[1:6,1:6]
-
 ```
 
 ### Extract library specific label
@@ -81,7 +71,6 @@ genecounts_with_label[1:8,1:6]
 ```
 
 ### Combine per library counts across lanes
-
 ```{r}
 genecounts_with_label %>%
   group_by(Label) %>%
@@ -98,4 +87,12 @@ genecounts_lanes_combined %<>%
   select(library=Label, enrichment_method, RNA_sample_num, everything())
 genecounts_lanes_combined[,1:6]
 ```
+
+## Compare library preps
+
+### Drop rRNA genes and genes with rRNA homology
+
+### Generate scatterplots for MA vs TOT and RZ vs TOT 
+
+### Generate correlation coefficients for MA vs TOT and RZ vs TOT
 
