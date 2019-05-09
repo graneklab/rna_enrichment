@@ -147,38 +147,6 @@ import(gtf_with_mito_rrna.file, format="gtf") %>%
   h99_granges
 ```
 
-### Count Reads per Gene
-
-```{r}
-countBam(oligo_bam.file,
-         param=ScanBamParam(which=h99_granges)) %>%
-  filter(records > 0) %>%
-  dplyr::select(chr=space, start, end) %>%
-  makeGRangesFromDataFrame ->
-  rrna_homologous.gr
-  # oligo_gene_counts
-```
-
-
-```{r}
-o = findOverlaps(h99_granges, rrna_homologous.gr)
-grl1 = split(h99_granges[queryHits(o)], 1:length(o)) # You can't mendoapply on a GRanges object
-grl2 = split(rrna_homologous.gr[subjectHits(o)], 1:length(o))
-foo = function(x, y) {
-  rv = x
-  start(rv) = max(start(x), start(y))
-  end(rv) = min(end(x), end(y))
-  return(rv)
-}
-
-unlist(mendoapply(foo, grl1, y=grl2)) %>%
-  as.data.frame %>%
-  pull(gene_id) %>%
-  unique
-#   x
-# x[,"gene_id"]
-```
-
 
 ### Find all genes that overlap with rRNA reads
 https://bioinformatics.stackexchange.com/questions/874/intersection-of-two-genomic-ranges-to-keep-metadata
