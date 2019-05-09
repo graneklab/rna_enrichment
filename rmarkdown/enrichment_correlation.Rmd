@@ -26,6 +26,8 @@ countfiles %>%
 ```
 
 ## Load STAR Count Data
+### Load STAR Count tables into a single dataframe
+
 Loading code borrowed from https://gitlab.oit.duke.edu/HTS2018/HTS2018-notebooks/blob/master/pilot/01_Read_Counts.ipynb
 
 
@@ -69,4 +71,103 @@ out %>%
 genecounts[1:6,1:6]
 
 ```
+
+### Add metadata to STAR count dataframe
+```{r}
+genecounts %>%
+  mutate(Label=str_extract(expid, "^\\d+_[A-Z]+_[A-Z]")) %>%
+  select(Label, everything()) %>%
+  select(-expid) ->
+  genecounts_with_label
+genecounts_with_label[1:4,1:6]
+
+```
+
+```{r}
+79+79+81+61
+30+35+36+36
+38+32+37+50
+```
+```{r}
+genecounts_with_label[5:8,1:6]
+
+```
+```{r}
+43+39+47+39
+```
+
+
+```{r}
+genecounts_with_label %>%
+  group_by(Label) %>%
+  summarise_all(funs(sum)) ->
+  genecounts_lanes_combined
+
+genecounts_lanes_combined[1:6,1:6]
+
+```
+
+
+
+```{r}
+genecounts_with_label %>% 
+genecounts %>%
+  mutate(Label=str_extract(expid, "^\\d+_[A-Z]+_[A-Z]")) %>%
+  select(Label, everything()) %>%
+  select(-expid) ->
+  genecounts_with_label
+genecounts_with_label[1:6,1:6]
+```
+
+```{r}
+genecounts %>%
+  mutate(Label=str_extract(expid, "^\\d+_[A-Z]+_[A-Z]"), 
+         lane=str_extract(expid, "L\\d{3}$")) %>%
+  select(expid, Label, lane, everything()) ->
+  genecounts_with_label
+genecounts_with_label[1:6,1:6]
+```
+
+```{r}
+
+
+metadata.df = read_tsv(metadata.file)
+
+genecounts %>%
+  mutate(Label=str_extract(expid, "^\\d+_[A-Z]+_[A-Z]"), 
+         lane=str_extract(expid, "L\\d{3}$")) %>%
+  left_join(metadata.df, by="Label") %>%
+  select(expid, Label, lane, everything()) ->
+  genecounts_with_meta
+
+metadata.df
+genecounts_with_meta[1:6,1:6]
+ncol(metadata.df)
+ncol(genecounts)
+ncol(genecounts_with_meta)
+
+ncol(genecounts_with_meta)
+
+```
+### Combine per library counts across lanes
+```{r}
+# genecounts_with_meta %>%
+#   colnames %>%
+#   str_detect(., "CNAG", negate = FALSE))
+
+genecounts_with_meta %>%
+  colnames %>%
+  grep("CNAG|ENSRNA", ., value = TRUE, invert = TRUE)
+
+# genecounts_with_meta %>%
+#   group_by(Label) %>%
+#   summarise_all(funs(sum)) ->
+#   genecounts_with_meta_lanes_combined
+# 
+# genecounts_with_meta_lanes_combined[1:6,1:6]
+
+starts_with()
+```
+
+
 
