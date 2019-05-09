@@ -10,10 +10,6 @@ library(tidyverse)
 library(magrittr)
 ```
 
-
-
-
-
 ```{r}
 count_suffix = "_ReadsPerGene.out.tab"
 countfiles = list.files(starout.dir, pattern = paste0(count_suffix,"$"), full.names = TRUE)
@@ -74,28 +70,14 @@ genecounts[1:6,1:6]
 
 ```
 
-### Add metadata to STAR count dataframe
+### Extract library specific label
 ```{r}
 genecounts %>%
   mutate(Label=str_extract(expid, "^\\d+_[A-Z]+_[A-Z]")) %>%
   select(Label, everything()) %>%
   select(-expid) ->
   genecounts_with_label
-genecounts_with_label[1:4,1:6]
-
-```
-
-```{r}
-79+79+81+61
-30+35+36+36
-38+32+37+50
-```
-```{r}
-genecounts_with_label[5:8,1:6]
-
-```
-```{r}
-43+39+47+39
+genecounts_with_label[1:8,1:6]
 ```
 
 ### Combine per library counts across lanes
@@ -113,105 +95,7 @@ read_tsv(metadata.file) %>%
 
 genecounts_lanes_combined %<>%
   left_join(metadata.df, by="Label") %>%
-  select(Label, enrichment_method, RNA_sample_num, everything())
+  select(library=Label, enrichment_method, RNA_sample_num, everything())
 genecounts_lanes_combined[,1:6]
 ```
-
-```{r}
-
-
-genecounts_lanes_combined[,1:6]
-```
-
-```{r}
-read_tsv(metadata.file) %>%
-  select(Label, enrichment_method, RNA_sample_num) ->
-  metadata.df
-
-genecounts_lanes_combined %<>%
-  left_join(metadata.df, by="Label") %>%
-  select(Label, enrichment_method, RNA_sample_num, everything())
-#   genecounts_with_meta
-# 
-# genecounts %>%
-#   mutate(Label=str_extract(expid, "^\\d+_[A-Z]+_[A-Z]"), 
-#          lane=str_extract(expid, "L\\d{3}$")) %>%
-#   left_join(metadata.df, by="Label") %>%
-#   select(expid, Label, lane, everything()) ->
-#   genecounts_with_meta
-# 
-# metadata.df
-# genecounts_with_meta[1:6,1:6]
-# ncol(metadata.df)
-# ncol(genecounts)
-# ncol(genecounts_with_meta)
-# 
-# ncol(genecounts_with_meta)
-# 
-genecounts_lanes_combined
-```
-
-
-
-```{r}
-genecounts_with_label %>% 
-genecounts %>%
-  mutate(Label=str_extract(expid, "^\\d+_[A-Z]+_[A-Z]")) %>%
-  select(Label, everything()) %>%
-  select(-expid) ->
-  genecounts_with_label
-genecounts_with_label[1:6,1:6]
-```
-
-```{r}
-genecounts %>%
-  mutate(Label=str_extract(expid, "^\\d+_[A-Z]+_[A-Z]"), 
-         lane=str_extract(expid, "L\\d{3}$")) %>%
-  select(expid, Label, lane, everything()) ->
-  genecounts_with_label
-genecounts_with_label[1:6,1:6]
-```
-
-```{r}
-
-
-metadata.df = read_tsv(metadata.file)
-
-genecounts %>%
-  mutate(Label=str_extract(expid, "^\\d+_[A-Z]+_[A-Z]"), 
-         lane=str_extract(expid, "L\\d{3}$")) %>%
-  left_join(metadata.df, by="Label") %>%
-  select(expid, Label, lane, everything()) ->
-  genecounts_with_meta
-
-metadata.df
-genecounts_with_meta[1:6,1:6]
-ncol(metadata.df)
-ncol(genecounts)
-ncol(genecounts_with_meta)
-
-ncol(genecounts_with_meta)
-
-```
-### Combine per library counts across lanes
-```{r}
-# genecounts_with_meta %>%
-#   colnames %>%
-#   str_detect(., "CNAG", negate = FALSE))
-
-genecounts_with_meta %>%
-  colnames %>%
-  grep("CNAG|ENSRNA", ., value = TRUE, invert = TRUE)
-
-# genecounts_with_meta %>%
-#   group_by(Label) %>%
-#   summarise_all(funs(sum)) ->
-#   genecounts_with_meta_lanes_combined
-# 
-# genecounts_with_meta_lanes_combined[1:6,1:6]
-
-starts_with()
-```
-
-
 
