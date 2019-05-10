@@ -7,15 +7,15 @@ output: html_document
 ```{r include=FALSE}
 source("run_config.R")
 library(foreach)
-library(tidyverse)
+library(dplyr)
+library(tidyr)
 library(magrittr)
 library(rtracklayer)
 ```
 
 ## Load STAR Count Data
 ```{r}
-count_suffix = "_ReadsPerGene.out.tab"
-countfiles = list.files(starout.dir, pattern = paste0(count_suffix,"$"), full.names = TRUE)
+countfiles = list.files(enrich_compare_starout.dir, pattern = paste0(count_suffix,"$"), full.names = TRUE)
 countfiles
 ```
 
@@ -191,6 +191,16 @@ check_select[,1:6]
 genecounts_lanes_combined %>%
   dplyr::select(-strand_specific_rrna_homologs) ->
   genecounts_lanes_combined_no_rrna
+
+genecounts_lanes_combined_no_rrna[,1:6]
+
+dim(check_select)
+dim(genecounts_lanes_combined)
+dim(genecounts_lanes_combined_no_rrna)
+
+dplyr::select(genecounts_lanes_combined,small_MTrRNA)
+# dplyr::select(genecounts_lanes_combined_no_rrna,small_MTrRNA)
+
 ```
 
 

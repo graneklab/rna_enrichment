@@ -93,5 +93,7 @@ Sys.setenv(RRNA_OLIGO_STAROUT = rrna_oligo_starout.dir)
 #--------------------------------
 Sys.setenv(ENRICH_COMPARE_STAROUT = enrich_compare_starout.dir)
 
+count_suffix = "_ReadsPerGene.out.tab"
+bam_suffix = "_Aligned.sortedByCoord.out.bam"
 
 

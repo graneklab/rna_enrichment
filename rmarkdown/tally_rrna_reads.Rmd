@@ -136,8 +136,6 @@ percentRRNA = function(gtf_path, star_out_dir){
     subset(type=="exon") ->
     rrna_granges
   #-------------------------------------
-  bam_suffix = "_Aligned.sortedByCoord.out.bam"
-  count_suffix = "_ReadsPerGene.out.tab"
   bamfiles = list.files(star_out_dir, pattern = paste0(bam_suffix,"$"), full.names = TRUE)
   countfiles = bamfiles %>%
     str_replace(bam_suffix, count_suffix)
