@@ -1,6 +1,6 @@
 # Libraries
 library(fs)
-library(tidyverse)
+library(dplyr)
 
 # Setup R variables
 threads=3
