@@ -9,6 +9,7 @@ source("run_config.R")
 library(foreach)
 library(tidyverse)
 library(magrittr)
+library(rtracklayer)
 ```
 
 ## Load STAR Count Data
@@ -64,8 +65,8 @@ genecounts[1:6,1:6]
 ```{r}
 genecounts %>%
   mutate(Label=str_extract(expid, "^\\d+_[A-Z]+_[A-Z]")) %>%
-  select(Label, everything()) %>%
-  select(-expid) ->
+  dplyr::select(Label, everything()) %>%
+  dplyr::select(-expid) ->
   genecounts_with_label
 genecounts_with_label[1:8,1:6]
 ```
@@ -79,18 +80,95 @@ genecounts_with_label %>%
 
 # Add metadata 
 read_tsv(metadata.file) %>%
-  select(Label, enrichment_method, RNA_sample_num) ->
+  dplyr::select(Label, enrichment_method, RNA_sample_num) ->
   metadata.df
 
 genecounts_lanes_combined %<>%
   left_join(metadata.df, by="Label") %>%
-  select(library=Label, enrichment_method, RNA_sample_num, everything())
+  dplyr::select(library=Label, enrichment_method, RNA_sample_num, everything())
 genecounts_lanes_combined[,1:6]
 ```
 
 ## Compare library preps
 
 ### Drop rRNA genes and genes with rRNA homology
+
+#### Find all genes that are mapped by rRNA reads
+##### Load GTF
+```{r}
+import(gtf_with_mito_rrna.file, format="gtf") %>%
+  subset(type=="exon") ->
+  h99_granges
+```
+
+
+##### Find all genes that overlap with rRNA reads
+https://bioinformatics.stackexchange.com/questions/874/intersection-of-two-genomic-ranges-to-keep-metadata
+```{r}
+scanBam(oligo_bam.file) %>%
+  as.data.frame %>%
+  mutate(end=pos+qwidth) %>%
+  dplyr::select(chr=rname, start=pos, end, strand) %>%
+  makeGRangesFromDataFrame(ignore.strand = TRUE) %>%
+  invertStrand -> # we invert the strand since the oligos are antisense
+  oligo_bam.gr
+
+# %>% rev
+  # oligo_gene_counts
+
+o = findOverlaps(h99_granges, oligo_bam.gr)
+grl1 = split(h99_granges[queryHits(o)], 1:length(o)) # You can't mendoapply on a GRanges object
+grl2 = split(oligo_bam.gr[subjectHits(o)], 1:length(o))
+foo = function(x, y) {
+  rv = x
+  start(rv) = max(start(x), start(y))
+  end(rv) = min(end(x), end(y))
+  return(rv)
+}
+
+unlist(mendoapply(foo, grl1, y=grl2)) %>%
+  as.data.frame %>%
+  pull(gene_id) %>%
+  unique ->
+  all_rrna_homologs
+
+all_rrna_homologs
+```
+
+##### Find STRAND-SPECIFIC genes that overlap with rRNA reads
+```{r}
+scanBam(oligo_bam.file) %>%
+  as.data.frame %>%
+  mutate(end=pos+qwidth) %>%
+  dplyr::select(chr=rname, start=pos, end, strand) %>%
+  makeGRangesFromDataFrame %>%
+  invertStrand -> # we invert the strand since the oligos are antisense
+  oligo_bam.gr
+
+# %>% rev
+  # oligo_gene_counts
+
+o = findOverlaps(h99_granges, oligo_bam.gr)
+grl1 = split(h99_granges[queryHits(o)], 1:length(o)) # You can't mendoapply on a GRanges object
+grl2 = split(oligo_bam.gr[subjectHits(o)], 1:length(o))
+foo = function(x, y) {
+  rv = x
+  start(rv) = max(start(x), start(y))
+  end(rv) = min(end(x), end(y))
+  return(rv)
+}
+
+unlist(mendoapply(foo, grl1, y=grl2)) %>%
+  as.data.frame %>%
+  pull(gene_id) %>%
+  unique ->
+  strand_specific_rrna_homologs
+
+strand_specific_rrna_homologs
+```
+
+#### Drop genes from count table
+
 
 ### Generate scatterplots for MA vs TOT and RZ vs TOT 
 
