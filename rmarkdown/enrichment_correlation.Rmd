@@ -204,7 +204,30 @@ dplyr::select(genecounts_lanes_combined,small_MTrRNA)
 ```
 
 
-### Generate scatterplots for MA vs TOT and RZ vs TOT 
+### Generate scatterplots for MA vs TOT and RZ vs TOT
+```{r}
+genecounts_lanes_combined_no_rrna[,1:6]
+
+```
+
+```{r}
+genecounts_lanes_combined_no_rrna %>%
+  filter(RNA_sample_num == 2) %>%
+  dplyr::select(-c(library,RNA_sample_num)) %>%
+  
+```
+
+
+# Drop STAR count statistics and rotate dataframe
+out %>%
+    dplyr::slice(-(1:4)) %>%
+    gather(expid, value, -gene) %>% 
+    spread(gene, value) -> genecounts
+
+genecounts[1:6,1:6]
+
+
+
 
 ### Generate correlation coefficients for MA vs TOT and RZ vs TOT
 
