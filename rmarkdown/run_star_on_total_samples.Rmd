@@ -95,8 +95,8 @@ trim_and_star_func() {
 }
 export -f trim_and_star_func
 
-parallel --jobs $MAX_JOBS trim_and_star_func ::: $RAW_FASTQS/*.fastq.gz
-# parallel --jobs 1 trim_and_star_func ::: $RAW_FASTQS/2_TOT*L00[12]*.fastq.gz
+# parallel --jobs $MAX_JOBS trim_and_star_func ::: $RAW_FASTQS/*.fastq.gz
+parallel --jobs 1 trim_and_star_func ::: $RAW_FASTQS/?_TOT*L00[12]*.fastq.gz
 
 ```
 
