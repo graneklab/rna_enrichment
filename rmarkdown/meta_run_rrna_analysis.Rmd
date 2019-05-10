@@ -60,7 +60,7 @@ for (cur_rmd in regression_rmds){
 files_to_tar = c(gtf_with_mito_rrna.file, 
                  fa_for_mito_rrna.file,
                  rrna_oligos.file,
-                 list.files(mito_rrna_star_out.dir, 
+                 list.files(RRNA_OLIGO_STAROUT.dir, 
                             pattern = ".bam", 
                             full.names = TRUE)
                  )

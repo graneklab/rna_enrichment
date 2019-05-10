@@ -58,7 +58,7 @@ fa.file %>%
   file.path(genome_with_mito_rrna.dir, .) ->
   fa_for_mito_rrna.file
 
-mito_rrna_star_out.dir=file.path(out.dir, "mito_rrna_star_out")
+RRNA_OLIGO_STAROUT.dir=file.path(out.dir, "RRNA_OLIGO_STAROUT")
 
 
 
@@ -90,7 +90,7 @@ Sys.setenv(GTF_WITH_MITO_RRNA = gtf_with_mito_rrna.file)
 Sys.setenv(FA_WITH_MITO_RRNA = fa_for_mito_rrna.file)
 Sys.setenv(GENOME_WITH_MITO_RRNA_DIR = genome_with_mito_rrna.dir)
 Sys.setenv(RRNA_OLIGOS_FASTQ = rrna_oligos.fastq)
-Sys.setenv(MITO_RRNA_STAR_OUT = mito_rrna_star_out.dir)
+Sys.setenv(RRNA_OLIGO_STAROUT = RRNA_OLIGO_STAROUT.dir)
 
 
 

@@ -39,7 +39,7 @@ rrna_granges
 
 ### Count reads in granges
 ```{r eval=FALSE, include=FALSE}
-oligo_bam.file = file.path(mito_rrna_star_out.dir, "rrna_oligos_Aligned.sortedByCoord.out.bam")
+oligo_bam.file = file.path(RRNA_OLIGO_STAROUT.dir, "rrna_oligos_Aligned.sortedByCoord.out.bam")
 countBam(oligo_bam.file,
          param=ScanBamParam(which=rrna_granges)) ->
   rrna_count_tab

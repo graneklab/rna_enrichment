@@ -172,8 +172,8 @@ strand_specific_rrna_homologs
 small_MTrRNA and large_MTrRNA are not present in current STAR count files because it was run with the ensembl version of GTF.  Need to run with the custom version that includes small_MTrRNA and large_MTrRNA, but first need to do some refactoring
 
 Need to:
-1. rename (MITO_RRNA_STAR_OUT -> RRNA_OLIGO_STAROUT) in all files
-2. rename (mito_rrna_star_out.dir -> rrna_oligo_star_out.dir)
+1. rename (RRNA_OLIGO_STAROUT -> RRNA_OLIGO_STAROUT) in all files
+2. rename (RRNA_OLIGO_STAROUT.dir -> rrna_oligo_star_out.dir)
 3. change run_star_on_total_samples.Rmd so that it *only runs on total samples* (with gtf from ensembl)
 4. create run_star_on_enrich_compare_samples.Rmd
 5. Test run with CUSTOM version of GTF that includes mito rRNA

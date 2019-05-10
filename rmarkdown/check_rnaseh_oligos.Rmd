@@ -25,13 +25,13 @@ gunzip -f ${FA_WITH_MITO_RRNA}.gz
 
 ```{bash}
 set -u
-mkdir -p ${MITO_RRNA_STAR_OUT}
+mkdir -p ${RRNA_OLIGO_STAROUT}
 STAR \
     --runMode genomeGenerate \
     --genomeDir $GENOME_WITH_MITO_RRNA_DIR \
     --genomeFastaFiles ${FA_WITH_MITO_RRNA} \
     --sjdbGTFfile ${GTF_WITH_MITO_RRNA} \
-    --outFileNamePrefix ${MITO_RRNA_STAR_OUT}/genome_ \
+    --outFileNamePrefix ${RRNA_OLIGO_STAROUT}/genome_ \
     --genomeSAindexNbases 11
 # --genomeSAindexNbases 6
 ```
@@ -40,7 +40,7 @@ STAR \
 ```{bash}
 set -u
 SAMPLE="rrna_oligos"
-mkdir -p ${MITO_RRNA_STAR_OUT}
+mkdir -p ${RRNA_OLIGO_STAROUT}
     STAR \
     --runMode alignReads \
     --runThreadN $THREADS \
@@ -50,12 +50,12 @@ mkdir -p ${MITO_RRNA_STAR_OUT}
     --genomeLoad NoSharedMemory \
     --twopassMode None \
     --limitBAMsortRAM 1280000000 \
-    --outFileNamePrefix ${MITO_RRNA_STAR_OUT}/${SAMPLE}_ \
+    --outFileNamePrefix ${RRNA_OLIGO_STAROUT}/${SAMPLE}_ \
     --outFilterScoreMinOverLread 0 --outFilterMatchNminOverLread 0 \
     --outFilterMatchNmin 0 --outFilterMismatchNmax 2 \
     --readFilesIn $RRNA_OLIGOS_FASTQ        
         
-    samtools index ${MITO_RRNA_STAR_OUT}/${SAMPLE}_Aligned.sortedByCoord.out.bam
+    samtools index ${RRNA_OLIGO_STAROUT}/${SAMPLE}_Aligned.sortedByCoord.out.bam
 ```
 
 ## How is STAR counting multimappers
@@ -63,7 +63,7 @@ There are some reads from CNAG_10500 that map to an unannotated region between C
 
 ### Load STAR table of reads per gene
 ```{r}
-star_oligo_readspergene.path = file.path(mito_rrna_star_out.dir,"rrna_oligos_ReadsPerGene.out.tab")
+star_oligo_readspergene.path = file.path(RRNA_OLIGO_STAROUT.dir,"rrna_oligos_ReadsPerGene.out.tab")
 
 # load reads per gene count table, dropping rows with all zeroes
 read_tsv(star_oligo_readspergene.path, 
@@ -103,7 +103,7 @@ full_join(generated_oligo_counts, oligo_read_counts) %>%
 
 ### Look for multimappers
 ```{bash}
-samtools view ${MITO_RRNA_STAR_OUT}/rrna_oligos_Aligned.sortedByCoord.out.bam | grep -v NH:i:1 | cut -f1,3-4
+samtools view ${RRNA_OLIGO_STAROUT}/rrna_oligos_Aligned.sortedByCoord.out.bam | grep -v NH:i:1 | cut -f1,3-4
 ```
 
 #### Promiscuos MTrRNA oligos
@@ -134,7 +134,7 @@ rrna_granges
 
 #### Count reads in granges
 ```{r}
-oligo_bam.file = file.path(mito_rrna_star_out.dir, "rrna_oligos_Aligned.sortedByCoord.out.bam")
+oligo_bam.file = file.path(RRNA_OLIGO_STAROUT.dir, "rrna_oligos_Aligned.sortedByCoord.out.bam")
 countBam(oligo_bam.file,
          param=ScanBamParam(which=rrna_granges))
 ```
