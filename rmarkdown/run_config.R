@@ -3,8 +3,8 @@ library(fs)
 library(tidyverse)
 
 # Setup R variables
-threads=2
-max_jobs=5
+threads=3
+max_jobs=4
 
 # input
 raw_fastq.dir="/data/hts_2018_data/hts2018_pilot_rawdata"
