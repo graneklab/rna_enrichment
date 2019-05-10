@@ -101,7 +101,7 @@ generateOligos = function(cur.grange, genome, oligo_length=50, gapwidth=1){
   extractAt(cur.seq, cur.ir) %>%
     as.data.frame %>%
     dplyr::mutate(oligo_name = paste(cur.grange$gene_id, row_number(), sep="__")) %>%
-    select(oligo_name, oligo_sequence=value) %>%
+    dplyr::select(oligo_name, oligo_sequence=value) %>%
     return
 }
 ```
@@ -125,7 +125,7 @@ all_oligos.df
 # Reformat oligos for eurofins form
 all_oligos.df %>%
   mutate(five_prime_mods="", three_prime_mods="") %>%
-  select(oligo_name, five_prime_mods, oligo_sequence, three_prime_mods) %>%
+  dplyr::select(oligo_name, five_prime_mods, oligo_sequence, three_prime_mods) %>%
   write_tsv(rrna_oligos.file)
 ```
 ### Make FASTQ from oligos for checking

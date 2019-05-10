@@ -63,7 +63,7 @@ There are some reads from CNAG_10500 that map to an unannotated region between C
 
 ### Load STAR table of reads per gene
 ```{r}
-star_oligo_readspergene.path = file.path(RRNA_OLIGO_STAROUT.dir,"rrna_oligos_ReadsPerGene.out.tab")
+star_oligo_readspergene.path = file.path(rrna_oligo_starout.dir,"rrna_oligos_ReadsPerGene.out.tab")
 
 # load reads per gene count table, dropping rows with all zeroes
 read_tsv(star_oligo_readspergene.path, 
