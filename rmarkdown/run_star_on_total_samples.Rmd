@@ -40,13 +40,13 @@ ls ${GENOME_DIR}
 
 ```{bash}
 set -u
-mkdir -p ${STAR_OUT}
+mkdir -p ${TOTAL_SAMPLES_STAROUT}
 STAR \
     --runMode genomeGenerate \
     --genomeDir $GENOME_DIR \
     --genomeFastaFiles ${FA} \
     --sjdbGTFfile ${GTF} \
-    --outFileNamePrefix ${STAR_OUT}/genome_ \
+    --outFileNamePrefix ${TOTAL_SAMPLES_STAROUT}/genome_ \
     --genomeSAindexNbases 11
 # --genomeSAindexNbases 6
 ```
@@ -54,7 +54,7 @@ STAR \
 
 ```{bash}
 set -u
-mkdir -p ${STAR_OUT}
+mkdir -p ${TOTAL_SAMPLES_STAROUT}
 trim_and_star_func() {
     FASTQ=$1
     FASTQ_BASE=${FASTQ##*/} # strip directory from file path
@@ -85,13 +85,13 @@ trim_and_star_func() {
     --genomeLoad NoSharedMemory \
     --twopassMode None \
     --limitBAMsortRAM 1280000000 \
-    --outFileNamePrefix ${STAR_OUT}/${SAMPLE}_ \
+    --outFileNamePrefix ${TOTAL_SAMPLES_STAROUT}/${SAMPLE}_ \
     --outFilterScoreMinOverLread 0 --outFilterMatchNminOverLread 0 \
     --outFilterMatchNmin 0 --outFilterMismatchNmax 2 \
     --readFilesIn $CUR_PIPE        
         
     rm -f $CUR_PIPE
-    samtools index ${STAR_OUT}/${SAMPLE}_Aligned.sortedByCoord.out.bam
+    samtools index ${TOTAL_SAMPLES_STAROUT}/${SAMPLE}_Aligned.sortedByCoord.out.bam
 }
 export -f trim_and_star_func
 

@@ -16,7 +16,7 @@ info.dir=file.path(out.dir, "info")
 adapters.file= file.path(info.dir, "neb_e7600_adapters_withrc.fasta")
 trimmed.dir=file.path(out.dir, "trimmed_fastqs")
 genome.dir=file.path(out.dir, "genome")
-starout.dir=file.path(out.dir, "star_out")
+total_samples_starout.dir=file.path(out.dir, "total_samples_starout")
 mosdepth.dir=file.path(out.dir, "mosdepth")
 seq.dir = file.path(out.dir, "seq_out"); dir.create(seq.dir, recursive = TRUE)
 # export final_counts=$data_base/star_counts
@@ -58,9 +58,8 @@ fa.file %>%
   file.path(genome_with_mito_rrna.dir, .) ->
   fa_for_mito_rrna.file
 
-RRNA_OLIGO_STAROUT.dir=file.path(out.dir, "RRNA_OLIGO_STAROUT")
-
-
+rrna_oligo_starout.dir=file.path(out.dir, "rrna_oligo_starout")
+enrich_compare_starout.dir=file.path(out.dir, "enrich_compare_starout")
 
 # Setup Bash variables
 
@@ -76,7 +75,7 @@ Sys.setenv(INFO = info.dir)
 Sys.setenv(ADAPTERS = adapters.file)
 Sys.setenv(TRIMMED = trimmed.dir)
 Sys.setenv(GENOME_DIR = genome.dir)
-Sys.setenv(STAR_OUT = starout.dir)
+Sys.setenv(TOTAL_SAMPLES_STAROUT = total_samples_starout.dir)
 Sys.setenv(MOSDEPTH_OUT = mosdepth.dir)
 
 Sys.setenv(FA_URL = fa_url)
@@ -90,8 +89,9 @@ Sys.setenv(GTF_WITH_MITO_RRNA = gtf_with_mito_rrna.file)
 Sys.setenv(FA_WITH_MITO_RRNA = fa_for_mito_rrna.file)
 Sys.setenv(GENOME_WITH_MITO_RRNA_DIR = genome_with_mito_rrna.dir)
 Sys.setenv(RRNA_OLIGOS_FASTQ = rrna_oligos.fastq)
-Sys.setenv(RRNA_OLIGO_STAROUT = RRNA_OLIGO_STAROUT.dir)
-
+Sys.setenv(RRNA_OLIGO_STAROUT = rrna_oligo_starout.dir)
+#--------------------------------
+Sys.setenv(ENRICH_COMPARE_STAROUT = enrich_compare_starout.dir)
 
 
 

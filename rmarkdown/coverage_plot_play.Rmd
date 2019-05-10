@@ -40,13 +40,13 @@ large_mito_rrna_id = "21s_mito_rrna"
 
 
 ```{r}
-tot_bam_files = dir_ls(starout.dir,glob = "*TOT*L00*.bam") 
+tot_bam_files = dir_ls(total_samples_starout.dir,glob = "*TOT*L00*.bam") 
 tot_bams = BamFileList(tot_bam_files, paste0(tot_bam_files, ".bai"))
 tot_bam_files
 ```
 
 ```{r}
-tot_L1_bam_files = dir_ls(starout.dir,glob = "*TOT*L001*.bam") 
+tot_L1_bam_files = dir_ls(total_samples_starout.dir,glob = "*TOT*L001*.bam") 
 tot_L1_bams = BamFileList(tot_L1_bam_files, paste0(tot_L1_bam_files, ".bai"))
 tot_L1_bam_files
 ```
@@ -381,7 +381,7 @@ grep -i rRNA /workspace/2018_tot_samples/genome/Cryptococcus_neoformans_var_grub
 ```
 
 ```{bash}
-grep CNAG_10500 /workspace/2018_tot_samples/star_out/*_L001_ReadsPerGene.out.tab
+grep CNAG_10500 $TOTAL_SAMPLES_STAROUT/*_L001_ReadsPerGene.out.tab
 ```
 
 # Notes
