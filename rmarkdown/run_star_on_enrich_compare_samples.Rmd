@@ -97,6 +97,10 @@ parallel --jobs $MAX_JOBS trim_and_star_func ::: $RAW_FASTQS/2_TOT*L00[12]*.fast
 
 ```
 
+### Check that custom GTF (with MTrRNA) was used
+```{bash}
+grep MTrRNA $ENRICH_COMPARE_STAROUT/*_ReadsPerGene.out.tab
+```
 
 # SessionInfo
 ```{r}
