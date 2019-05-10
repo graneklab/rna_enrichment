@@ -8,6 +8,9 @@ output:
 ```{r}
 source("run_config.R")
 
+library(dplyr)
+library(readr)
+library(stringr)
 library(GenomicFeatures)
 library(Rsamtools)
 library(rtracklayer)
@@ -93,7 +96,6 @@ generated_oligo_counts
 
 generated_oligo_counts %>%
   summarise(total = sum(total_counts))
-
 ```
 
 ```{r}
@@ -134,7 +136,7 @@ rrna_granges
 
 #### Count reads in granges
 ```{r}
-oligo_bam.file = file.path(RRNA_OLIGO_STAROUT.dir, "rrna_oligos_Aligned.sortedByCoord.out.bam")
+oligo_bam.file = file.path(rrna_oligo_starout.dir, "rrna_oligos_Aligned.sortedByCoord.out.bam")
 countBam(oligo_bam.file,
          param=ScanBamParam(which=rrna_granges))
 ```
