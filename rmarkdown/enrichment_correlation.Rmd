@@ -11,6 +11,7 @@ library(dplyr)
 library(tidyr)
 library(magrittr)
 library(rtracklayer)
+library(ggplot2)
 ```
 
 ## Load STAR Count Data
@@ -211,9 +212,25 @@ genecounts_lanes_combined_no_rrna[,1:6]
 ```
 
 ```{r}
+cur_sample = 3
+
 genecounts_lanes_combined_no_rrna %>%
-  filter(RNA_sample_num == 2) %>%
+  filter(RNA_sample_num == cur_sample) %>%
   dplyr::select(-c(library,RNA_sample_num)) %>%
+  gather(gene_id, reads, 2:ncol(.)) %>%
+  spread(enrichment_method,reads) ->
+  sample2.tidy
+  
+title_text = paste0("Sample #", cur_sample, collapse=" ")
+
+ggplot(sample2.tidy, aes(TOT, MA)) + 
+  geom_point() +
+  ggtitle(title_text)
+ggplot(sample2.tidy, aes(TOT, RZ)) + 
+  geom_point() + 
+  ggtitle(title_text)
+
+
   
 ```
 
