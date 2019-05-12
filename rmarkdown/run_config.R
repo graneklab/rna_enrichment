@@ -60,6 +60,7 @@ fa.file %>%
 
 rrna_oligo_starout.dir=file.path(out.dir, "rrna_oligo_starout")
 enrich_compare_starout.dir=file.path(out.dir, "enrich_compare_starout")
+oligo_bam.file = file.path(rrna_oligo_starout.dir, "rrna_oligos_Aligned.sortedByCoord.out.bam")
 
 # Setup Bash variables
 
