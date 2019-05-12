@@ -245,14 +245,32 @@ tot_vs_rz = ggplot(cur_sample.tidy, aes(TOT, RZ)) +
 
 grid.arrange(tot_vs_ma, tot_vs_rz, nrow = 1)
 
+#------------------------------------------------------------------
+ma_cor = paste("MA R =", 
+               cor(cur_sample.tidy[["TOT"]],
+                   cur_sample.tidy[["MA"]]) %>%
+                 round(2))
 
+rz_cor = paste("RZ R =", 
+               cor(cur_sample.tidy[["TOT"]],
+                   cur_sample.tidy[["RZ"]]) %>%
+                 round(2))
+ma_cor
+rz_cor
+cat(paste(ma_cor, rz_cor, sep="\n"))
+#------------------------------------------------------------------
 ggplot(cur_sample.tidy, aes(TOT, y=value, color=variable, alpha = 1/2)) + 
   geom_point(aes(y=MA, color="MA"), size=1) +
   geom_point(aes(y=RZ, color="RZ"), size=1) +
   ggtitle(title_text) +
-  theme_bw()
+  theme_bw() +
+  annotate("text", x=0, y = ymax*0.95, 
+           label = paste(ma_cor, rz_cor, sep="\n"),
+           hjust="inward",
+           just="inward", 
+           color="red")
 
-
+#------------------------------------------------------------------
 
 ggplot(cur_sample.tidy, alpha = 1/2) +
   geom_point(aes(TOT, MA), color="red", size=1) + 
@@ -261,7 +279,68 @@ ggplot(cur_sample.tidy, alpha = 1/2) +
   geom_smooth(aes(TOT, RZ), method=lm, se=FALSE, color="blue") +
   ggtitle(title_text) +
   theme_bw() 
+
+
 ```
+```{r}
+makeScatterPlot = function(genecounts_lanes_combined_no_rrna, cur_sample_num) {
+  
+genecounts_lanes_combined_no_rrna %>%
+  filter(RNA_sample_num == cur_sample_num) %>%
+  dplyr::select(-c(library,RNA_sample_num)) %>%
+  gather(gene_id, reads, 2:ncol(.)) %>%
+  spread(enrichment_method,reads) ->
+  cur_sample.tidy
+  
+title_text = paste0("Sample #", cur_sample_num, collapse=" ")
+
+cur_sample.tidy %>%
+  summarise(max(MA), max(RZ)) %>%
+  max -> ymax
+
+#------------------------------------------------------------------
+ma_cor = paste("MA R =", 
+               cor(cur_sample.tidy[["TOT"]],
+                   cur_sample.tidy[["MA"]]) %>%
+                 round(2))
+
+rz_cor = paste("RZ R =", 
+               cor(cur_sample.tidy[["TOT"]],
+                   cur_sample.tidy[["RZ"]]) %>%
+                 round(2))
+#------------------------------------------------------------------
+ggplot(cur_sample.tidy, aes(TOT, y=value, color=variable, alpha = 1/2)) + 
+  geom_point(aes(y=MA, color="MA"), size=1) +
+  geom_point(aes(y=RZ, color="RZ"), size=1) +
+  ggtitle(title_text) +
+  theme_bw() +
+  annotate("text", x=0, y = ymax, 
+           label = paste(ma_cor, rz_cor, sep="\n"),
+           hjust="inward",
+           vjust="inward", 
+           color="black")
+}
+for (cur_sample in 2:4) {
+  print(makeScatterPlot(genecounts_lanes_combined_no_rrna, cur_sample))
+}
+```
+
+
+
+
+
+
+```{r}
+require(dplyr)
+set.seed(123)
+xx = data.frame(group = rep(1:4, 100), a = rnorm(400) , b = rnorm(400))
+
+xx
+gp = group_by(xx, group)
+dplyr::summarize(gp, cor(a, b))
+```
+
+
 
 https://www.sixhat.net/how-to-plot-multpile-data-series-with-ggplot.html
 
