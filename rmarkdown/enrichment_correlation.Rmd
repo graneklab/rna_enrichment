@@ -214,7 +214,7 @@ genecounts_lanes_combined_no_rrna[,1:6]
 
 ```{r}
 
-cur_sample_num = 4
+cur_sample_num = 2
 
 genecounts_lanes_combined_no_rrna %>%
   filter(RNA_sample_num == cur_sample_num) %>%
@@ -229,8 +229,6 @@ cur_sample.tidy %>%
   summarise(max(MA), max(RZ)) %>%
   max -> ymax
 
-
-
 tot_vs_ma = ggplot(cur_sample.tidy, aes(TOT, MA)) + 
   geom_point(alpha = 1/2, color="red", size=1) +
   ggtitle(title_text) +
@@ -244,7 +242,37 @@ tot_vs_rz = ggplot(cur_sample.tidy, aes(TOT, RZ)) +
 
 grid.arrange(tot_vs_ma, tot_vs_rz, nrow = 1)
 
+
+ggplot(cur_sample.tidy, aes(TOT, y=value, color=variable, alpha = 1/2)) + 
+  geom_point(aes(y=MA, color="MA"), size=1) +
+  geom_point(aes(y=RZ, color="RZ"), size=1) +
+  ggtitle(title_text) +
+  theme_bw()
+
+
+
+
 ```
+https://www.sixhat.net/how-to-plot-multpile-data-series-with-ggplot.html
+
+library(reshape)
+# This creates a new data frame with columns x, variable and value
+# x is the id, variable holds each of our timeseries designation
+ 
+ggplot(data = df.melted, aes(x = x, y = value, color = variable)) +
+  geom_point()
+And thats how to plot multiple data series using ggplot. The basic trick is that you need to melt your data into a new data.frame. Remember, in data.frames each row represents an observation.
+
+update:
+
+Another option, pointed to me in the comments by Cosmin Saveanu (Thanks!), it to plot the multiple data series with facets (good for B&W):
+
+library(reshape)
+ggplot(data = df.melted, aes(x = x, y = value)) +
+geom_point() + facet_grid(variable ~ .)
+
+
+
 
 
 # Drop STAR count statistics and rotate dataframe
