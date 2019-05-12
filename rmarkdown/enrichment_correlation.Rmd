@@ -13,6 +13,9 @@ library(magrittr)
 library(rtracklayer)
 library(ggplot2)
 library(gridExtra)
+library(readr)
+library(stringr)
+library(Rsamtools)
 ```
 
 ## Load STAR Count Data
