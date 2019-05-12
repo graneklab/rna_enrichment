@@ -251,8 +251,15 @@ ggplot(cur_sample.tidy, aes(TOT, y=value, color=variable, alpha = 1/2)) +
 
 
 
-
+ggplot(cur_sample.tidy, alpha = 1/2) +
+  geom_point(aes(TOT, MA), color="red", size=1) + 
+  geom_smooth(aes(TOT, MA), method=lm, se=FALSE, color="red") +
+  geom_point(aes(TOT, RZ), color="blue", size=1) +
+  geom_smooth(aes(TOT, RZ), method=lm, se=FALSE, color="blue") +
+  ggtitle(title_text) +
+  theme_bw() 
 ```
+
 https://www.sixhat.net/how-to-plot-multpile-data-series-with-ggplot.html
 
 library(reshape)
