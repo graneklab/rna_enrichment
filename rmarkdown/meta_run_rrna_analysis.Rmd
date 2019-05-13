@@ -17,7 +17,7 @@ library(utils)
 
 ```{r set_paths}
 source("run_config.R")
-delete_outdir=FALSE
+delete_outdir=TRUE
 ```
 
 ```{r prepare_output_dir}
@@ -36,6 +36,7 @@ list.files(pattern = ".Rmd") ->
 
 ordered_rmds_to_run = c(
   "download_data.Rmd", 
+  "run_star_on_total_samples.Rmd",
   "coverage_plot_play.Rmd", 
   "generate_rnaseh_oligos.Rmd",
   "check_rnaseh_oligos.Rmd",
