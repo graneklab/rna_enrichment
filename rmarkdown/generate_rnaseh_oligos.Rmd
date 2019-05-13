@@ -8,10 +8,12 @@ output:
 # Setup
 ## Load Libraries
 ```{r}
-library(tidyverse)
+# library(tidyverse)
 library(BSgenome)
 library(rtracklayer)
 library(Biostrings)
+library(stringr)
+library(readr)
 ```
 
 ## Load Data

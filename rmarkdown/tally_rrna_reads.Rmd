@@ -11,6 +11,7 @@ library(GenomicFeatures)
 library(Rsamtools)
 library(rtracklayer)
 library(knitr)
+library(stringr)
 ```
 
 
@@ -171,14 +172,20 @@ percentRRNA = function(gtf_path, star_out_dir){
 # 4. calculate rRNA_reads/total_reads and rRNA_reads/mapped_reads for each of the 2018 Total libraries
 
 }
-y = percentRRNA(gtf_with_mito_rrna.file, "/workspace/2018_tot_samples/tmp_star_out")
+y = percentRRNA(gtf_path=gtf_with_mito_rrna.file, star_out_dir=total_samples_starout.dir)
 kable(y)
+```
+
+
+```{r}
+list.files(total_samples_starout.dir, pattern = paste0(bam_suffix,"$"), full.names = TRUE)
+# list.files(star_out_dir, pattern = paste0(bam_suffix,"$"), full.names = TRUE)
 ```
 
 
 
 ```{r}
-full_data_counts = percentRRNA(gtf_with_mito_rrna.file, starout.dir)
+full_data_counts = percentRRNA(gtf_with_mito_rrna.file, enrich_compare_starout.dir)
 ```
 
 

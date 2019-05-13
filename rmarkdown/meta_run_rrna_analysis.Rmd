@@ -17,27 +17,30 @@ library(utils)
 
 ```{r set_paths}
 source("run_config.R")
+delete_outdir=FALSE
 ```
 
 ```{r prepare_output_dir}
-if (dir_exists(out.dir)) {dir_delete(out.dir)}
+
+if (delete_outdir & dir_exists(out.dir)) {dir_delete(out.dir)}
 
 regression_output_dir = file.path(out.dir, "full_run_html")
 dir.create(regression_output_dir, recursive = TRUE)
 ```
 
-```{r find_rmds, eval=FALSE, include=TRUE}
+```{r find_rmds}
 list.files(pattern = ".Rmd") ->
   all_rmd_vector
 
+"run_star_on_total_samples.Rmd" # should be second, but it is creating problems when knit
+
 ordered_rmds_to_run = c(
   "download_data.Rmd", 
-  "run_star_on_total_samples.Rmd",
   "coverage_plot_play.Rmd", 
   "generate_rnaseh_oligos.Rmd",
   "check_rnaseh_oligos.Rmd",
-  "tally_rrna_reads.Rmd",
   "run_star_on_enrich_compare_samples.Rmd",
+  "tally_rrna_reads.Rmd",
   "enrichment_correlation.Rmd"
   )
 
@@ -61,7 +64,7 @@ for (cur_rmd in ordered_rmds_to_run){
 files_to_tar = c(gtf_with_mito_rrna.file, 
                  fa_for_mito_rrna.file,
                  rrna_oligos.file,
-                 list.files(RRNA_OLIGO_STAROUT.dir, 
+                 list.files(rrna_oligo_starout.dir, 
                             pattern = ".bam", 
                             full.names = TRUE)
                  )

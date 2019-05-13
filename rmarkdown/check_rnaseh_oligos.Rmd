@@ -14,6 +14,7 @@ library(stringr)
 library(GenomicFeatures)
 library(Rsamtools)
 library(rtracklayer)
+library(tibble)
 ```
 
 
@@ -89,7 +90,7 @@ read_tsv(rrna_oligos.file) %>%
   as_tibble %>%
   dplyr::rename(gene_id="V1", gene_oligo_num="V2") %>%
   group_by(gene_id) %>%
-  summarise(total_counts = n()) ->
+  dplyr::summarise(total_counts = n()) ->
   generated_oligo_counts
   
 generated_oligo_counts

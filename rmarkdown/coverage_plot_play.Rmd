@@ -13,8 +13,10 @@ library(ggbio)
 library(fs)
 library(GenomicAlignments)
 library(rtracklayer)
-library(tidyverse)
+# library(tidyverse)
 library(plyr)
+library(stringr)
+library(tibble)
 ```
 
 ## Load Data
@@ -354,7 +356,7 @@ make_df_from_gr = function(gr_vec){
   print(attr_template)
   print(attr)
   gr_vec %>%
-    as.tibble %>%
+    as_tibble %>%
     add_column(attributes=attr, source="JAG", feature="exon", score=".", frame=".") %>%
     dplyr::select(seqname=seqnames, source, feature, start, end, score, 
                        strand, frame, attributes)
