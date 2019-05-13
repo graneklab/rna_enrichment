@@ -11,6 +11,7 @@ source("run_config.R")
 
 
 # Make adapter file
+Don't need to run this chunk because it should have been run by check_rnaseh_oligos.Rmd
 ```{bash eval=FALSE, include=FALSE}
 set -u
 mkdir -p $INFO
@@ -26,6 +27,7 @@ head $ADAPTERS
 ```
 
 # Download and Index Genome
+Don't need to run this chunk because it should have been run by run_star_on_total_samples.Rmd
 ```{bash eval=FALSE, include=FALSE}
 set -u
 mkdir -p $GENOME_WITH_MITO_RRNA_DIR
@@ -35,6 +37,7 @@ gunzip -f ${FA_WITH_MITO_RRNA}.gz
 
 
 ```{bash eval=FALSE, include=FALSE}
+Don't need to run this chunk because it should have been run by check_rnaseh_oligos.Rmd
 set -u
 mkdir -p ${ENRICH_COMPARE_STAROUT}
 STAR \
@@ -47,7 +50,6 @@ STAR \
 # --genomeSAindexNbases 6
 ```
 
-## Check oligos
 
 ```{bash}
 set -u
