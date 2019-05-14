@@ -3,6 +3,10 @@ title: "Tally rRNA Reads"
 output: html_document
 ---
 
+```{r global_options, include=FALSE}
+library(knitr)
+knitr::opts_chunk$set(echo=FALSE, include=FALSE)
+```
 
 ```{r}
 source("run_config.R")
@@ -12,6 +16,9 @@ library(Rsamtools)
 library(rtracklayer)
 library(knitr)
 library(stringr)
+library(tibble)
+library(readr)
+library(ggplot2)
 ```
 
 
@@ -201,7 +208,7 @@ full_data_counts %>%
 kable(full_data_counts_with_meta)
 ```
 
-```{r}
+```{r include=TRUE}
 enrichment_names <- c(
                     `MA` = "polyA",
                     `RZ` = "RiboZero",

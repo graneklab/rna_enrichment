@@ -3,6 +3,11 @@ title: "Enrichment Correlation"
 output: html_document
 ---
 
+```{r global_options, include=FALSE}
+library(knitr)
+knitr::opts_chunk$set(echo=FALSE, include=FALSE)
+```
+
 # Load paths and libraries
 ```{r include=FALSE}
 source("run_config_2019.R")
@@ -120,16 +125,6 @@ import(gtf_with_mito_rrna.file, format="gtf") %>%
 
 #### Drop genes from count table
 
-small_MTrRNA and large_MTrRNA are not present in current STAR count files because it was run with the ensembl version of GTF.  Need to run with the custom version that includes small_MTrRNA and large_MTrRNA, but first need to do some refactoring
-
-Need to:
-1. rename (MITO_RRNA_STAR_OUT -> RRNA_OLIGO_STAROUT) in all files
-2. rename (mito_rrna_star_out.dir -> rrna_oligo_star_out.dir)
-3. change run_star_on_total_samples.Rmd so that it *only runs on total samples* (with gtf from ensembl)
-4. create run_star_on_enrich_compare_samples.Rmd
-5. Test run with CUSTOM version of GTF that includes mito rRNA
-6. run on all enrichment comparison libraries (samples 2, 3, and 4) with CUSTOM version of GTF that includes mito rRNA
-
 ```{r}
 # genes_to_drop = intersect(colnames(genecounts_lanes_combined), 
 #                           strand_specific_rrna_homologs)
@@ -230,7 +225,7 @@ ggplot(cur_sample.tidy, alpha = 1/2) +
 
 
 ```
-```{r}
+```{r include=TRUE}
 makeScatterPlot = function(genecounts_lanes_combined_no_rrna, cur_sample_num, cur_enrich_rep = 1) {
   
 genecounts_lanes_combined_no_rrna %>%
@@ -280,6 +275,7 @@ for (cur_sample in 2:4) {
 
 
 ```{r}
+# Trying to generalize plotting 
 require(dplyr)
 set.seed(123)
 xx = data.frame(group = rep(1:4, 100), a = rnorm(400) , b = rnorm(400))
@@ -287,42 +283,12 @@ xx = data.frame(group = rep(1:4, 100), a = rnorm(400) , b = rnorm(400))
 xx
 gp = group_by(xx, group)
 dplyr::summarize(gp, cor(a, b))
+
+# https://www.sixhat.net/how-to-plot-multpile-data-series-with-ggplot.html
 ```
 
 
 
-https://www.sixhat.net/how-to-plot-multpile-data-series-with-ggplot.html
-
-library(reshape)
-# This creates a new data frame with columns x, variable and value
-# x is the id, variable holds each of our timeseries designation
- 
-ggplot(data = df.melted, aes(x = x, y = value, color = variable)) +
-  geom_point()
-And thats how to plot multiple data series using ggplot. The basic trick is that you need to melt your data into a new data.frame. Remember, in data.frames each row represents an observation.
-
-update:
-
-Another option, pointed to me in the comments by Cosmin Saveanu (Thanks!), it to plot the multiple data series with facets (good for B&W):
-
-library(reshape)
-ggplot(data = df.melted, aes(x = x, y = value)) +
-geom_point() + facet_grid(variable ~ .)
 
 
-
-
-
-# Drop STAR count statistics and rotate dataframe
-out %>%
-    dplyr::slice(-(1:4)) %>%
-    gather(expid, value, -gene) %>% 
-    spread(gene, value) -> genecounts
-
-genecounts[1:6,1:6]
-
-
-
-
-### Generate correlation coefficients for mRNA vs Total and RNaseH vs Total
 

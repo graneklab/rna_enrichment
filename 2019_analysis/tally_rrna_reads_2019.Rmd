@@ -3,12 +3,16 @@ title: "Tally rRNA Reads"
 output: html_document
 ---
 
+```{r global_options, include=FALSE}
+library(knitr)
+knitr::opts_chunk$set(echo=FALSE, include=FALSE)
+```
+
 ```{r}
 source("run_config_2019.R")
 library(GenomicFeatures)
 library(Rsamtools)
 library(rtracklayer)
-library(knitr)
 library(stringr)
 library(tibble)
 library(readr)
@@ -125,7 +129,7 @@ kable(enrich_compare_counts_with_meta)
 ```
 
 ## rRNA Reads as a portion of Total Reads
-```{r}
+```{r include=TRUE}
 ggplot(data=enrich_compare_counts_with_meta, 
        aes(x=RNA_sample_num, y=rrna_percent_total, fill=lane)) +
   geom_bar(stat="identity", 
