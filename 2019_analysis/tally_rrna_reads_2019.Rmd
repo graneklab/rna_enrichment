@@ -127,7 +127,7 @@ kable(enrich_compare_counts_with_meta)
 ## rRNA Reads as a portion of Total Reads
 ```{r}
 ggplot(data=enrich_compare_counts_with_meta, 
-       aes(x=SampleNum, y=rrna_percent_total, fill=lane)) +
+       aes(x=RNA_sample_num, y=rrna_percent_total, fill=lane)) +
   geom_bar(stat="identity", 
            position = position_dodge(preserve = "total"),
            color="black") +
@@ -142,7 +142,7 @@ ggplot(data=enrich_compare_counts_with_meta,
 ## Mapped Reads as a portion of Total Reads
 ```{r}
 ggplot(data=enrich_compare_counts_with_meta, 
-       aes(x=SampleNum, y=percent_mapped, fill=lane)) +
+       aes(x=RNA_sample_num, y=percent_mapped, fill=lane)) +
   geom_bar(stat="identity", 
            position = position_dodge(preserve = "total"),
            color="black") +
