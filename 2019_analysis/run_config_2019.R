@@ -8,7 +8,8 @@ max_jobs=4
 
 # # input
 raw_fastq.dir="/data/hts_2019_data/hts2019_pilot_rawdata"
-# metadata.file=file.path(raw_fastq.dir, "2018_pilot_metadata.tsv")
+metadata.file=file.path(raw_fastq.dir, "2019_pilot_metadata.tsv")
+
 # 
 # # output
 out.dir="/workspace/2019_enrich_samples"
@@ -94,7 +95,7 @@ Sys.setenv(RRNA_OLIGO_STAROUT = rrna_oligo_starout.dir)
 # #--------------------------------
 Sys.setenv(ENRICH_COMPARE_STAROUT = enrich_compare_starout.dir)
 # 
-# count_suffix = "_ReadsPerGene.out.tab"
-# bam_suffix = "_Aligned.sortedByCoord.out.bam"
+count_suffix = "_ReadsPerGene.out.tab"
+bam_suffix = "_Aligned.sortedByCoord.out.bam"
 # 
 # 
