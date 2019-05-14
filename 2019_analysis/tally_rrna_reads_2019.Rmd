@@ -97,6 +97,8 @@ cat("rRNA % of Mapped Reads:", 100 * rrna_count_total/strand_mapped_reads, fill 
 
 #------------------------------------------
 
+## Determine rRNA Counts
+
 ```{r}
 countsFromBam <- function(bam_file, gene_granges) {
   countBam(bam_file,
@@ -165,7 +167,8 @@ percentRRNA = function(gtf_path, star_out_dir, bam_subset_regex=".*"){
   star_counts
   
   combined_counts = full_join(star_counts, bam_counts, by="sample") %>%
-    mutate(rrna_percent_total = 100 * rrna_reads/total_reads,
+    mutate(percent_mapped = 100 * mapped_reads/total_reads,
+           rrna_percent_total = 100 * rrna_reads/total_reads,
            rrna_percent_mapped = 100 * rrna_reads/mapped_reads)
 
   # return(list(bam_counts, star_counts))
@@ -212,6 +215,7 @@ enrich_compare_counts %>%
 kable(enrich_compare_counts_with_meta)
 ```
 
+## rRNA Reads as a portion of Total Reads
 ```{r}
 ggplot(data=enrich_compare_counts_with_meta, 
        aes(x=SampleNum, y=rrna_percent_total, fill=lane)) +
@@ -225,5 +229,18 @@ ggplot(data=enrich_compare_counts_with_meta,
   ylim(c(0,100))
 
 ```
+## Mapped Reads as a portion of Total Reads
+```{r}
+ggplot(data=enrich_compare_counts_with_meta, 
+       aes(x=SampleNum, y=percent_mapped, fill=lane)) +
+  geom_bar(stat="identity", 
+           position = position_dodge(preserve = "total"),
+           color="black") +
+  facet_grid(cols = vars(enrichment_method), scale="free_x") +
+  scale_fill_brewer(guide=FALSE) +
+  theme_bw() +
+  labs(x = "Sample", y="% Reads Mapped") +
+  ylim(c(0,100))
 
+```
 
