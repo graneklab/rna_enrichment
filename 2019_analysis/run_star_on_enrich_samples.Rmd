@@ -1,0 +1,119 @@
+---
+title: "Run STAR on TOTAL samples"
+output:
+  html_document:
+    toc: false
+---
+
+```{r}
+source("run_config_2019.R")
+library(tools)
+```
+
+
+# Make adapter file
+```{bash}
+set -u
+mkdir -p $INFO
+echo ">Adapter
+AGATCGGAAGAGCACACGTCTGAACTCCAGTCA
+>AdapterRead2
+AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT
+>Adapter_rc
+TGACTGGAGTTCAGACGTGTGCTCTTCCGATCT
+>AdapterRead2_rc
+ACACTCTTTCCCTACACGACGCTCTTCCGATCT" >  $ADAPTERS
+head $ADAPTERS
+```
+
+# Download and Index Genome
+## Download
+```{bash}
+set -u
+mkdir -p $GENOME_WITH_MITO_RRNA_DIR
+wget --no-verbose --directory-prefix ${GENOME_WITH_MITO_RRNA_DIR} ${FA_URL} 
+gunzip -f ${FA_WITH_MITO_RRNA}.gz
+```
+```{r}
+stopifnot(md5sum(fa_for_mito_rrna.file) == "77e35feb6e9fb4deb279df882d933f7d")
+
+```
+
+## Index Genome
+```{bash}
+set -u
+mkdir -p ${ENRICH_COMPARE_STAROUT}
+STAR \
+    --runMode genomeGenerate \
+    --genomeDir $GENOME_WITH_MITO_RRNA_DIR \
+    --genomeFastaFiles ${FA_WITH_MITO_RRNA} \
+    --sjdbGTFfile ${GTF_WITH_MITO_RRNA} \
+    --outFileNamePrefix ${ENRICH_COMPARE_STAROUT}/genome_ \
+    --genomeSAindexNbases 11
+# --genomeSAindexNbases 6
+```
+
+
+
+
+```{bash}
+set -u
+
+ls $RAW_FASTQS
+```
+
+# Run Mapping
+
+```{bash}
+set -u
+mkdir -p ${ENRICH_COMPARE_STAROUT}
+trim_and_star_func() {
+    FASTQ=$1
+    FASTQ_BASE=${FASTQ##*/} # strip directory from file path
+    SAMPLE="${FASTQ_BASE%_R1_001.fastq.gz}" # strip .fq.gz file extension
+    echo $SAMPLE
+    echo $FASTQ
+    echo $FASTQ_BASE
+    # exit 1
+
+
+    # make a pipe for trimmed fastq
+    CUR_PIPE=`mktemp --dry-run`_${SAMPLE}_pipe.fq
+    mkfifo $CUR_PIPE
+
+    # Run fastq-mcf
+    fastq-mcf \
+        $ADAPTERS \
+        $FASTQ \
+        -o $CUR_PIPE \
+        -q 20 -x 0.5 &
+        
+    STAR \
+    --runMode alignReads \
+    --runThreadN $THREADS \
+    --genomeDir $GENOME_WITH_MITO_RRNA_DIR \
+    --outSAMtype BAM SortedByCoordinate \
+    --quantMode GeneCounts \
+    --genomeLoad NoSharedMemory \
+    --twopassMode None \
+    --limitBAMsortRAM 1280000000 \
+    --outFileNamePrefix ${ENRICH_COMPARE_STAROUT}/${SAMPLE}_ \
+    --outFilterScoreMinOverLread 0 --outFilterMatchNminOverLread 0 \
+    --outFilterMatchNmin 0 --outFilterMismatchNmax 2 \
+    --readFilesIn $CUR_PIPE        
+        
+    rm -f $CUR_PIPE
+    samtools index ${ENRICH_COMPARE_STAROUT}/${SAMPLE}_Aligned.sortedByCoord.out.bam
+}
+export -f trim_and_star_func
+
+# A few test samples
+# parallel --jobs $MAX_JOBS trim_and_star_func ::: $RAW_FASTQS/4_2018_P_*_S*_L001_R1_001.fastq.gz
+# All enrichment samples
+parallel --jobs $MAX_JOBS trim_and_star_func ::: $RAW_FASTQS/[234]__2018_P_*L00[1234]*.fastq.gz
+```
+
+# SessionInfo
+```{r}
+sessionInfo()
+```
