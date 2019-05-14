@@ -1,0 +1,60 @@
+---
+title: "Run rRNA Analysis"
+output:
+  html_document:
+    toc: false
+---
+
+
+```{r load_libraries}
+source("run_config_2019.R")
+
+library(knitr)
+library(rmarkdown)
+# library(here)
+# library(dplyr)
+# library(fs)
+# library(magrittr)
+# library(utils)
+```
+
+```{r prepare_output_dir}
+
+if (dir_exists(out.dir)) {dir_delete(out.dir)}
+
+regression_output_dir = file.path(out.dir, "full_run_html")
+dir.create(regression_output_dir, recursive = TRUE)
+```
+
+```{r find_rmds}
+list.files(pattern = ".Rmd") ->
+  all_rmd_vector
+
+"run_star_on_total_samples.Rmd" # should be second, but it is creating problems when knit
+
+ordered_rmds_to_run = c(
+  "download_data_2019.Rmd",
+  "run_star_on_enrich_samples.Rmd"
+  )
+
+cat(paste("Rmds not run by this meta script:", paste(setdiff(all_rmd_vector, ordered_rmds_to_run), collapse="\n"), sep="\n"))
+```
+
+```{r run_render}
+#R -e "rmarkdown::render('run_full_lemur_data.Rmd',output_file='run_full_lemur_data.html')"
+
+for (cur_rmd in ordered_rmds_to_run){
+  print(cur_rmd)
+  path_file(cur_rmd) %>%
+    path_ext_set("html") %>%
+    file.path(regression_output_dir, .) ->
+    cur_out
+  render(cur_rmd, output_file=cur_out, output_format="html_document")
+}
+```
+
+
+# SessionInfo
+```{r session_info}
+sessionInfo()
+```
