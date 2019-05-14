@@ -3,7 +3,6 @@ title: "Tally rRNA Reads"
 output: html_document
 ---
 
-
 ```{r}
 source("run_config_2019.R")
 library(GenomicFeatures)
@@ -16,89 +15,7 @@ library(readr)
 library(ggplot2)
 ```
 
-
-# TODO
-1. Use RSamtools to count reads mapping to rRNA genes
-2. Calculate "total_reads" as sum of "second_strand" column
-3. Calculate "strand mapped reads" as sum of "second_strand" column minus "unmapped" reads from that column
-4. calculate rRNA_reads/total_reads and rRNA_reads/strand_mapped_reads for each of the 2018 Total libraries
-
-# 
-
-## 1. Use RSamtools to count reads mapping to rRNA genes
-https://support.bioconductor.org/p/50774/
-
-### Load GTF
-```{r eval=FALSE, include=FALSE}
-import(gtf_with_mito_rrna.file, format="gtf") %>%
-  subset(gene_biotype=="rRNA") %>%
-  subset(type=="exon") ->
-  rrna_granges
-rrna_granges
-```
-
-
-
-
-### Count reads in granges
-```{r eval=FALSE, include=FALSE}
-countBam(oligo_bam.file,
-         param=ScanBamParam(which=rrna_granges)) ->
-  rrna_count_tab
-rrna_count_tab
-
-# rrna_count_total = 
-rrna_count_tab %>%
-  pull(records) %>%
-  sum ->
-  rrna_count_total
-```
-
-
-## 2. Calculate "total_reads" as sum of "second_strand" column
-
-```{r eval=FALSE, include=FALSE}
-read_tsv(star_oligo_readspergene.path, 
-         col_names = c("gene_id", "unstranded", "first_strand", "second_strand")) ->
-  star_counts
-head(star_counts)
-
-# star_counts %>%
-#   summarise(total = sum(second_strand))%>%
-#   pull(total)
-```
-
-```{r eval=FALSE, include=FALSE}
-star_counts %>%
-  summarise(total = sum(second_strand))%>%
-  pull(total) ->
-  total_reads
-```
-
-### 3. Calculate "strand mapped reads" as sum of "second_strand" column minus "unmapped" reads from that column
-
-```{r eval=FALSE, include=FALSE}
-star_counts %>%
-  filter(gene_id != "N_unmapped") %>%
-  summarise(total = sum(second_strand))%>%
-  pull(total) ->
-  strand_mapped_reads
-
-total_reads
-strand_mapped_reads
-```
-
-### 4. calculate rRNA_reads/total_reads and rRNA_reads/strand_mapped_reads for each of the 2018 Total libraries
-```{r eval=FALSE, include=FALSE}
-cat("rRNA % of Total Reads:", 100 * rrna_count_total/total_reads, fill = TRUE)
-cat("rRNA % of Mapped Reads:", 100 * rrna_count_total/strand_mapped_reads, fill = TRUE)
-
-```
-
-#------------------------------------------
-
 ## Determine rRNA Counts
-
 ```{r}
 countsFromBam <- function(bam_file, gene_granges) {
   countBam(bam_file,
@@ -182,14 +99,6 @@ percentRRNA = function(gtf_path, star_out_dir, bam_subset_regex=".*"){
 ```
 
 
-```{r eval=FALSE, include=FALSE}
-enrich_compare_starout.dir
-list.files(enrich_compare_starout.dir, pattern = paste0(bam_suffix,"$"), full.names = TRUE) %>%
-  path_filter(regex="_2018_P_") %>%
-  length
-# list.files(star_out_dir, pattern = paste0(bam_suffix,"$"), full.names = TRUE)
-```
-
 
 
 ```{r}
@@ -229,6 +138,7 @@ ggplot(data=enrich_compare_counts_with_meta,
   ylim(c(0,100))
 
 ```
+
 ## Mapped Reads as a portion of Total Reads
 ```{r}
 ggplot(data=enrich_compare_counts_with_meta, 
