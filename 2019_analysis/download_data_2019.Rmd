@@ -5,6 +5,10 @@ output:
     toc: false
 ---
 
+```{r load_libraries}
+source("run_config_2019.R")
+```
+
 # Check the informational files (i.e. not FASTQs)
 ```{bash}
 ddsclient list -p HTS_course | grep hts2019_pilot_rawdata | grep -v .fastq
@@ -75,6 +79,22 @@ ddsclient download -p HTS_course \
 
 chmod -R a-w /data
 ```
+
+# Download all 2019 data
+```{bash}
+chmod u+w $RAW_FASTQS
+ddsclient download -p HTS_course \
+  --include hts_2019_data/hts2019_pilot_rawdata \
+  /data
+
+chmod -R a-w /data
+```
+
+```{bash}
+cd $RAW_FASTQS
+md5sum -c md5_checksum.txt
+```
+
 
 # SessionInfo
 ```{r}
