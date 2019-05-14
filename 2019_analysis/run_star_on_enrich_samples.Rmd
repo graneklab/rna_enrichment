@@ -107,10 +107,12 @@ trim_and_star_func() {
 }
 export -f trim_and_star_func
 
+parallel --jobs $MAX_JOBS trim_and_star_func ::: $RAW_FASTQS/*.fastq.gz
+
+# parallel --jobs $MAX_JOBS trim_and_star_func ::: $RAW_FASTQS/[234]_2018_P_*L00[1234]*.fastq.gz
 # A few test samples
 # parallel --jobs $MAX_JOBS trim_and_star_func ::: $RAW_FASTQS/4_2018_P_*_S*_L001_R1_001.fastq.gz
 # All enrichment samples
-parallel --jobs $MAX_JOBS trim_and_star_func ::: $RAW_FASTQS/[234]__2018_P_*L00[1234]*.fastq.gz
 ```
 
 # SessionInfo
