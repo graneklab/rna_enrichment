@@ -1,0 +1,328 @@
+---
+title: "Enrichment Correlation"
+output: html_document
+---
+
+# Load paths and libraries
+```{r include=FALSE}
+source("run_config_2019.R")
+library(foreach)
+library(dplyr)
+library(tidyr)
+library(magrittr)
+library(rtracklayer)
+library(ggplot2)
+library(gridExtra)
+library(readr)
+library(stringr)
+library(Rsamtools)
+```
+
+## Load STAR Count Data
+```{r}
+list.files(enrich_compare_starout.dir, pattern = paste0(count_suffix,"$"), full.names = TRUE) %>%
+      path_filter(regex="_2018_P_") ->
+  countfiles
+
+countfiles
+```
+
+### Load STAR Count tables into a single dataframe
+Loading code borrowed from https://gitlab.oit.duke.edu/HTS2018/HTS2018-notebooks/blob/master/pilot/01_Read_Counts.ipynb
+```{r}
+mycombine <- function(df1, df2) {
+    # Combine two data frames by gene names
+    #
+    # Args:
+    #   df1 (Dataframe): the first count data
+    #   df2 (Dataframe): the second count data
+    #
+    # Returns:
+    #   (Dataframe) The combined data frame of df1 and df2
+    full_join(df1, df2, by = "gene")
+}
+
+# Data type for each column
+coltypes <- list(col_character(), col_integer(), col_integer(), col_integer())
+
+out <- foreach(count_path = countfiles, .combine = mycombine) %do% {
+  # generate rowname (extracted from count file name)
+  count_path %>%
+    path_file %>%
+    str_replace(count_suffix,"") ->
+    readset_label 
+
+    # read in the count file
+    readr::read_tsv(count_path, col_names = FALSE, col_types = coltypes) %>%
+        dplyr::select(X1, X4) %>% # get the 1st and 4th columns (gene ids and second strand read counts)
+            dplyr::rename_(.dots=setNames(names(.), c("gene",readset_label)))
+}
+
+out[1:6,1:6]
+
+# Drop STAR count statistics and rotate dataframe
+out %>%
+    dplyr::slice(-(1:4)) %>%
+    gather(expid, value, -gene) %>% 
+    spread(gene, value) -> genecounts
+
+genecounts[1:6,1:6]
+```
+
+### Extract library specific label
+
+```{r}
+genecounts %>%
+  mutate(Label=str_extract(expid, "^\\d+_\\d+_[A-Z]_[HMT]\\d")) %>%
+  dplyr::select(Label, everything()) %>%
+  dplyr::select(-expid) ->
+  genecounts_with_label
+genecounts_with_label[1:8,1:6]
+
+```
+
+
+
+### Combine per library counts across lanes
+```{r}
+read_tsv(metadata.file)
+```
+
+```{r}
+genecounts_with_label %>%
+  group_by(Label) %>%
+  summarise_all(funs(sum)) ->
+  genecounts_lanes_combined
+
+# Add metadata 
+read_tsv(metadata.file) %>%
+  dplyr::select(Label, enrichment_method, RNA_sample_num, enrich_rep) ->
+  metadata.df
+
+genecounts_lanes_combined %<>%
+  left_join(metadata.df, by="Label") %>%
+  dplyr::select(library=Label, enrichment_method, RNA_sample_num, enrich_rep, everything())
+genecounts_lanes_combined[,1:6]
+```
+
+## Compare library preps
+
+### Drop rRNA genes and genes with rRNA homology
+
+#### Find all genes that are mapped by rRNA reads
+##### Load GTF
+```{r}
+import(gtf_with_mito_rrna.file, format="gtf") %>%
+  subset(type=="exon") ->
+  h99_granges
+```
+
+
+#### Drop genes from count table
+
+small_MTrRNA and large_MTrRNA are not present in current STAR count files because it was run with the ensembl version of GTF.  Need to run with the custom version that includes small_MTrRNA and large_MTrRNA, but first need to do some refactoring
+
+Need to:
+1. rename (MITO_RRNA_STAR_OUT -> RRNA_OLIGO_STAROUT) in all files
+2. rename (mito_rrna_star_out.dir -> rrna_oligo_star_out.dir)
+3. change run_star_on_total_samples.Rmd so that it *only runs on total samples* (with gtf from ensembl)
+4. create run_star_on_enrich_compare_samples.Rmd
+5. Test run with CUSTOM version of GTF that includes mito rRNA
+6. run on all enrichment comparison libraries (samples 2, 3, and 4) with CUSTOM version of GTF that includes mito rRNA
+
+```{r}
+# genes_to_drop = intersect(colnames(genecounts_lanes_combined), 
+#                           strand_specific_rrna_homologs)
+genecounts_lanes_combined %>%
+  dplyr::select(strand_specific_rrna_homologs) ->
+  check_select
+
+check_select[,1:6]
+
+genecounts_lanes_combined %>%
+  dplyr::select(-strand_specific_rrna_homologs) ->
+  genecounts_lanes_combined_no_rrna
+
+genecounts_lanes_combined_no_rrna[,1:6]
+
+dim(check_select)
+dim(genecounts_lanes_combined)
+dim(genecounts_lanes_combined_no_rrna)
+
+dplyr::select(genecounts_lanes_combined,small_MTrRNA)
+# dplyr::select(genecounts_lanes_combined_no_rrna,small_MTrRNA)
+
+```
+
+
+### Generate scatterplots for mRNA vs Total and RNaseH vs Total
+```{r}
+genecounts_lanes_combined_no_rrna[,1:6]
+
+```
+
+```{r}
+
+cur_sample_num = 2
+cur_enrich_rep = 1
+
+genecounts_lanes_combined_no_rrna %>%
+  filter(RNA_sample_num == cur_sample_num, 
+         enrich_rep == cur_enrich_rep) %>%
+  dplyr::select(-c(library,RNA_sample_num)) %>%
+  gather(gene_id, reads, 2:ncol(.)) %>%
+  spread(enrichment_method,reads) ->
+  cur_sample.tidy
+  
+title_text = paste0("Sample #", cur_sample_num, collapse=" ")
+
+cur_sample.tidy %>%
+  summarise(max(mRNA), max(RNaseH)) %>%
+  max -> ymax
+
+total_vs_mrna = ggplot(cur_sample.tidy, aes(Total, mRNA)) + 
+  geom_point(alpha = 1/2, color="red", size=1) +
+  ggtitle(title_text) +
+  theme_bw() +
+  ylim(0, ymax)
+total_vs_rnaseh = ggplot(cur_sample.tidy, aes(Total, RNaseH)) + 
+  geom_point(alpha = 1/2, color="red", size=1) +
+  ggtitle(title_text) +
+  theme_bw() +
+  ylim(0, ymax)
+
+grid.arrange(total_vs_mrna, total_vs_rnaseh, nrow = 1)
+
+#------------------------------------------------------------------
+mrna_cor = paste("mRNA R =", 
+               cor(cur_sample.tidy[["Total"]],
+                   cur_sample.tidy[["mRNA"]]) %>%
+                 round(2))
+
+rnaseh_cor = paste("RNaseH R =", 
+               cor(cur_sample.tidy[["Total"]],
+                   cur_sample.tidy[["RNaseH"]]) %>%
+                 round(2))
+mrna_cor
+rnaseh_cor
+cat(paste(mrna_cor, rnaseh_cor, sep="\n"))
+#------------------------------------------------------------------
+ggplot(cur_sample.tidy, aes(Total, y=value, color=variable, alpha = 1/2)) + 
+  geom_point(aes(y=mRNA, color="mRNA"), size=1) +
+  geom_point(aes(y=RNaseH, color="RNaseH"), size=1) +
+  ggtitle(title_text) +
+  theme_bw() +
+  annotate("text", x=0, y = ymax*0.95, 
+           label = paste(mrna_cor, rnaseh_cor, sep="\n"),
+           hjust="inward",
+           just="inward", 
+           color="red")
+
+#------------------------------------------------------------------
+
+ggplot(cur_sample.tidy, alpha = 1/2) +
+  geom_point(aes(Total, mRNA), color="red", size=1) + 
+  geom_smooth(aes(Total, mRNA), method=lm, se=FALSE, color="red") +
+  geom_point(aes(Total, RNaseH), color="blue", size=1) +
+  geom_smooth(aes(Total, RNaseH), method=lm, se=FALSE, color="blue") +
+  ggtitle(title_text) +
+  theme_bw() 
+
+
+```
+```{r}
+makeScatterPlot = function(genecounts_lanes_combined_no_rrna, cur_sample_num, cur_enrich_rep = 1) {
+  
+genecounts_lanes_combined_no_rrna %>%
+  filter(RNA_sample_num == cur_sample_num, 
+         enrich_rep == cur_enrich_rep) %>%
+  dplyr::select(-c(library,RNA_sample_num)) %>%
+  gather(gene_id, reads, 2:ncol(.)) %>%
+  spread(enrichment_method,reads) ->
+  cur_sample.tidy
+  
+title_text = paste0("Sample #", cur_sample_num, collapse=" ")
+
+cur_sample.tidy %>%
+  summarise(max(mRNA), max(RNaseH)) %>%
+  max -> ymax
+
+#------------------------------------------------------------------
+mrna_cor = paste("mRNA R =", 
+               cor(cur_sample.tidy[["Total"]],
+                   cur_sample.tidy[["mRNA"]]) %>%
+                 round(2))
+
+rnaseh_cor = paste("RNaseH R =", 
+               cor(cur_sample.tidy[["Total"]],
+                   cur_sample.tidy[["RNaseH"]]) %>%
+                 round(2))
+#------------------------------------------------------------------
+ggplot(cur_sample.tidy, aes(Total, y=value, color=variable, alpha = 1/2)) + 
+  geom_point(aes(y=mRNA, color="mRNA"), size=1) +
+  geom_point(aes(y=RNaseH, color="RNaseH"), size=1) +
+  ggtitle(title_text) +
+  theme_bw() +
+  annotate("text", x=0, y = ymax, 
+           label = paste(mrna_cor, rnaseh_cor, sep="\n"),
+           hjust="inward",
+           vjust="inward", 
+           color="black")
+}
+for (cur_sample in 2:4) {
+  print(makeScatterPlot(genecounts_lanes_combined_no_rrna, cur_sample, cur_enrich_rep = 1))
+}
+```
+
+
+
+
+
+
+```{r}
+require(dplyr)
+set.seed(123)
+xx = data.frame(group = rep(1:4, 100), a = rnorm(400) , b = rnorm(400))
+
+xx
+gp = group_by(xx, group)
+dplyr::summarize(gp, cor(a, b))
+```
+
+
+
+https://www.sixhat.net/how-to-plot-multpile-data-series-with-ggplot.html
+
+library(reshape)
+# This creates a new data frame with columns x, variable and value
+# x is the id, variable holds each of our timeseries designation
+ 
+ggplot(data = df.melted, aes(x = x, y = value, color = variable)) +
+  geom_point()
+And thats how to plot multiple data series using ggplot. The basic trick is that you need to melt your data into a new data.frame. Remember, in data.frames each row represents an observation.
+
+update:
+
+Another option, pointed to me in the comments by Cosmin Saveanu (Thanks!), it to plot the multiple data series with facets (good for B&W):
+
+library(reshape)
+ggplot(data = df.melted, aes(x = x, y = value)) +
+geom_point() + facet_grid(variable ~ .)
+
+
+
+
+
+# Drop STAR count statistics and rotate dataframe
+out %>%
+    dplyr::slice(-(1:4)) %>%
+    gather(expid, value, -gene) %>% 
+    spread(gene, value) -> genecounts
+
+genecounts[1:6,1:6]
+
+
+
+
+### Generate correlation coefficients for mRNA vs Total and RNaseH vs Total
+

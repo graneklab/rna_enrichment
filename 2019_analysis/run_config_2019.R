@@ -99,3 +99,13 @@ count_suffix = "_ReadsPerGene.out.tab"
 bam_suffix = "_Aligned.sortedByCoord.out.bam"
 # 
 # 
+
+# #--------------------------------
+# The following are determined in 2018_analysis/enrichment_correlation.Rmd 
+all_rrna_homologs = c("CNAG_12438","CNAG_07466","CNAG_10500",
+                      "CNAG_12145","CNAG_10501","CNAG_10502",
+                      "CNAG_10503","CNAG_04124","CNAG_06164",
+                      "CNAG_13073","small_MTrRNA","large_MTrRNA")
+strand_specific_rrna_homologs = c("CNAG_10500","CNAG_10501","CNAG_10502",
+                                  "CNAG_10503","CNAG_13073","small_MTrRNA",
+                                  "large_MTrRNA")
