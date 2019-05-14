@@ -1,0 +1,73 @@
+---
+title: "Upload Counts"
+output:
+  html_document:
+    toc: false
+---
+
+```{r load_libraries}
+source("run_config_2019.R")
+```
+
+
+# Add Metadata Table
+```{bash eval=FALSE, include=FALSE}
+cd /data
+ddsclient upload --dry-run -p HTS_course hts_2019_data
+```
+
+```{bash eval=FALSE, include=FALSE}
+cd /data
+ddsclient upload -p HTS_course hts_2019_data
+```
+
+# Upload counts
+```{bash}
+ddsclient list -p HTS_course | grep count
+```
+
+```{bash}
+ddsclient list -p HTS_course | egrep "2018|2019" | grep -v "fastq.gz" | grep -v ".tab"
+```
+
+```{bash}
+set -u
+PARENT_DIR="/tmp/2019_pilot_count_upload/"
+PILOT_COUNT_DIR="${PARENT_DIR}/hts_2019_data/hts2019_pilot_counts"
+rm -rf $PILOT_COUNT_DIR
+mkdir -p $PILOT_COUNT_DIR
+cd $PILOT_COUNT_DIR
+ln -s $ENRICH_COMPARE_STAROUT/*ReadsPerGene.out.tab .
+# ls -ltr 
+cd ${PARENT_DIR}
+# ddsclient upload --dry-run -p HTS_course --follow-symlinks hts_2019_data
+ddsclient upload -p HTS_course --follow-symlinks hts_2019_data
+```
+
+```{bash}
+ddsclient upload -h
+```
+
+
+
+```{bash}
+ls $ENRICH_COMPARE_STAROUT
+```
+
+
+```{bash}
+set -u 
+MY_DOWNLOAD_DIRECTORY=/tmp/dds_download
+mkdir -p $MY_DOWNLOAD_DIRECTORY
+ddsclient download -p HTS_course \
+  --include hts_2019_data/hts2019_pilot_rawdata/2019_pilot_metadata.md \
+  --include hts_2019_data/hts2019_pilot_rawdata/2019_pilot_metadata.tsv \
+  --include hts_2019_data/hts2019_pilot_counts \
+  $MY_DOWNLOAD_DIRECTORY
+```
+
+
+# SessionInfo
+```{r}
+sessionInfo()
+```

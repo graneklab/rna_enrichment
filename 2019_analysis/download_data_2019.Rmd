@@ -96,15 +96,6 @@ md5sum -c md5_checksum.txt
 ```
 
 
-```{bash eval=FALSE, include=FALSE}
-cd /data
-ddsclient upload --dry-run -p HTS_course hts_2019_data
-```
-
-```{bash eval=FALSE, include=FALSE}
-cd /data
-ddsclient upload -p HTS_course hts_2019_data
-```
 
 # SessionInfo
 ```{r}
