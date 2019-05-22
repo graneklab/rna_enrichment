@@ -196,7 +196,7 @@ full_data_counts = percentRRNA(gtf_with_mito_rrna.file, enrich_compare_starout.d
 ```
 
 
-```{r}
+```{r include=TRUE}
 metadata.df = read_tsv(metadata.file)
 
 full_data_counts %>%

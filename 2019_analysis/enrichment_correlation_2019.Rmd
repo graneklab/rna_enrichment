@@ -225,7 +225,8 @@ ggplot(cur_sample.tidy, alpha = 1/2) +
 
 
 ```
-```{r include=TRUE}
+```{r correlation_scatter_plot, include=TRUE, fig.path='figures/', dev=c('png','pdf')}
+
 makeScatterPlot = function(genecounts_lanes_combined_no_rrna, cur_sample_num, cur_enrich_rep = 1) {
   
 genecounts_lanes_combined_no_rrna %>%
@@ -253,10 +254,11 @@ rnaseh_cor = paste("RNaseH R =",
                    cur_sample.tidy[["RNaseH"]]) %>%
                  round(2))
 #------------------------------------------------------------------
-ggplot(cur_sample.tidy, aes(Total, y=value, color=variable, alpha = 1/2)) + 
+ggplot(cur_sample.tidy, aes(Total, y=value, color=variable)) + 
   geom_point(aes(y=mRNA, color="mRNA"), size=1) +
   geom_point(aes(y=RNaseH, color="RNaseH"), size=1) +
   ggtitle(title_text) +
+  labs(x="Read Counts in Total Sample",y="Read Counts in Enriched Sample", color='Enrichment') +
   theme_bw() +
   annotate("text", x=0, y = ymax, 
            label = paste(mrna_cor, rnaseh_cor, sep="\n"),

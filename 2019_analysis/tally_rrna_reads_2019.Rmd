@@ -17,6 +17,7 @@ library(stringr)
 library(tibble)
 library(readr)
 library(ggplot2)
+library(magrittr)
 ```
 
 ## Determine rRNA Counts
@@ -129,7 +130,12 @@ kable(enrich_compare_counts_with_meta)
 ```
 
 ## rRNA Reads as a portion of Total Reads
-```{r include=TRUE}
+```{r percent_rrna_plot, include=TRUE, fig.width=10, fig.height=5, fig.path='figures/', dev=c('pdf')}
+
+enrich_compare_counts_with_meta %<>%
+   mutate(enrichment_method = factor(enrichment_method, 
+                                     levels = c("Total", "RNaseH", "mRNA")))
+
 ggplot(data=enrich_compare_counts_with_meta, 
        aes(x=RNA_sample_num, y=rrna_percent_total, fill=lane)) +
   geom_bar(stat="identity", 
@@ -139,7 +145,10 @@ ggplot(data=enrich_compare_counts_with_meta,
   scale_fill_brewer(guide=FALSE) +
   theme_bw() +
   labs(x = "Sample", y="% rRNA reads") +
-  ylim(c(0,100))
+  ylim(c(0,100)) ->
+  percent_rrna.plot
+
+percent_rrna.plot
 
 ```
 
