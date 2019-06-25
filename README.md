@@ -2,7 +2,7 @@
 
 
 # Running Singularity Image
-Run a cimseq container with `singularity run shub://granek//mar1_rnaseq`
+Run a mar1_rnaseq container with `singularity run shub://granek//mar1_rnaseq`
 
 ## /tmp issues
 It is recommended to do one of the following when running this image. There is no need to do both:
