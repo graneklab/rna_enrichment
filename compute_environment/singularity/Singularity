@@ -1,9 +1,13 @@
 BootStrap: shub
-From: granek/singularity-rstudio-tidyverse:3.5.2
+From: granek/singularity-rstudio-base:3.6.0
 
 %labels
     Maintainer Josh Granek
-    Image_Version 0002
+    Image_Name cimseq
+    Image_Version 0003
+
+
+
 
 ##------------------------------------------------------------
 ## Build example:
