@@ -4,7 +4,7 @@ From: granek/singularity-rstudio-base:3.6.0
 %labels
     Maintainer Josh Granek
     Image_Name cimseq
-    Image_Version 0003
+    Image_Version 0004
 
 
 
