@@ -49,6 +49,8 @@ From: granek/default/singularity-rstudio-base:3.6.1
     libmariadb-client-lgpl-dev \
     seqtk \
     rna-star \
+    sra-toolkit \
+    bcftools \
     htop
    apt-get clean
    rm -rf /var/lib/apt/lists/*
@@ -64,20 +66,16 @@ Rscript -e "if (!requireNamespace('BiocManager')){install.packages('BiocManager'
     BiocManager::install(c('ggbio','GenomicRanges','rtracklayer', 'DESeq2', 'Gviz'))"
 
 ##------------------------------------------------------------
-CONDA_DIR=/opt/conda
-cd /tmp && \
-    mkdir -p $CONDA_DIR && \
-    wget --quiet https://repo.continuum.io/miniconda/Miniconda3-4.4.10-Linux-x86_64.sh && \
-    echo "bec6203dbb2f53011e974e9bf4d46e93 Miniconda3-4.4.10-Linux-x86_64.sh" | md5sum -c - && \
-    /bin/bash Miniconda3-4.4.10-Linux-x86_64.sh -f -b -p $CONDA_DIR && \
-    rm Miniconda3-4.4.10-Linux-x86_64.sh && \
-    $CONDA_DIR/bin/conda clean -tipsy
-
-$CONDA_DIR/bin/conda install -c bioconda biopython gatk sra-tools samtools bwakit bwa bcftools ea-utils && \
-    $CONDA_DIR/bin/conda clean -tipsy
-
-$CONDA_DIR/bin/conda install -c bioconda mosdepth && \
-    $CONDA_DIR/bin/conda clean -tipsy
+# install fastq-mcf and fastq-multx from source since apt-get install causes problems
+RUN mkdir -p /usr/bin && \
+    	  cd /tmp && \
+	  wget https://github.com/ExpressionAnalysis/ea-utils/archive/1.04.807.tar.gz && \
+	  tar -zxf 1.04.807.tar.gz &&  \
+    	  cd ea-utils-1.04.807/clipper &&  \
+    	  make fastq-mcf fastq-multx &&  \
+    	  cp fastq-mcf fastq-multx /usr/bin &&  \
+    	  cd /tmp &&  \
+    	  rm -rf ea-utils-1.04.807
 
 #--------------------------------------------------------------------------------
 pip install DukeDSClient
