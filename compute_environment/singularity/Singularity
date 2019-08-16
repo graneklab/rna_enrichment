@@ -1,13 +1,10 @@
-BootStrap: shub
-From: granek/singularity-rstudio-base:3.6.0
+BootStrap: library
+From: granek/default/singularity-rstudio-base:3.6.1
 
 %labels
     Maintainer Josh Granek
-    Image_Name cimseq
-    Image_Version 0004
-
-
-
+    Image_Name mar1
+    Image_Version mar1_0005
 
 ##------------------------------------------------------------
 ## Build example:
@@ -19,12 +16,6 @@ From: granek/singularity-rstudio-base:3.6.0
 ## singularity run canu_rstudio.simg ls
 ## singularity run --app rstudio canu_rstudio.simg
 ##------------------------------------------------------------
-
-%runscript
-  exec "${@}"
-
-%apprun rstudio
-  exec rserver "${@}"
 
 %environment
   export PATH=/usr/lib/rstudio-server/bin:${PATH}
