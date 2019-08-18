@@ -6,17 +6,6 @@ From: granek/default/singularity-rstudio-base:3.6.1
     Image_Name mar1
     Image_Version mar1_0005
 
-##------------------------------------------------------------
-## Build example:
-## sudo singularity build mar1_rstudio_v0002.simg Singularity.mar1
-## sudo singularity build ~/container_images/mar1_rstudio_v0002.simg Singularity.mar1
-
-##
-## Run example:
-## singularity run canu_rstudio.simg ls
-## singularity run --app rstudio canu_rstudio.simg
-##------------------------------------------------------------
-
 %environment
   export PATH=/usr/lib/rstudio-server/bin:${PATH}
   export CONDA_DIR=/opt/conda
@@ -67,8 +56,8 @@ Rscript -e "if (!requireNamespace('BiocManager')){install.packages('BiocManager'
 
 ##------------------------------------------------------------
 # install fastq-mcf and fastq-multx from source since apt-get install causes problems
-RUN mkdir -p /usr/bin && \
-    	  cd /tmp && \
+mkdir -p /usr/bin && \
+    cd /tmp && \
 	  wget https://github.com/ExpressionAnalysis/ea-utils/archive/1.04.807.tar.gz && \
 	  tar -zxf 1.04.807.tar.gz &&  \
     	  cd ea-utils-1.04.807/clipper &&  \
