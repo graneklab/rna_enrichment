@@ -1,0 +1,46 @@
+---
+title: "Ribo Depletion Manuscript Plan"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+# rRNA Depletion
+
+## Mapping of H99 mitochondrial rRNA
+
+
+### Fred's suggestions about mito rRNA annotation
+
+1. Look for conserved region of mitochondrial rRNA (should be low points in spacer regions)
+    - BLASTing MT large rRNA produces >95% coverage with Hannaella oryzae and Tremella fuciformis
+    - BLASTing MT small rRNA produces ~81% coverage with Hannaella oryzae and Tremella fuciformis
+
+2. Look into spikeyness of MT rRNA read coverage by checking coverage of other genes
+    - nuclear rRNA
+    - mt COX1
+    - tubulin
+
+
+
+## Comparison of rRNA depletion methods: polyA, RiboZero, RNaseH
+1. Depletion efficiency
+2. replication of Total
+    1. compare total vs totaltechnical replicates
+    - account for non-coding RNA besides rRNA in comparisons with Total RNA
+
+# LncRNA?
+## LncRNA References
+### Search
+
+- https://scholar.google.com/scholar?q=cryptococcus+neoformans+lncrna&hl=en&as_sdt=0&as_vis=1&oi=scholart
+
+### Pubs
+- https://doi.org/10.1371/journal.pgen.1005692
+    - https://www.ncbi.nlm.nih.gov/pubmed?linkname=pubmed_pubmed_citedin&from_uid=26588844  
+
+
+# TODO
