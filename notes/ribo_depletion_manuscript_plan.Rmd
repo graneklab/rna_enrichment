@@ -24,6 +24,7 @@ knitr::opts_chunk$set(echo = TRUE)
     - mt COX1
     - tubulin
 
+## RNaseH Protocol, oligos
 
 
 ## Comparison of rRNA depletion methods: polyA, RiboZero, RNaseH
