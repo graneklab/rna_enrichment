@@ -20,13 +20,16 @@ If a second user tries on the same server tries to run an RStudio container they
 
 
 # Build, Sign, and Push
+```
 singularity build --remote --force ~/container_images/mar1_rnaseq_0005.sif \
   ~/project_repos/mar1_rnaseq/compute_environment/singularity/Singularity
 singularity push -U ~/container_images/mar1_rnaseq_0005.sif library://granek/default/mar1_rnaseq:latest
+```
 
 ## Build remote
+```
 singularity build --force --fakeroot ~/container_images/mar1_0005.sif \
   ~/project_repos/mar1_rnaseq/compute_environment/singularity/Singularity
-
+```
 
 
