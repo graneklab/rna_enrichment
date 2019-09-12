@@ -123,6 +123,7 @@ import(gtf_with_mito_rrna.file, format="gtf") %>%
 ```
 
 
+
 #### Drop genes from count table
 
 ```{r}
@@ -288,8 +289,42 @@ dplyr::summarize(gp, cor(a, b))
 
 # https://www.sixhat.net/how-to-plot-multpile-data-series-with-ggplot.html
 ```
+# testing for all ncRNAs, tRNAs, rRNAs
+```{r}
+head(h99_granges)
+```
+```{r}
+h99_granges %>% 
+  as.data.frame %>% 
+  filter(gene_biotype != "protein_coding") %>%
+  pull(gene_id) %>%
+  unique ->
+  all_non_protein_coding_gene_IDs
+```
+```{r}
 
+all_non_protein_coding_and_rrna_homologs_gene_IDs = 
+  union(all_non_protein_coding_gene_IDs, strand_specific_rrna_homologs)
 
+genecounts_lanes_combined %>%
+  dplyr::select(all_non_protein_coding_and_rrna_homologs_gene_IDs) ->
+  check_select
+
+check_select[,1:6]
+
+genecounts_lanes_combined %>%
+  dplyr::select(-all_non_protein_coding_and_rrna_homologs_gene_IDs) ->
+  genecounts_lanes_combined_protein_coding_only
+
+genecounts_lanes_combined_protein_coding_only[,1:6]
+
+dim(check_select)
+dim(genecounts_lanes_combined)
+dim(genecounts_lanes_combined_protein_coding_only)
+
+dplyr::select(genecounts_lanes_combined,small_MTrRNA)
+
+```
 
 
 
