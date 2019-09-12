@@ -12,24 +12,21 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Mapping of H99 mitochondrial rRNA
 
+## Analyze conservation of gene boundaries
 
-### Fred's suggestions about mito rRNA annotation
-
-1. Look for conserved region of mitochondrial rRNA (should be low points in spacer regions)
-    - BLASTing MT large rRNA produces >95% coverage with Hannaella oryzae and Tremella fuciformis
-    - BLASTing MT small rRNA produces ~81% coverage with Hannaella oryzae and Tremella fuciformis
-
-2. Look into spikeyness of MT rRNA read coverage by checking coverage of other genes
-    - nuclear rRNA
-    - mt COX1
-    - tubulin
-
-
+## RNaseH Method
+### Detailed protocol
+### Oligo sequences 
 
 ## Comparison of rRNA depletion methods: polyA, RiboZero, RNaseH
-1. Depletion efficiency
-2. replication of Total
-    1. compare total vs totaltechnical replicates
+1. Calculate depletion efficiency for each method
+2. Determine how well each method replicates Total (the gold standard)
+    1. For each method:
+        1. scatter plot of per-gene raw counts vs Total
+        2. Calculate correlation coefficient vs Total
+    1. Benchmark Total vs Total
+        1. scatter plots of T1 vs T2, T1 vs T3, and T2 vs T3
+        1. correlation coefficient of T1 vs T2, T1 vs T3, and T2 vs T3 
     - account for non-coding RNA besides rRNA in comparisons with Total RNA
 
 # LncRNA?
@@ -44,3 +41,56 @@ knitr::opts_chunk$set(echo = TRUE)
 
 
 # TODO
+
+
+# rRNA Depletion
+
+## Mapping of H99 mitochondrial rRNA
+
+## Analyze conservation of gene boundaries
+
+### Fred's suggestions about mito rRNA annotation
+
+1. Look for conserved region of mitochondrial rRNA (should be low points in spacer regions)
+    - BLASTing MT large rRNA produces >95% coverage with Hannaella oryzae and Tremella fuciformis
+    - BLASTing MT small rRNA produces ~81% coverage with Hannaella oryzae and Tremella fuciformis
+
+2. Look into spikeyness of MT rRNA read coverage by checking coverage of other genes
+    - nuclear rRNA
+    - mt COX1
+    - tubulin
+
+
+## Comparison of rRNA depletion methods: polyA, RiboZero, RNaseH
+### Account for all (?) non-coding RNA besides rRNA in comparisons with Total RNA
+1. Identify all non-coding RNAs
+```
+head Cryptococcus_neoformans_var_grubii_h99.CNA3.39__with_mito_rrna.gtf
+grep -v protein_coding Cryptococcus_neoformans_var_grubii_h99.CNA3.39__with_mito_rrna.gtf | head
+grep -v protein_coding Cryptococcus_neoformans_var_grubii_h99.CNA3.39__with_mito_rrna.gtf | egrep -v "ncRNA" | head
+grep -v protein_coding Cryptococcus_neoformans_var_grubii_h99.CNA3.39__with_mito_rrna.gtf | egrep -v "ncRNA|tRNA" | head
+grep -v protein_coding Cryptococcus_neoformans_var_grubii_h99.CNA3.39__with_mito_rrna.gtf | egrep -v "ncRNA|tRNA|rRNA" | head
+```
+
+
+2. Determine how well each method replicates Total (the gold standard)
+    1. For each method (remove ncRNA, tRNA, and rRNA before doing comparisions to avoid biasing in favor of RNaseH):
+        1. scatter plot of per-gene raw counts vs Total
+        2. Calculate correlation coefficient vs Total
+    1. Benchmark Total vs Total
+        1. scatter plots of T1 vs T2, T1 vs T3, and T2 vs T3
+        1. correlation coefficient of T1 vs T2, T1 vs T3, and T2 vs T3 
+    1. Comparte RNaseH vs Total separately for ncRNA, tRNA, and rRNA
+        1. scatter plot of per-gene raw counts vs Total
+        2. Calculate correlation coefficient vs Total
+        
+
+## Comparison of rRNA depletion methods: polyA, RiboZero, RNaseH
+1. Depletion efficiency
+2. replication of Total
+    1. compare total vs totaltechnical replicates
+    - account for non-coding RNA besides rRNA in comparisons with Total RNA
+
+# LncRNA?
+## Find Pipeline
+
