@@ -462,22 +462,24 @@ genecounts_lanes_combined_protein_coding_only %>%
          enrich_rep == cur_enrich_rep) %>%
   dplyr::select(-c(library,enrichment_method)) %>%
   gather(gene_id, reads, 2:ncol(.)) %>%
-  spread(RNA_sample_num,reads) ->
+  spread(RNA_sample_num,reads) %>%
+  dplyr::rename(Total_2 = `2`, Total_3 = `3`, Total_4 = `4`) ->
   cur_sample.tidy
-  
+ 
+
 title_text = paste0(cur_enrich_method, collapse=" ")
 
 cur_sample.tidy %>%
-  summarise(max(3), max(4)) %>%
+  summarise(max(Total_3), max(Total_4)) %>%
   max -> ymax
 
-T2_vs_T3 = ggplot(cur_sample.tidy, aes(2, 3)) + 
+T2_vs_T3 = ggplot(cur_sample.tidy, aes(Total_2, Total_3)) + 
   geom_point(alpha = 1/2, color="red", size=1) +
   ggtitle(title_text) +
   theme_bw() +
   ylim(0, ymax)
 
-T2_vs_T4 = ggplot(cur_sample.tidy, aes(2, 4)) + 
+T2_vs_T4 = ggplot(cur_sample.tidy, aes(Total_2, Total_4)) + 
   geom_point(alpha = 1/2, color="red", size=1) +
   ggtitle(title_text) +
   theme_bw() +
@@ -487,21 +489,21 @@ grid.arrange(T2_vs_T3, T2_vs_T3, nrow = 1)
 
 #------------------------------------------------------------------
 T3_cor = paste("3 R =", 
-               cor(cur_sample.tidy[["2"]],
-                   cur_sample.tidy[["3"]]) %>%
+               cor(cur_sample.tidy[["Total_2"]],
+                   cur_sample.tidy[["Total_3"]]) %>%
                  round(2))
 
 T4_cor = paste("4 R =", 
-               cor(cur_sample.tidy[["2"]],
-                   cur_sample.tidy[["4"]]) %>%
+               cor(cur_sample.tidy[["Total_2"]],
+                   cur_sample.tidy[["Total_4"]]) %>%
                  round(2))
 T3_cor
 T4_cor
 cat(paste(T3_cor, T4_cor, sep="\n"))
 #------------------------------------------------------------------
-ggplot(cur_sample.tidy, aes(2, y=value, color=variable, alpha = 1/2)) + 
-  geom_point(aes(y=3, color="T3"), size=1) +
-  geom_point(aes(y=4, color="T4"), size=1) +
+ggplot(cur_sample.tidy, aes(Total_2, y=value, color=variable, alpha = 1/2)) + 
+  geom_point(aes(y=Total_3, color="T3"), size=1) +
+  geom_point(aes(y=Total_4, color="T4"), size=1) +
   ggtitle(title_text) +
   theme_bw() +
   annotate("text", x=0, y = ymax*0.95, 
@@ -513,10 +515,10 @@ ggplot(cur_sample.tidy, aes(2, y=value, color=variable, alpha = 1/2)) +
 #------------------------------------------------------------------
 
 ggplot(cur_sample.tidy, alpha = 1/2) +
-  geom_point(aes(2, 3), color="red", size=1) + 
-  geom_smooth(aes(2, 3), method=lm, se=FALSE, color="red") +
-  geom_point(aes(2, 4), color="blue", size=1) +
-  geom_smooth(aes(2, 4), method=lm, se=FALSE, color="blue") +
+  geom_point(aes(Total_2, Total_3), color="red", size=1) + 
+  geom_smooth(aes(Total_2, Total_3), method=lm, se=FALSE, color="red") +
+  geom_point(aes(Total_2, Total_4), color="blue", size=1) +
+  geom_smooth(aes(Total_2, Total_4), method=lm, se=FALSE, color="blue") +
   ggtitle(title_text) +
   theme_bw()
 
