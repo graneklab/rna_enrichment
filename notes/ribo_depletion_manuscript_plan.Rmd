@@ -83,6 +83,9 @@ grep -v protein_coding Cryptococcus_neoformans_var_grubii_h99.CNA3.39__with_mito
     1. Comparte RNaseH vs Total separately for ncRNA, tRNA, and rRNA
         1. scatter plot of per-gene raw counts vs Total
         2. Calculate correlation coefficient vs Total
+    1. Compare RiboZero vs Total for ncRNA {Josh needs to check mapping parameters for 2018 data: `find /space/hts2018/ . -name \*RZ\*`} 
+        1. scatter plot of per-gene raw counts vs Total
+        2. Calculate correlation coefficient vs Total
         
 
 ## Comparison of rRNA depletion methods: polyA, RiboZero, RNaseH
