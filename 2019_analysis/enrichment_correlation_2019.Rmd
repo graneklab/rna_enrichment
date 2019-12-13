@@ -26,6 +26,7 @@ library(Rsamtools)
 
 ## Load STAR Count Data
 ```{r}
+
 list.files(enrich_compare_starout.dir, pattern = paste0(count_suffix,"$"), full.names = TRUE) %>%
       path_filter(regex="_2018_P_") ->
   countfiles
@@ -896,4 +897,20 @@ ggplot(cur_sample.tidy, aes(Total, y=value, color=variable)) +
 for (cur_sample in 2:4) {
   print(makeScatterPlot(genecounts_lanes_combined_ncRNA_only, cur_sample, cur_enrich_rep = 1))
 }
+```
+## Load STAR count data for RZ comparisons
+```{r}
+
+list.files(RZ_enrich_samples_starout.dir, pattern = paste0(count_suffix,"$"), full.names = TRUE) %>%
+      path_filter(regex="_") ->
+  countfiles2018
+
+countfiles2018
+```
+## Concatenate countfiles and countfilesRZ
+```{r}
+c(countfiles,countfiles2018) ->
+  countfilesRZ
+
+countfilesRZ
 ```

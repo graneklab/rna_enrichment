@@ -13,11 +13,13 @@ metadata.file=file.path(raw_fastq.dir, "2019_pilot_metadata.tsv")
 # 
 # # output
 out.dir="/workspace/2019_enrich_samples"
+RZ_out.dir="/workspace/2018_tot_samples"
 info.dir=file.path(out.dir, "info")
 adapters.file= file.path(info.dir, "neb_e7600_adapters_withrc.fasta")
 # trimmed.dir=file.path(out.dir, "trimmed_fastqs")
 genome.dir=file.path(out.dir, "genome")
 enrich_samples_starout.dir=file.path(out.dir, "enrich_samples_starout")
+RZ_enrich_samples_starout.dir=file.path(RZ_out.dir,"enrich_compare_starout")
 # mosdepth.dir=file.path(out.dir, "mosdepth")
 # seq.dir = file.path(out.dir, "seq_out"); dir.create(seq.dir, recursive = TRUE)
 # # export final_counts=$data_base/star_counts
