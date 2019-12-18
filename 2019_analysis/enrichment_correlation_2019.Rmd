@@ -914,3 +914,111 @@ c(countfiles,countfiles2018) ->
 
 countfilesRZ
 ```
+### Load STAR Count tables into a single dataframe
+Loading code borrowed from https://gitlab.oit.duke.edu/HTS2018/HTS2018-notebooks/blob/master/pilot/01_Read_Counts.ipynb
+```{r}
+mycombineRZ <- function(df1, df2) {
+    # Combine two data frames by gene names
+    #
+    # Args:
+    #   df1 (Dataframe): the first count data
+    #   df2 (Dataframe): the second count data
+    #
+    # Returns:
+    #   (Dataframe) The combined data frame of df1 and df2
+    full_join(df1, df2, by = "gene")
+}
+
+# Data type for each column
+coltypesRZ <- list(col_character(), col_integer(), col_integer(), col_integer())
+
+outRZ <- foreach(count_path = countfilesRZ, .combine = mycombineRZ) %do% {
+  # generate rowname (extracted from count file name)
+  count_path %>%
+    path_file %>%
+    str_replace(count_suffix,"") ->
+    readset_labelRZ 
+
+    # read in the count file
+    readr::read_tsv(count_path, col_names = FALSE, col_types = coltypesRZ) %>%
+        dplyr::select(X1, X4) %>% # get the 1st and 4th columns (gene ids and second strand read counts)
+            dplyr::rename_(.dots=setNames(names(.), c("gene",readset_labelRZ)))
+}
+
+outRZ[1:6,1:6]
+
+# Drop STAR count statistics and rotate dataframe
+outRZ %>%
+    dplyr::slice(-(1:4)) %>%
+    gather(expid, value, -gene) %>% 
+    spread(gene, value) -> genecountsRZ
+
+genecountsRZ
+```
+### Extract library specific label
+
+```{r}
+genecountsRZ %>%
+  mutate(Label=str_extract(expid, "^\\d+_\\d+_[A-Z]_[HMT]\\d")) %>%
+  dplyr::select(Label, everything()) %>%
+  dplyr::select(-expid) ->
+  genecountsRZ_with_label
+genecountsRZ_with_label[1:8,1:6]
+
+```
+### Combine per library counts across lanes
+```{r}
+read_tsv(metadata.file)
+```
+```{r}
+genecountsRZ_with_label %>%
+  group_by(Label) %>%
+  summarise_all(funs(sum)) ->
+  genecountsRZ_lanes_combined
+
+# Add metadata 
+read_tsv(metadata.file) %>%
+  dplyr::select(Label, enrichment_method, RNA_sample_num, enrich_rep) ->
+  metadataRZ.df
+
+genecountsRZ_lanes_combined %<>%
+  left_join(metadataRZ.df, by="Label") %>%
+  dplyr::select(library=Label, enrichment_method, RNA_sample_num, enrich_rep, everything())
+genecountsRZ_lanes_combined
+```
+## Compare library preps
+
+### Drop rRNA genes and genes with rRNA homology
+
+#### Find all genes that are mapped by rRNA reads
+##### Load GTF
+```{r}
+import(gtf_with_mito_rrna.file, format="gtf") %>%
+  subset(type=="exon") ->
+  h99_grangesRZ
+```
+#### Drop genes from count table
+
+```{r}
+# genes_to_dropRZ = intersect(colnames(genecountsRZ_lanes_combined), 
+#                           strand_specific_rrna_homologs)
+genecountsRZ_lanes_combined %>%
+  dplyr::select(strand_specific_rrna_homologs) ->
+  check_selectRZ
+
+check_selectRZ[,1:6]
+
+genecountsRZ_lanes_combined %>%
+  dplyr::select(-strand_specific_rrna_homologs) ->
+  genecountsRZ_lanes_combined_no_rrna
+
+genecountsRZ_lanes_combined_no_rrna[,1:6]
+
+dim(check_selectRZ)
+dim(genecountsRZ_lanes_combined)
+dim(genecountsRZ_lanes_combined_no_rrna)
+
+dplyr::select(genecountsRZ_lanes_combined,small_MTrRNA)
+# dplyr::select(genecountsRZ_lanes_combined_no_rrna,small_MTrRNA)
+
+```
