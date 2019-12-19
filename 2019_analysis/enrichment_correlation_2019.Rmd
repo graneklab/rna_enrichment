@@ -968,7 +968,7 @@ genecountsRZ
 
 ```{r}
 genecountsRZ %>%
-  mutate(Label=str_extract(expid, "^\\d+_\\d+_[A-Z]_[HMT]\\d")) %>%
+  mutate(Label=str_extract(expid, "(^\\d+_\\d+_[A-Z]_[HMT]\\d)|(^\\d+_[A-Z]+_[A-Z])")) %>%
   dplyr::select(Label, everything()) %>%
   dplyr::select(-expid) ->
   genecountsRZ_with_label
@@ -979,6 +979,7 @@ genecountsRZ_with_label[1:8,1:6]
 ```{r}
 read_tsv(metadata.file)
 ```
+
 ```{r}
 genecountsRZ_with_label %>%
   group_by(Label) %>%
@@ -990,8 +991,17 @@ read_tsv(metadata.file) %>%
   dplyr::select(Label, enrichment_method, RNA_sample_num, enrich_rep) ->
   metadataRZ.df
 
+# need to add enrich_rep to 2018 because 2019 has this since each sample had two technical RNAseH 
+read_tsv(metadata_2018.file) %>%
+  dplyr::select(Label, enrichment_method, RNA_sample_num) %>%
+  mutate(enrich_rep=1) ->
+  metadata_2018.df
+
+bind_rows(metadata_2018.df, metadataRZ.df) ->
+  metadata_combined.df
+
 genecountsRZ_lanes_combined %<>%
-  left_join(metadataRZ.df, by="Label") %>%
+  left_join(metadata_combined.df, by="Label") %>%
   dplyr::select(library=Label, enrichment_method, RNA_sample_num, enrich_rep, everything())
 genecountsRZ_lanes_combined
 ```
