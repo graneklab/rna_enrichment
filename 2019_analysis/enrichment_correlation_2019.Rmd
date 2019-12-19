@@ -912,7 +912,16 @@ countfiles2018
 c(countfiles,countfiles2018) ->
   countfilesRZ
 
-countfilesRZ
+head(countfilesRZ)
+
+length(countfiles)
+length(countfiles2018)
+length(countfilesRZ)
+
+head(names(countfiles))
+head(names(countfiles2018))
+head(names(countfilesRZ))
+
 ```
 ### Load STAR Count tables into a single dataframe
 Loading code borrowed from https://gitlab.oit.duke.edu/HTS2018/HTS2018-notebooks/blob/master/pilot/01_Read_Counts.ipynb
