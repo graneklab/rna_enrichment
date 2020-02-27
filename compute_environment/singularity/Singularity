@@ -4,7 +4,7 @@ From: granek/duke-chsi-informatics/singularity-rnaseq:0001
 %labels
     Maintainer Josh Granek
     Image_Name mar1
-    Image_Version mar1_0007
+    Image_Version mar1_0008
 
 %environment
   export PATH=/usr/lib/rstudio-server/bin:${PATH}
@@ -15,3 +15,4 @@ From: granek/duke-chsi-informatics/singularity-rnaseq:0001
 
 %post
   # Install extra stuff
+  mkdir -p /space

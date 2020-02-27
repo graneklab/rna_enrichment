@@ -7,7 +7,7 @@ export SINGULARITY_CACHEDIR
 SINGULARITY_PULLFOLDER="$SINGULARITY_DIR/pulldir"
 export SINGULARITY_PULLFOLDER
 
-SINGULARITY_IMAGE="${1:-library://granek/default/mar1_rnaseq:latest}"
+SINGULARITY_IMAGE="${1:-library://granek/default/mar1:latest}"
 
 DATA_BASE_DIR="${DATA_BASE_DIR:-$HOME}"
 WORKSPACE_BASE_DIR="${WORKSPACE_BASE_DIR:-$HOME}"
@@ -15,7 +15,8 @@ WORKSPACE_BASE_DIR="${WORKSPACE_BASE_DIR:-$HOME}"
 DATA="$DATA_BASE_DIR/hts2018/rawdata"
 WORKSPACE="$WORKSPACE_BASE_DIR/hts2018/workspace"
 
- 
+SPACE="/space"
+
 
  
 if [ -d "${DATA}" ]; then
@@ -30,6 +31,13 @@ if [ -d "${WORKSPACE}" ]; then
 else
     echo "Make sure WORKSPACE exists: $WORKSPACE"
 fi
+
+if [ -d "${SPACE}" ]; then
+    BIND_ARGS="$BIND_ARGS --bind ${SPACE}:/space"
+else
+    echo "Make sure SPACE exists: $SPACE"
+fi
+
 
 #-----------------
 SINGTMP="/tmp/${USER}_`date +%s`_tmp"
