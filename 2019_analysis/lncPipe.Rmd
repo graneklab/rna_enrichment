@@ -1,0 +1,51 @@
+---
+title: "lncPipe"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{bash}
+### Download and unzip FASTA and GTF files
+
+wget -P /space/hts2018/workspace/genome "ftp://ftp.ensemblgenomes.org/pub/release-46/fungi/fasta/fungi_basidiomycota1_collection/cryptococcus_neoformans_var_grubii_h99_gca_000149245/dna/Cryptococcus_neoformans_var_grubii_h99_gca_000149245.CNA3.dna.toplevel.fa.gz"  
+
+gunzip -f /space/hts2018/workspace/genome/Cryptococcus_neoformans_var_grubii_h99_gca_000149245.CNA3.dna.toplevel.fa.gz
+
+wget -P /space/hts2018/workspace/genome "ftp://ftp.ensemblgenomes.org/pub/release-46/fungi/gtf/fungi_basidiomycota1_collection/cryptococcus_neoformans_var_grubii_h99_gca_000149245/Cryptococcus_neoformans_var_grubii_h99_gca_000149245.CNA3.46.gtf.gz" 
+
+gunzip -f /space/hts2018/workspace/genome/Cryptococcus_neoformans_var_grubii_h99_gca_000149245.CNA3.46.gtf.gz
+
+```
+
+```{bash}
+### make protein-coding GTF
+
+awk '$3 == "exon"' /space/hts2018/workspace/genome/Cryptococcus_neoformans_var_grubii_h99_gca_000149245.CNA3.46.gtf | awk '$18 ~ "protein_coding"' > /space/hts2018/workspace/genome/Cryptococcus_neoformans_var_grubii_h99_gca_000149245_protein_coding.CNA3.46.gtf
+
+```
+
+```{bash}
+### make ncRNA GTF
+
+awk '$3 == "exon"' /space/hts2018/workspace/genome/Cryptococcus_neoformans_var_grubii_h99_gca_000149245.CNA3.46.gtf | awk '$20 ~ "ncRNA"' > /space/hts2018/workspace/genome/Cryptococcus_neoformans_var_grubii_h99_gca_000149245_ncRNA.CNA3.46.gtf
+
+```
+
+```{bash}
+### Index FASTA using STAR
+
+STAR \
+  --runMode genomeGenerate \
+  --genomeDir /space/hts2018/workspace/genome \
+  --genomeFastaFiles /space/hts2018/workspace/genome/Cryptococcus_neoformans_var_grubii_h99_gca_000149245.CNA3.dna.toplevel.fa \
+  --sjdbGTFfile /space/hts2018/workspace/genome/Cryptococcus_neoformans_var_grubii_h99_gca_000149245.CNA3.46.gtf \
+  --outFileNamePrefix /space/hts2018/workspace/genome/genome_
+  --genomeSAindexNbases 6
+  
+```
+
+
+
