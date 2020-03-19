@@ -39,10 +39,10 @@ awk '$3 == "exon"' /space/hts2018/workspace/genome/Cryptococcus_neoformans_var_g
 
 STAR \
   --runMode genomeGenerate \
-  --genomeDir /space/hts2018/workspace/genome \
-  --genomeFastaFiles /space/hts2018/workspace/genome/Cryptococcus_neoformans_var_grubii_h99_gca_000149245.CNA3.dna.toplevel.fa \
-  --sjdbGTFfile /space/hts2018/workspace/genome/Cryptococcus_neoformans_var_grubii_h99_gca_000149245.CNA3.46.gtf \
-  --outFileNamePrefix /space/hts2018/workspace/genome/genome_
+  --genomeDir /space/hts2018/workspace/LncPipe/genome \
+  --genomeFastaFiles /space/hts2018/workspace/LncPipe/genome/Cryptococcus_neoformans_var_grubii_h99_gca_000149245.CNA3.dna.toplevel.fa \
+  --sjdbGTFfile /space/hts2018/workspace/LncPipe/genome/Cryptococcus_neoformans_var_grubii_h99_gca_000149245.CNA3.46.gtf \
+  --outFileNamePrefix /space/hts2018/workspace/LncPipe/genome/genome_
   --genomeSAindexNbases 6
   
 ```
