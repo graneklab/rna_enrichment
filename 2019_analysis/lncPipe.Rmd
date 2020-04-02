@@ -47,5 +47,9 @@ STAR \
   
 ```
 
+```{bash}
+ ###run nextflow
+ nextflow run LncPipe/LncRNAanalysisPipe.nf -with-singularity docker://nfcore/lncpipe
+```
 
 
