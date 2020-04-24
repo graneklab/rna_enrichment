@@ -1,3 +1,7 @@
+echo "Maybe revert to lncpipe version 0.2.4?: https://github.com/nf-core/lncpipe/archive/V0.2.4.tar.gz"
+echo "also need to make docker/singularity image that has STAR"
+exit 20
+
 SCRATCH=/space/temp/run_lnc_pipe
 # LNCPIPE_DIR=$SCRATCH/lncpipe-0.2.4
 mkdir -p $SCRATCH
