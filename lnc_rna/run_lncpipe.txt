@@ -1,0 +1,1 @@
+nextflow run LncRNAanalysisPipe.nf -c nextflow.config -with-singularity docker://nfcore/lncpipe
