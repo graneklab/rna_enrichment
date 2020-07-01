@@ -1233,3 +1233,174 @@ for (cur_sample in 2:4) {
   print(makeScatterPlot(genecountsRZ_lanes_combined_ncRNA_only, cur_sample, cur_enrich_rep = 1))
 }
 ```
+# setting up 2018 total to 2019 total comparison
+
+```{r 2018_2019_total_scatter_plot, include=TRUE, fig.path='figures/', dev=c('png','pdf')}
+head (h99_granges)
+head (genecounts_lanes_combined_protein_coding_only)
+head (genecountsRZ_lanes_combined_no_rrna)
+
+genecountsRZ
+
+genecountsRZ_lanes_combined
+
+genecountsRZ_lanes_combined %>%
+  dplyr::select(-all_non_protein_coding_and_rrna_homologs_gene_IDs) ->
+  genecountsRZ_lanes_combined_protein_coding_only
+
+genecountsRZ_lanes_combined_protein_coding_only
+```
+# Plotting Total 2 comparison
+```{r 2018_2019_total_scatter_plot, include=TRUE, fig.path='figures/', dev=c('png','pdf')}
+cur_sample_num = "2"
+cur_enrich_rep = 1
+
+genecountsRZ_lanes_combined_protein_coding_only %>%
+  filter(RNA_sample_num == cur_sample_num, 
+         enrich_rep == cur_enrich_rep) %>%
+  dplyr::select(-c(library,RNA_sample_num)) %>%
+  gather(gene_id, reads, 2:ncol(.)) %>%
+  spread(enrichment_method,reads) %>%
+  dplyr::rename(Total_2_2019 = `Total`, Total_2_2018 = `TOT`,) ->
+  cur_sample_total2.tidy
+ 
+
+title_text = paste0(cur_sample_num, collapse=" ")
+
+cur_sample_total2.tidy %>%
+  summarise(max(Total_2_2019), max(Total_2_2018)) %>%
+  max -> ymax
+
+T2_2018_vs_T2_2019 = ggplot(cur_sample_total2.tidy, aes(Total_2_2019, Total_2_2018)) + 
+  geom_point(alpha = 1/2, color="red", size=1) +
+  ggtitle(title_text) +
+  theme_bw() +
+  ylim(0, ymax)
+
+grid.arrange(T2_2018_vs_T2_2019, nrow = 1)
+
+#------------------------------------------------------------------
+T2_cor = paste("2 R =", 
+               cor(cur_sample_total2.tidy[["Total_2_2019"]],
+                   cur_sample_total2.tidy[["Total_2_2018"]]) %>%
+                 round(5))
+
+T2_cor
+
+#------------------------------------------------------------------
+
+ggplot(cur_sample_total2.tidy, alpha = 1/2) +
+  geom_point(aes(Total_2_2019, Total_2_2018), color="red", size=1) + 
+  geom_smooth(aes(Total_2_2019, Total_2_2018), method=lm, se=FALSE, color="red") +
+  ggtitle(title_text) +
+  theme_bw() +
+  annotate("text", x=0, y = ymax*0.95, 
+           label = paste(T2_cor),
+           hjust="inward",
+           just="inward", 
+           color="red")
+
+
+```
+# Plotting Total 3 comparison
+```{r 2018_2019_total_scatter_plot, include=TRUE, fig.path='figures/', dev=c('png','pdf')}
+cur_sample_num = "3"
+cur_enrich_rep = 1
+
+genecountsRZ_lanes_combined_protein_coding_only %>%
+  filter(RNA_sample_num == cur_sample_num, 
+         enrich_rep == cur_enrich_rep) %>%
+  dplyr::select(-c(library,RNA_sample_num)) %>%
+  gather(gene_id, reads, 2:ncol(.)) %>%
+  spread(enrichment_method,reads) %>%
+  dplyr::rename(Total_3_2019 = `Total`, Total_3_2018 = `TOT`,) ->
+  cur_sample_total3.tidy
+ 
+
+title_text = paste0(cur_sample_num, collapse=" ")
+
+cur_sample_total3.tidy %>%
+  summarise(max(Total_3_2019), max(Total_3_2018)) %>%
+  max -> ymax
+
+T3_2018_vs_T3_2019 = ggplot(cur_sample_total3.tidy, aes(Total_3_2019, Total_3_2018)) + 
+  geom_point(alpha = 1/2, color="red", size=1) +
+  ggtitle(title_text) +
+  theme_bw() +
+  ylim(0, ymax)
+
+grid.arrange(T3_2018_vs_T3_2019, nrow = 1)
+
+#------------------------------------------------------------------
+T3_cor = paste("3 R =", 
+               cor(cur_sample_total3.tidy[["Total_3_2019"]],
+                   cur_sample_total3.tidy[["Total_3_2018"]]) %>%
+                 round(5))
+
+T3_cor
+
+#------------------------------------------------------------------
+
+ggplot(cur_sample_total3.tidy, alpha = 1/2) +
+  geom_point(aes(Total_3_2019, Total_3_2018), color="red", size=1) + 
+  geom_smooth(aes(Total_3_2019, Total_3_2018), method=lm, se=FALSE, color="red") +
+  ggtitle(title_text) +
+  theme_bw() +
+  annotate("text", x=0, y = ymax*0.95, 
+           label = paste(T3_cor),
+           hjust="inward",
+           just="inward", 
+           color="red")
+
+```
+# Plotting Total 4 comparison
+```{r 2018_2019_total_scatter_plot, include=TRUE, fig.path='figures/', dev=c('png','pdf')}
+cur_sample_num = "4"
+cur_enrich_rep = 1
+
+genecountsRZ_lanes_combined_protein_coding_only %>%
+  filter(RNA_sample_num == cur_sample_num, 
+         enrich_rep == cur_enrich_rep) %>%
+  dplyr::select(-c(library,RNA_sample_num)) %>%
+  gather(gene_id, reads, 2:ncol(.)) %>%
+  spread(enrichment_method,reads) %>%
+  dplyr::rename(Total_4_2019 = `Total`, Total_4_2018 = `TOT`,) ->
+  cur_sample_total4.tidy
+ 
+
+title_text = paste0(cur_sample_num, collapse=" ")
+
+cur_sample_total4.tidy %>%
+  summarise(max(Total_4_2019), max(Total_4_2018)) %>%
+  max -> ymax
+
+T4_2018_vs_T4_2019 = ggplot(cur_sample_total4.tidy, aes(Total_4_2019, Total_4_2018)) + 
+  geom_point(alpha = 1/2, color="red", size=1) +
+  ggtitle(title_text) +
+  theme_bw() +
+  ylim(0, ymax)
+
+grid.arrange(T4_2018_vs_T4_2019, nrow = 1)
+
+#------------------------------------------------------------------
+T4_cor = paste("4 R =", 
+               cor(cur_sample_total4.tidy[["Total_4_2019"]],
+                   cur_sample_total4.tidy[["Total_4_2018"]]) %>%
+                 round(5))
+
+T4_cor
+
+#------------------------------------------------------------------
+
+ggplot(cur_sample_total4.tidy, alpha = 1/2) +
+  geom_point(aes(Total_4_2019, Total_4_2018), color="red", size=1) + 
+  geom_smooth(aes(Total_4_2019, Total_4_2018), method=lm, se=FALSE, color="red") +
+  ggtitle(title_text) +
+  theme_bw() +
+  annotate("text", x=0, y = ymax*0.95, 
+           label = paste(T4_cor),
+           hjust="inward",
+           just="inward", 
+           color="red")
+
+```
