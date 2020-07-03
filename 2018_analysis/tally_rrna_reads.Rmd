@@ -57,12 +57,15 @@ rrna_count_tab %>%
   pull(records) %>%
   sum ->
   rrna_count_total
+rrna_count_total
 ```
 
 
 ## 2. Calculate "total_reads" as sum of "second_strand" column
 
 ```{r eval=FALSE, include=FALSE}
+star_oligo_readspergene.path = file.path(rrna_oligo_starout.dir,"rrna_oligos_ReadsPerGene.out.tab")
+
 read_tsv(star_oligo_readspergene.path, 
          col_names = c("gene_id", "unstranded", "first_strand", "second_strand")) ->
   star_counts
