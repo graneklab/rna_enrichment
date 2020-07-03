@@ -458,7 +458,8 @@ dplyr::summarize(gp, cor(a, b))
 cur_enrich_method = "Total"
 cur_enrich_rep = 1
 
-genecounts_lanes_combined_protein_coding_only %>%
+### used 'genecounts_lanes_combined_protein_coding_only %>%' previously
+genecounts_lanes_combined %>%
   filter(enrichment_method == cur_enrich_method, 
          enrich_rep == cur_enrich_rep) %>%
   dplyr::select(-c(library,enrichment_method)) %>%
@@ -523,13 +524,14 @@ ggplot(cur_sample.tidy, alpha = 1/2) +
   ggtitle(title_text) +
   theme_bw()
 
+
 ```
 
 ```{r correlation_scatter_plot, include=TRUE, fig.path='figures/', dev=c('png','pdf')}
 
-makeScatterPlot = function(genecounts_lanes_combined_protein_coding_only, cur_enrich_method, cur_enrich_rep) {
+makeScatterPlot = function(genecounts_lanes_combined, cur_enrich_method, cur_enrich_rep) {
   
-genecounts_lanes_combined_protein_coding_only %>%
+genecounts_lanes_combined %>%
   filter(enrichment_method == cur_enrich_method, 
          enrich_rep == cur_enrich_rep) %>%
   dplyr::select(-c(library,enrichment_method)) %>%
@@ -568,13 +570,13 @@ ggplot(cur_sample.tidy, aes(Total_2, y=value, color=variable)) +
            color="black")
 }
 
-  print(makeScatterPlot(genecounts_lanes_combined_protein_coding_only, cur_enrich_method, cur_enrich_rep = 1))
+  print(makeScatterPlot(genecounts_lanes_combined, cur_enrich_method, cur_enrich_rep = 1))
 ```
 ```{r correlation_scatter_plot, include=TRUE, fig.path='figures/', dev=c('png','pdf')}
 
-makeScatterPlot = function(genecounts_lanes_combined_protein_coding_only, cur_enrich_method, cur_enrich_rep) {
+makeScatterPlot = function(genecounts_lanes_combined, cur_enrich_method, cur_enrich_rep) {
   
-genecounts_lanes_combined_protein_coding_only %>%
+genecounts_lanes_combined %>%
   filter(enrichment_method == cur_enrich_method, 
          enrich_rep == cur_enrich_rep) %>%
   dplyr::select(-c(library,enrichment_method)) %>%
@@ -589,7 +591,7 @@ title_text = paste0(cur_enrich_method, collapse=" ")
 T3_cor = paste("3 R =", 
                cor(cur_sample.tidy[["Total_2"]],
                    cur_sample.tidy[["Total_3"]]) %>%
-                 round(5))
+                 round(6))
 #------------------------------------------------------------------
 ggplot(cur_sample.tidy, aes(Total_2, y=value, color=variable)) + 
   geom_point(aes(y=Total_3, color="Counts"), size=1) +
@@ -603,13 +605,13 @@ ggplot(cur_sample.tidy, aes(Total_2, y=value, color=variable)) +
            color="black")
 }
 
-  print(makeScatterPlot(genecounts_lanes_combined_protein_coding_only, cur_enrich_method, cur_enrich_rep = 1))
+  print(makeScatterPlot(genecounts_lanes_combined, cur_enrich_method, cur_enrich_rep = 1))
 ```
 ```{r correlation_scatter_plot, include=TRUE, fig.path='figures/', dev=c('png','pdf')}
 
-makeScatterPlot = function(genecounts_lanes_combined_protein_coding_only, cur_enrich_method, cur_enrich_rep) {
+makeScatterPlot = function(genecounts_lanes_combined, cur_enrich_method, cur_enrich_rep) {
   
-genecounts_lanes_combined_protein_coding_only %>%
+genecounts_lanes_combined %>%
   filter(enrichment_method == cur_enrich_method, 
          enrich_rep == cur_enrich_rep) %>%
   dplyr::select(-c(library,enrichment_method)) %>%
@@ -624,7 +626,7 @@ title_text = paste0(cur_enrich_method, collapse=" ")
 T4_cor = paste("4 R =", 
                cor(cur_sample.tidy[["Total_2"]],
                    cur_sample.tidy[["Total_4"]]) %>%
-                 round(5))
+                 round(6))
 #------------------------------------------------------------------
 ggplot(cur_sample.tidy, aes(Total_2, y=value, color=variable)) + 
   geom_point(aes(y=Total_4, color="Counts"), size=1) +
@@ -638,14 +640,14 @@ ggplot(cur_sample.tidy, aes(Total_2, y=value, color=variable)) +
            color="black")
 }
 
-  print(makeScatterPlot(genecounts_lanes_combined_protein_coding_only, cur_enrich_method, cur_enrich_rep = 1))
+  print(makeScatterPlot(genecounts_lanes_combined, cur_enrich_method, cur_enrich_rep = 1))
 ```
 # T3 vs T4 plotting
 ```{r correlation_scatter_plot, include=TRUE, fig.path='figures/', dev=c('png','pdf')}
 
-makeScatterPlot = function(genecounts_lanes_combined_protein_coding_only, cur_enrich_method, cur_enrich_rep) {
+makeScatterPlot = function(genecounts_lanes_combined, cur_enrich_method, cur_enrich_rep) {
   
-genecounts_lanes_combined_protein_coding_only %>%
+genecounts_lanes_combined %>%
   filter(enrichment_method == cur_enrich_method, 
          enrich_rep == cur_enrich_rep) %>%
   dplyr::select(-c(library,enrichment_method)) %>%
@@ -660,7 +662,7 @@ title_text = paste0(cur_enrich_method, collapse=" ")
 T4_cor = paste("4 R =", 
                cor(cur_sample.tidy[["Total_3"]],
                    cur_sample.tidy[["Total_4"]]) %>%
-                 round(5))
+                 round(6))
 #------------------------------------------------------------------
 ggplot(cur_sample.tidy, aes(Total_3, y=value, color=variable)) + 
   geom_point(aes(y=Total_4, color="Counts"), size=1) +
@@ -674,7 +676,7 @@ ggplot(cur_sample.tidy, aes(Total_3, y=value, color=variable)) +
            color="black")
 }
 
-  print(makeScatterPlot(genecounts_lanes_combined_protein_coding_only, cur_enrich_method, cur_enrich_rep = 1))
+  print(makeScatterPlot(genecounts_lanes_combined, cur_enrich_method, cur_enrich_rep = 1))
 ```
 # testing for tRNA correlations
 ```{r}
@@ -1237,10 +1239,8 @@ for (cur_sample in 2:4) {
 
 ```{r 2018_2019_total_scatter_plot, include=TRUE, fig.path='figures/', dev=c('png','pdf')}
 head (h99_granges)
-head (genecounts_lanes_combined_protein_coding_only)
-head (genecountsRZ_lanes_combined_no_rrna)
 
-genecountsRZ
+head (genecountsRZ_lanes_combined_no_rrna)
 
 genecountsRZ_lanes_combined
 
