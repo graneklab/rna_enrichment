@@ -1255,7 +1255,8 @@ genecountsRZ_lanes_combined_protein_coding_only
 cur_sample_num = "2"
 cur_enrich_rep = 1
 
-genecountsRZ_lanes_combined_protein_coding_only %>%
+###genecountsRZ_lanes_combined_protein_coding_only %>%
+genecountsRZ_lanes_combined %>% 
   filter(RNA_sample_num == cur_sample_num, 
          enrich_rep == cur_enrich_rep) %>%
   dplyr::select(-c(library,RNA_sample_num)) %>%
@@ -1307,7 +1308,7 @@ ggplot(cur_sample_total2.tidy, alpha = 1/2) +
 cur_sample_num = "3"
 cur_enrich_rep = 1
 
-genecountsRZ_lanes_combined_protein_coding_only %>%
+genecountsRZ_lanes_combined %>%
   filter(RNA_sample_num == cur_sample_num, 
          enrich_rep == cur_enrich_rep) %>%
   dplyr::select(-c(library,RNA_sample_num)) %>%
@@ -1358,7 +1359,7 @@ ggplot(cur_sample_total3.tidy, alpha = 1/2) +
 cur_sample_num = "4"
 cur_enrich_rep = 1
 
-genecountsRZ_lanes_combined_protein_coding_only %>%
+genecountsRZ_lanes_combined %>%
   filter(RNA_sample_num == cur_sample_num, 
          enrich_rep == cur_enrich_rep) %>%
   dplyr::select(-c(library,RNA_sample_num)) %>%
