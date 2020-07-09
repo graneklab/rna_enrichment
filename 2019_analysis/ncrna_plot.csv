@@ -1,0 +1,7 @@
+Sample,Number,Average_corr_coeff
+RNaseH,S2,0.76
+RNaseH,S3,0.72
+RNaseH,S4,0.75
+Poly(A),S2,0.13
+Poly(A),S3,0.13
+Poly(A),S4,0.14
