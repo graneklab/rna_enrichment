@@ -20,7 +20,7 @@ rrna_data_2019 <- read.csv(file.choose("rrna_depletion_calculation_2019.csv"))
 levels(rrna_data_2019$Sample)
 rrna_data_2019$Sample <- ordered(rrna_data_2019$Sample, levels = c("Total", "Poly(A)", "RNaseH"))
 levels(rrna_data_2019$Sample)
-
+ 
 library(rstatix)
 stat.test_2019 <- aov(log_tranform_ratio ~ Sample, data = rrna_data_2019) %>%
   tukey_hsd()
