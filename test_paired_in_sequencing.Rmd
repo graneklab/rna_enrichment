@@ -1,0 +1,97 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+---
+title: "Run STAR on TOTAL samples"
+output:
+  html_document:
+    toc: false
+---
+
+```{r}
+source("run_config.R")
+```
+
+
+
+# Download and Index Genome
+```{bash}
+set -u
+mkdir -p $GENOME_DIR
+wget --no-verbose --directory-prefix ${GENOME_DIR} ${FA_URL} 
+wget --no-verbose --directory-prefix ${GENOME_DIR} ${GTF_URL}
+gunzip -f ${FA}.gz
+gunzip -f ${GTF}.gz
+
+ls ${GENOME_DIR}
+```
+
+
+```{bash}
+set -u
+bwa index ${FA}
+```
+
+
+```{bash engine.path="/bin/bash"}
+set -u
+mkdir -p ${TOTAL_SAMPLES_STAROUT}
+trim_and_star_func() {
+    FASTQ=$1
+    FASTQ_BASE=${FASTQ##*/} # strip directory from file path
+    SAMPLE="${FASTQ_BASE%_R1_001.fastq.gz}" # strip .fq.gz file extension
+    echo $SAMPLE
+    echo $FASTQ
+    echo $FASTQ_BASE
+    # exit 1
+
+
+    # make a pipe for trimmed fastq
+    CUR_PIPE=`mktemp --dry-run`_${SAMPLE}_pipe.fq
+    mkfifo $CUR_PIPE
+
+    # Run fastq-mcf
+    fastq-mcf \
+        $ADAPTERS \
+        $FASTQ \
+        -o $CUR_PIPE \
+        -q 20 -x 0.5 &
+        
+    STAR \
+    --runMode alignReads \
+    --runThreadN $THREADS \
+    --genomeDir $GENOME_DIR \
+    --outSAMtype BAM SortedByCoordinate \
+    --quantMode GeneCounts \
+    --genomeLoad NoSharedMemory \
+    --twopassMode None \
+    --limitBAMsortRAM 1280000000 \
+    --outFileNamePrefix ${TOTAL_SAMPLES_STAROUT}/${SAMPLE}_ \
+    --outFilterScoreMinOverLread 0 --outFilterMatchNminOverLread 0 \
+    --outFilterMatchNmin 0 --outFilterMismatchNmax 2 \
+    --readFilesIn $CUR_PIPE        
+        
+    rm -f $CUR_PIPE
+    samtools index ${TOTAL_SAMPLES_STAROUT}/${SAMPLE}_Aligned.sortedByCoord.out.bam
+}
+export -f trim_and_star_func
+
+# parallel --jobs $MAX_JOBS trim_and_star_func ::: $RAW_FASTQS/*.fastq.gz
+# parallel --jobs $MAX_JOBS trim_and_star_func ::: $RAW_FASTQS/?_TOT*L00[12]*.fastq.gz
+parallel --jobs $MAX_JOBS trim_and_star_func ::: $RAW_FASTQS/[234]_TOT*L00[1234]*.fastq.gz
+# parallel --jobs $MAX_JOBS trim_and_star_func ::: $RAW_FASTQS/[234]_*_S*_L00*_R1_001.fastq.gz
+
+```
+
+
+# SessionInfo
+```{r}
+sessionInfo()
+```
