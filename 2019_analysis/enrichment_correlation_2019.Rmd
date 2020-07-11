@@ -1093,6 +1093,144 @@ dplyr::select(genecountsRZ_lanes_combined,small_MTrRNA)
 # dplyr::select(genecountsRZ_lanes_combined_no_rrna,small_MTrRNA)
 
 ```
+# testing for protein-coding correlations
+```{r}
+h99_grangesRZ %>% 
+  as.data.frame %>% 
+  filter(gene_biotype != "protein_coding") %>%
+  pull(gene_id) %>%
+  unique ->
+  all_non_protein_coding_gene_IDs_RZ
+```
+```{r}
+all_non_protein_coding_and_rrna_homologs_gene_IDs_RZ = 
+  union(all_non_protein_coding_gene_IDs_RZ, strand_specific_rrna_homologs)
+
+genecountsRZ_lanes_combined %>%
+  dplyr::select(all_non_protein_coding_and_rrna_homologs_gene_IDs_RZ) ->
+  check_selectRZ
+
+check_selectRZ[,1:6]
+
+genecountsRZ_lanes_combined %>%
+  dplyr::select(-all_non_protein_coding_and_rrna_homologs_gene_IDs_RZ) ->
+  genecounts_lanes_combined_protein_coding_only_RZ
+
+genecounts_lanes_combined_protein_coding_only_RZ[,1:6]
+
+
+dim(check_selectRZ)
+dim(genecountsRZ_lanes_combined)
+dim(genecounts_lanes_combined_protein_coding_only_RZ)
+
+dplyr::select(genecountsRZ_lanes_combined,small_MTrRNA)
+
+```
+# plotting for RZ protein-coding correlations - 2018 RZ to 2018 TOT
+```{r RZ2018_protein_coding_correlation_scatter_plot, include=TRUE, fig.path='figures/', dev=c('png','pdf')}
+
+makeScatterPlot = function(genecounts_lanes_combined_protein_coding_only_RZ, cur_sample_num, cur_enrich_rep = 1) {
+  
+genecounts_lanes_combined_protein_coding_only_RZ %>%
+  filter(RNA_sample_num == cur_sample_num, 
+         enrich_rep == cur_enrich_rep) %>%
+  dplyr::select(-c(library,RNA_sample_num)) %>%
+  gather(gene_id, reads, 2:ncol(.)) %>%
+  spread(enrichment_method,reads) ->
+  cur_sample.tidy
+  
+title_text = paste0("WT Sample #", cur_sample_num, collapse=" ")
+
+cur_sample.tidy %>%
+  summarise(max(RNaseH), max(RZ)) %>%
+  max -> ymax
+
+#------------------------------------------------------------------
+rnaseh_cor = paste("RNaseH R =", 
+               cor(cur_sample.tidy[["TOT"]],
+                   cur_sample.tidy[["RNaseH"]]) %>%
+                 round(2))
+
+RZ_cor = paste("RZ R =", 
+               cor(cur_sample.tidy[["TOT"]],
+                   cur_sample.tidy[["RZ"]]) %>%
+                 round(2))
+#------------------------------------------------------------------
+
+ggplot(cur_sample.tidy) +
+  geom_point(aes(TOT, RNaseH), color="#f8766e", size=1, alpha=0.25) + 
+  geom_smooth(aes(TOT, RNaseH), method=lm, se=FALSE, color="#f8766e", size=0.25) +
+  geom_point(aes(TOT, RZ), color="#6fc18a", size=1, alpha=0.25) +
+  geom_smooth(aes(TOT, RZ), method=lm, se=FALSE, color="#6fc18a", size=0.25) +
+  ggtitle(title_text) +
+  labs(x="Protein-Coding Read Counts in Total Sample (2018)",y="Protein-Coding Read Counts in Enriched Sample") +
+  theme_classic() +
+  theme(axis.text.x = element_text(colour = "black")) +
+  theme(axis.text.y = element_text(colour = "black")) +
+  annotate("text", x=4000, y = 0, 
+           label = paste(rnaseh_cor, RZ_cor, sep="\n"),
+           hjust="inward",
+           vjust="inward", 
+           color="black")
+
+}
+for (cur_sample in 2:4) {
+  print(makeScatterPlot(genecounts_lanes_combined_protein_coding_only_RZ, cur_sample, cur_enrich_rep = 1))
+}
+```
+# plotting for RZ protein-coding correlations - 2018 RZ to 2019 Total
+```{r RZ2019_protein_coding_correlation_scatter_plot, include=TRUE, fig.path='figures/', dev=c('png','pdf')}
+
+makeScatterPlot = function(genecounts_lanes_combined_protein_coding_only_RZ, cur_sample_num, cur_enrich_rep = 1) {
+  
+genecounts_lanes_combined_protein_coding_only_RZ %>%
+  filter(RNA_sample_num == cur_sample_num, 
+         enrich_rep == cur_enrich_rep) %>%
+  dplyr::select(-c(library,RNA_sample_num)) %>%
+  gather(gene_id, reads, 2:ncol(.)) %>%
+  spread(enrichment_method,reads) ->
+  cur_sample.tidy
+  
+title_text = paste0("WT Sample #", cur_sample_num, collapse=" ")
+
+cur_sample.tidy %>%
+  summarise(max(RNaseH), max(RZ)) %>%
+  max -> ymax
+
+#------------------------------------------------------------------
+rnaseh_cor = paste("RNaseH R =", 
+               cor(cur_sample.tidy[["Total"]],
+                   cur_sample.tidy[["RNaseH"]]) %>%
+                 round(2))
+
+RZ_cor = paste("RZ R =", 
+               cor(cur_sample.tidy[["Total"]],
+                   cur_sample.tidy[["RZ"]]) %>%
+                 round(2))
+#------------------------------------------------------------------
+
+ggplot(cur_sample.tidy) +
+  geom_point(aes(Total, RNaseH), color="#f8766e", size=1, alpha=0.25) + 
+  geom_smooth(aes(Total, RNaseH), method=lm, se=FALSE, color="#f8766e", size=0.25) +
+  geom_point(aes(Total, RZ), color="#6fc18a", size=1, alpha=0.25) +
+  geom_smooth(aes(Total, RZ), method=lm, se=FALSE, color="#6fc18a", size=0.25) +
+  ggtitle(title_text) +
+  labs(x="Protein-Coding Read Counts in Total Sample (2019)",y="Protein-Coding Read Counts in Enriched Sample") +
+  theme_classic() +
+  theme(axis.text.x = element_text(colour = "black")) +
+  theme(axis.text.y = element_text(colour = "black")) +
+  annotate("text", x=4000, y = 0, 
+           label = paste(rnaseh_cor, RZ_cor, sep="\n"),
+           hjust="inward",
+           vjust="inward", 
+           color="black")
+
+}
+for (cur_sample in 2:4) {
+  print(makeScatterPlot(genecounts_lanes_combined_protein_coding_only_RZ, cur_sample, cur_enrich_rep = 1))
+}
+```
+
 # testing for RZ ncRNA correlations
 ```{r}
 h99_grangesRZ %>% 
