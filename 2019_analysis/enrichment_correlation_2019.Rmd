@@ -3,7 +3,7 @@ title: "Enrichment Correlation"
 output:
   
 editor_options: 
-  chunk_output_type: inline
+  chunk_output_type: console
 ---
 
 ```{r global_options, include=FALSE}
@@ -411,7 +411,7 @@ genecounts_lanes_combined_protein_coding_only %>%
   spread(enrichment_method,reads) ->
   cur_sample.tidy
   
-title_text = paste0("Sample #", cur_sample_num, collapse=" ")
+title_text = paste0("WT Sample #", cur_sample_num, collapse=" ")
 
 cur_sample.tidy %>%
   summarise(max(mRNA), max(RNaseH)) %>%
@@ -440,20 +440,23 @@ rnaseh_cor = paste("RNaseH R =",
            #vjust="inward", 
            #color="black")
 
-ggplot(cur_sample.tidy, alpha = 1/2) +
-  geom_point(aes(Total, RNaseH), color="#f8766e", size=1) + 
-  geom_smooth(aes(Total, RNaseH), method=lm, se=FALSE, color="#f8766e") +
-  geom_point(aes(Total, mRNA), color="#00bfc4", size=1) +
-  geom_smooth(aes(Total, mRNA), method=lm, se=FALSE, color="#00bfc4") +
+ggplot(cur_sample.tidy) +
+  geom_point(aes(Total, RNaseH), color="#f8766e", size=1, alpha=0.25) + 
+  geom_smooth(aes(Total, RNaseH), method=lm, se=FALSE, color="#f8766e", size=0.25) +
+  geom_point(aes(Total, mRNA), color="#00bfc4", size=1, alpha=0.25) +
+  geom_smooth(aes(Total, mRNA), method=lm, se=FALSE, color="#00bfc4", size=0.25) +
   ggtitle(title_text) +
   labs(x="Protein-Coding Read Counts in Total Sample",y="Protein-Coding Read Counts in Enriched Sample") +
-  theme_bw() +
+  theme_classic() +
+  theme(axis.text.x = element_text(colour = "black")) +
+  theme(axis.text.y = element_text(colour = "black")) +
   annotate("text", x=15000, y = 10000, 
            label = paste(rnaseh_cor, mrna_cor, sep="\n"),
            hjust="inward",
            vjust="inward", 
            color="black")
 }
+
 for (cur_sample in 2:4) {
   print(makeScatterPlot(genecounts_lanes_combined_protein_coding_only, cur_sample, cur_enrich_rep = 1))
 }
@@ -511,12 +514,12 @@ grid.arrange(T2_vs_T3, T2_vs_T4, nrow = 1)
 T3_cor = paste("3 R =", 
                cor(cur_sample.tidy[["Total_2"]],
                    cur_sample.tidy[["Total_3"]]) %>%
-                 round(2))
+                 round(5))
 
 T4_cor = paste("4 R =", 
                cor(cur_sample.tidy[["Total_2"]],
                    cur_sample.tidy[["Total_4"]]) %>%
-                 round(2))
+                 round(6))
 T3_cor
 T4_cor
 cat(paste(T3_cor, T4_cor, sep="\n"))
@@ -606,20 +609,24 @@ genecounts_lanes_combined %>%
 title_text = paste0(cur_enrich_method, collapse=" ")
 
 #------------------------------------------------------------------
-T3_cor = paste("3 R =", 
+T3_cor = paste("R =", 
                cor(cur_sample.tidy[["Total_2"]],
                    cur_sample.tidy[["Total_3"]]) %>%
                  round(6))
 #------------------------------------------------------------------
-ggplot(cur_sample.tidy, aes(Total_2, y=value, color=variable)) + 
-  geom_point(aes(y=Total_3, color="Counts"), size=1) +
-  ggtitle(title_text) +
-  labs(x="Read Counts in Total_2",y="Read Counts in Total_3", color='Sample') +
-  theme_bw() +
-  annotate("text", x=0, y = ymax, 
-           label = paste(T3_cor, sep="\n"),
+
+ggplot(cur_sample.tidy) +
+  geom_point(aes(Total_2, Total_3), color="black", size=2, alpha=0.2) + 
+  geom_smooth(aes(Total_2, Total_3), method=lm, se=FALSE, color="black", size=0.25) +
+  ggtitle("WT 2019") +
+  labs(x="Read Counts in Total Sample #2",y="Read Counts in Total Sample #3") +
+  theme_classic() +
+  theme(axis.text.x = element_text(colour = "black")) +
+  theme(axis.text.y = element_text(colour = "black")) +
+  annotate("text", x=5000000, y = 0, 
+           label = paste(T3_cor),
            hjust="inward",
-           vjust="inward", 
+           just="inward", 
            color="black")
 }
 
@@ -641,20 +648,23 @@ genecounts_lanes_combined %>%
 title_text = paste0(cur_enrich_method, collapse=" ")
 
 #------------------------------------------------------------------
-T4_cor = paste("4 R =", 
+T4_cor = paste("R =", 
                cor(cur_sample.tidy[["Total_2"]],
                    cur_sample.tidy[["Total_4"]]) %>%
                  round(6))
 #------------------------------------------------------------------
-ggplot(cur_sample.tidy, aes(Total_2, y=value, color=variable)) + 
-  geom_point(aes(y=Total_4, color="Counts"), size=1) +
-  ggtitle(title_text) +
-  labs(x="Read Counts in Total_2",y="Read Counts in Total_4", color='Sample') +
-  theme_bw() +
-  annotate("text", x=0, y = ymax, 
-           label = paste(T4_cor, sep="\n"),
+ggplot(cur_sample.tidy) +
+  geom_point(aes(Total_2, Total_4), color="black", size=2, alpha=0.2) + 
+  geom_smooth(aes(Total_2, Total_4), method=lm, se=FALSE, color="black", size=0.25) +
+  ggtitle("WT 2019") +
+  labs(x="Read Counts in Total Sample #2",y="Read Counts in Total Sample #4") +
+  theme_classic() +
+  theme(axis.text.x = element_text(colour = "black")) +
+  theme(axis.text.y = element_text(colour = "black")) +
+  annotate("text", x=5000000, y = 0, 
+           label = paste(T4_cor),
            hjust="inward",
-           vjust="inward", 
+           just="inward", 
            color="black")
 }
 
@@ -677,20 +687,23 @@ genecounts_lanes_combined %>%
 title_text = paste0(cur_enrich_method, collapse=" ")
 
 #------------------------------------------------------------------
-T4_cor = paste("4 R =", 
+T4_cor = paste("R =", 
                cor(cur_sample.tidy[["Total_3"]],
                    cur_sample.tidy[["Total_4"]]) %>%
                  round(6))
 #------------------------------------------------------------------
-ggplot(cur_sample.tidy, aes(Total_3, y=value, color=variable)) + 
-  geom_point(aes(y=Total_4, color="Counts"), size=1) +
-  ggtitle(title_text) +
-  labs(x="Read Counts in Total_3",y="Read Counts in Total_4", color='Sample') +
-  theme_bw() +
-  annotate("text", x=0, y = ymax, 
-           label = paste(T4_cor, sep="\n"),
+ggplot(cur_sample.tidy) +
+  geom_point(aes(Total_3, Total_4), color="black", size=2, alpha=0.2) + 
+  geom_smooth(aes(Total_3, Total_4), method=lm, se=FALSE, color="black", size=0.25) +
+  ggtitle("WT 2019") +
+  labs(x="Read Counts in Total Sample #3",y="Read Counts in Total Sample #4") +
+  theme_classic() +
+  theme(axis.text.x = element_text(colour = "black")) +
+  theme(axis.text.y = element_text(colour = "black")) +
+  annotate("text", x=5000000, y = 0, 
+           label = paste(T4_cor),
            hjust="inward",
-           vjust="inward", 
+           just="inward", 
            color="black")
 }
 
@@ -851,7 +864,7 @@ genecounts_lanes_combined_ncRNA_only %>%
   spread(enrichment_method,reads) ->
   cur_sample.tidy
   
-title_text = paste0("Sample #", cur_sample_num, collapse=" ")
+title_text = paste0("WT Sample #", cur_sample_num, collapse=" ")
 
 cur_sample.tidy %>%
   summarise(max(RNaseH), max(mRNA)) %>%
@@ -880,14 +893,16 @@ mrna_cor = paste("mRNA R =",
            #vjust="inward", 
            #color="black")
 
-ggplot(cur_sample.tidy, alpha = 1/2) +
-  geom_point(aes(Total, RNaseH), color="#f8766e", size=1) + 
-  geom_smooth(aes(Total, RNaseH), method=lm, se=FALSE, color="#f8766e") +
-  geom_point(aes(Total, mRNA), color="#00bfc4", size=1) +
-  geom_smooth(aes(Total, mRNA), method=lm, se=FALSE, color="#00bfc4") +
+ggplot(cur_sample.tidy) +
+  geom_point(aes(Total, RNaseH), color="#f8766e", size=1, alpha=0.25) + 
+  geom_smooth(aes(Total, RNaseH), method=lm, se=FALSE, color="#f8766e", size=0.25) +
+  geom_point(aes(Total, mRNA), color="#00bfc4", size=1, alpha=0.25) +
+  geom_smooth(aes(Total, mRNA), method=lm, se=FALSE, color="#00bfc4", size=0.25) +
   ggtitle(title_text) +
   labs(x="ncRNA Read Counts in Total Sample",y="ncRNA Read Counts in Enriched Sample") +
-  theme_bw() +
+  theme_classic() +
+  theme(axis.text.x = element_text(colour = "black")) +
+  theme(axis.text.y = element_text(colour = "black")) +
   annotate("text", x=4000, y = 10000, 
            label = paste(rnaseh_cor, mrna_cor, sep="\n"),
            hjust="inward",
@@ -1121,7 +1136,7 @@ genecountsRZ_lanes_combined_ncRNA_only %>%
   spread(enrichment_method,reads) ->
   cur_sample.tidy
   
-title_text = paste0("Sample #", cur_sample_num, collapse=" ")
+title_text = paste0("WT Sample #", cur_sample_num, collapse=" ")
 
 cur_sample.tidy %>%
   summarise(max(RNaseH), max(RZ)) %>%
@@ -1150,14 +1165,16 @@ RZ_cor = paste("RZ R =",
            #vjust="inward", 
            #color="black")
 
-ggplot(cur_sample.tidy, alpha = 1/2) +
-  geom_point(aes(TOT, RNaseH), color="#f8766e", size=1) + 
-  geom_smooth(aes(TOT, RNaseH), method=lm, se=FALSE, color="#f8766e") +
-  geom_point(aes(TOT, RZ), color="#6fc18a", size=1) +
-  geom_smooth(aes(TOT, RZ), method=lm, se=FALSE, color="#6fc18a") +
+ggplot(cur_sample.tidy) +
+  geom_point(aes(TOT, RNaseH), color="#f8766e", size=1, alpha=0.25) + 
+  geom_smooth(aes(TOT, RNaseH), method=lm, se=FALSE, color="#f8766e", size=0.25) +
+  geom_point(aes(TOT, RZ), color="#6fc18a", size=1, alpha=0.25) +
+  geom_smooth(aes(TOT, RZ), method=lm, se=FALSE, color="#6fc18a", size=0.25) +
   ggtitle(title_text) +
   labs(x="ncRNA Read Counts in Total Sample (2018)",y="ncRNA Read Counts in Enriched Sample") +
-  theme_bw() +
+  theme_classic() +
+  theme(axis.text.x = element_text(colour = "black")) +
+  theme(axis.text.y = element_text(colour = "black")) +
   annotate("text", x=4000, y = 0, 
            label = paste(rnaseh_cor, RZ_cor, sep="\n"),
            hjust="inward",
@@ -1217,7 +1234,7 @@ genecountsRZ_lanes_combined_ncRNA_only %>%
   spread(enrichment_method,reads) ->
   cur_sample.tidy
   
-title_text = paste0("Sample #", cur_sample_num, collapse=" ")
+title_text = paste0("WT Sample #", cur_sample_num, collapse=" ")
 
 cur_sample.tidy %>%
   summarise(max(RNaseH), max(RZ)) %>%
@@ -1248,19 +1265,20 @@ RZ_cor = paste("RZ R =",
            #vjust="inward", 
            #color="black")
 
-ggplot(cur_sample.tidy, alpha = 1/2) +
-  geom_point(aes(Total, RNaseH), color="#f8766e", size=1) + 
-  geom_smooth(aes(Total, RNaseH), method=lm, se=FALSE, color="#f8766e") +
-  geom_point(aes(Total, RZ), color="#6fc18a", size=1) +
-  geom_smooth(aes(Total, RZ), method=lm, se=FALSE, color="#6fc18a") +
+ggplot(cur_sample.tidy) +
+  geom_point(aes(Total, RNaseH), color="#f8766e", size=1, alpha=0.25) + 
+  geom_smooth(aes(Total, RNaseH), method=lm, se=FALSE, color="#f8766e", size=0.25) +
+  geom_point(aes(Total, RZ), color="#6fc18a", size=1, alpha=0.25) +
+  geom_smooth(aes(Total, RZ), method=lm, se=FALSE, color="#6fc18a", size=0.25) +
   ggtitle(title_text) +
   labs(x="ncRNA Read Counts in Total Sample (2019)",y="ncRNA Read Counts in Enriched Sample") +
-  theme_bw() +
+  theme_classic() +
   annotate("text", x=4000, y = 0, 
            label = paste(rnaseh_cor, RZ_cor, sep="\n"),
            hjust="inward",
            vjust="inward", 
            color="black")
+
 }
 for (cur_sample in 2:4) {
   print(makeScatterPlot(genecountsRZ_lanes_combined_ncRNA_only, cur_sample, cur_enrich_rep = 1))
@@ -1335,7 +1353,7 @@ genecountsRZ_lanes_combined %>%
 
 ###title_text = paste0(cur_sample_num, collapse=" ")
 
-title_text = "Sample #2"
+title_text = "WT Sample #2"
 
 cur_sample_total2.tidy %>%
   summarise(max(Total_2_2019), max(Total_2_2018)) %>%
@@ -1350,7 +1368,7 @@ T2_2018_vs_T2_2019 = ggplot(cur_sample_total2.tidy, aes(Total_2_2019, Total_2_20
 grid.arrange(T2_2018_vs_T2_2019, nrow = 1)
 
 #------------------------------------------------------------------
-T2_cor = paste("Sample #2 R =", 
+T2_cor = paste("R =", 
                cor(cur_sample_total2.tidy[["Total_2_2019"]],
                    cur_sample_total2.tidy[["Total_2_2018"]]) %>%
                  round(5))
@@ -1359,11 +1377,14 @@ T2_cor
 
 #------------------------------------------------------------------
 
-ggplot(cur_sample_total2.tidy, alpha = 1/2) +
-  geom_point(aes(Total_2_2019, Total_2_2018), color="grey", size=2) + 
-  geom_smooth(aes(Total_2_2019, Total_2_2018), method=lm, se=FALSE, color="black") +
+ggplot(cur_sample_total2.tidy) +
+  geom_point(aes(Total_2_2019, Total_2_2018), color="black", size=2, alpha=0.2) + 
+  geom_smooth(aes(Total_2_2019, Total_2_2018), method=lm, se=FALSE, color="black", size=0.25) +
   ggtitle(title_text) +
-  theme_bw() +
+  labs(x="Read Counts in Total Sample (2019)",y="Read Counts in Total Sample (2018)") +
+  theme_classic() +
+  theme(axis.text.x = element_text(colour = "black")) +
+  theme(axis.text.y = element_text(colour = "black")) +
   annotate("text", x=5000000, y = 0, 
            label = paste(T2_cor),
            hjust="inward",
@@ -1387,7 +1408,7 @@ genecountsRZ_lanes_combined %>%
   cur_sample_total3.tidy
  
 
-title_text = "Sample #3"
+title_text = "WT Sample #3"
 
 cur_sample_total3.tidy %>%
   summarise(max(Total_3_2019), max(Total_3_2018)) %>%
@@ -1402,7 +1423,7 @@ T3_2018_vs_T3_2019 = ggplot(cur_sample_total3.tidy, aes(Total_3_2019, Total_3_20
 grid.arrange(T3_2018_vs_T3_2019, nrow = 1)
 
 #------------------------------------------------------------------
-T3_cor = paste("Sample #3 R =", 
+T3_cor = paste("R =", 
                cor(cur_sample_total3.tidy[["Total_3_2019"]],
                    cur_sample_total3.tidy[["Total_3_2018"]]) %>%
                  round(5))
@@ -1411,16 +1432,20 @@ T3_cor
 
 #------------------------------------------------------------------
 
-ggplot(cur_sample_total3.tidy, alpha = 1/2) +
-  geom_point(aes(Total_3_2019, Total_3_2018), color="grey", size=2) + 
-  geom_smooth(aes(Total_3_2019, Total_3_2018), method=lm, se=FALSE, color="black") +
+ggplot(cur_sample_total3.tidy) +
+  geom_point(aes(Total_3_2019, Total_3_2018), color="black", size=2, alpha=0.2) + 
+  geom_smooth(aes(Total_3_2019, Total_3_2018), method=lm, se=FALSE, color="black", size=0.25) +
   ggtitle(title_text) +
-  theme_bw() +
+  labs(x="Read Counts in Total Sample (2019)",y="Read Counts in Total Sample (2018)") +
+  theme_classic() +
+  theme(axis.text.x = element_text(colour = "black")) +
+  theme(axis.text.y = element_text(colour = "black")) +
   annotate("text", x=5000000, y = 0, 
            label = paste(T3_cor),
            hjust="inward",
            just="inward", 
            color="black")
+
 
 ```
 # Plotting Total 4 comparison
@@ -1438,7 +1463,7 @@ genecountsRZ_lanes_combined %>%
   cur_sample_total4.tidy
  
 
-title_text = "Sample #4"
+title_text = "WT Sample #4"
 
 cur_sample_total4.tidy %>%
   summarise(max(Total_4_2019), max(Total_4_2018)) %>%
@@ -1453,7 +1478,7 @@ T4_2018_vs_T4_2019 = ggplot(cur_sample_total4.tidy, aes(Total_4_2019, Total_4_20
 grid.arrange(T4_2018_vs_T4_2019, nrow = 1)
 
 #------------------------------------------------------------------
-T4_cor = paste("Sample #4 R =", 
+T4_cor = paste("R =", 
                cor(cur_sample_total4.tidy[["Total_4_2019"]],
                    cur_sample_total4.tidy[["Total_4_2018"]]) %>%
                  round(5))
@@ -1462,15 +1487,19 @@ T4_cor
 
 #------------------------------------------------------------------
 
-ggplot(cur_sample_total4.tidy, alpha = 1/2) +
-  geom_point(aes(Total_4_2019, Total_4_2018), color="grey", size=2) + 
-  geom_smooth(aes(Total_4_2019, Total_4_2018), method=lm, se=FALSE, color="black") +
+ggplot(cur_sample_total4.tidy) +
+  geom_point(aes(Total_4_2019, Total_4_2018), color="black", size=2, alpha=0.2) + 
+  geom_smooth(aes(Total_4_2019, Total_4_2018), method=lm, se=FALSE, color="black", size=0.25) +
   ggtitle(title_text) +
-  theme_bw() +
+  labs(x="Read Counts in Total Sample (2019)",y="Read Counts in Total Sample (2018)") +
+  theme_classic() +
+  theme(axis.text.x = element_text(colour = "black")) +
+  theme(axis.text.y = element_text(colour = "black")) +
   annotate("text", x=5000000, y = 0, 
            label = paste(T4_cor),
            hjust="inward",
            just="inward", 
            color="black")
+
 
 ```
