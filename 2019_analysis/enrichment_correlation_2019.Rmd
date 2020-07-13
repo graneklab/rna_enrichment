@@ -293,7 +293,7 @@ dplyr::summarize(gp, cor(a, b))
 
 # https://www.sixhat.net/how-to-plot-multpile-data-series-with-ggplot.html
 ```
-# testing for all ncRNAs, tRNAs, rRNAs
+# testing for protein-coding
 ```{r}
 head(h99_granges)
 ```
@@ -329,7 +329,7 @@ dim(genecounts_lanes_combined_protein_coding_only)
 dplyr::select(genecounts_lanes_combined,small_MTrRNA)
 
 ```
-# plotting for all ncRNAs, tRNAs, rRNAs
+# plotting for protein-coding
 ```{r}
 cur_sample_num = 2
 cur_enrich_rep = 1
