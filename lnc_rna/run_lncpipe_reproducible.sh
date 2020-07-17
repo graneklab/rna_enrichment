@@ -12,6 +12,19 @@ SINGULARITY_IMAGE="docker://bioinformatist/lncpipe"
 
 mkdir -p $SCRATCH $GENOME_DIR
 
+
+# CPAT Setup
+# http://rna-cpat.sourceforge.net
+# make_hexamer_tab.py -c Human_coding_transcripts_CDS.fa   -n Human_noncoding_transcripts_RNA.fa >Human_Hexamer.tsv
+
+# make_logitModel.py  -x Human_Hexamer.tsv -c Human_coding_transcripts_mRNA.fa -n Human_noncoding_transcripts_RNA.fa -o Human
+
+#or use BED file as input
+# make_logitModel.py  -x Human_Hexamer.tsv -c Human_coding_transcripts_hg19.bed -n Human_noncoding_transcripts_hg19.bed  -r /database/hg19.fa  -o Human
+# ftp://ftp.ensemblgenomes.org/pub/release-46/fungi/fasta/fungi_basidiomycota1_collection/cryptococcus_neoformans_var_grubii_h99_gca_000149245/cds/Cryptococcus_neoformans_var_grubii_h99_gca_000149245.CNA3.cds.all.fa.gz
+# ftp://ftp.ensemblgenomes.org/pub/release-46/fungi/fasta/fungi_basidiomycota1_collection/cryptococcus_neoformans_var_grubii_h99_gca_000149245/ncrna/Cryptococcus_neoformans_var_grubii_h99_gca_000149245.CNA3.ncrna.fa.gz
+
+
 # Download Genome
 
 wget -P $GENOME_DIR "ftp://ftp.ensemblgenomes.org/pub/release-46/fungi/fasta/fungi_basidiomycota1_collection/cryptococcus_neoformans_var_grubii_h99_gca_000149245/dna/Cryptococcus_neoformans_var_grubii_h99_gca_000149245.CNA3.dna.toplevel.fa.gz"

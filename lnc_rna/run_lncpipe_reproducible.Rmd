@@ -1,0 +1,47 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+```{r}
+library(dplyr)
+library(fs)
+library(R.utils)
+```
+
+
+# CPAT Setup
+# http://rna-cpat.sourceforge.net
+# make_hexamer_tab.py -c Human_coding_transcripts_CDS.fa   -n Human_noncoding_transcripts_RNA.fa >Human_Hexamer.tsv
+
+# make_logitModel.py  -x Human_Hexamer.tsv -c Human_coding_transcripts_mRNA.fa -n Human_noncoding_transcripts_RNA.fa -o Human
+
+#or use BED file as input
+# make_logitModel.py  -x Human_Hexamer.tsv -c Human_coding_transcripts_hg19.bed -n Human_noncoding_transcripts_hg19.bed  -r /database/hg19.fa  -o Human
+# ftp://ftp.ensemblgenomes.org/pub/release-46/fungi/fasta/fungi_basidiomycota1_collection/cryptococcus_neoformans_var_grubii_h99_gca_000149245/cds/Cryptococcus_neoformans_var_grubii_h99_gca_000149245.CNA3.cds.all.fa.gz
+# ftp://ftp.ensemblgenomes.org/pub/release-46/fungi/fasta/fungi_basidiomycota1_collection/cryptococcus_neoformans_var_grubii_h99_gca_000149245/ncrna/Cryptococcus_neoformans_var_grubii_h99_gca_000149245.CNA3.ncrna.fa.gz
+```{r}
+scratch_dir="/space/temp/run_lnc_pipe_002"
+genome_dir=file.path(scratch_dir, "genome")
+
+h99_cds_url="ftp://ftp.ensemblgenomes.org/pub/release-46/fungi/fasta/fungi_basidiomycota1_collection/cryptococcus_neoformans_var_grubii_h99_gca_000149245/cds/Cryptococcus_neoformans_var_grubii_h99_gca_000149245.CNA3.cds.all.fa.gz"
+
+h99_cds_url %>%
+  basename %>%
+  file.path(genome_dir, .) ->
+  h99_cds_gz
+
+h99_cds_gz %>%
+  path_ext_remove ->
+  h99_cds_file
+
+dir_create(genome_dir, recurse = TRUE)
+download.file(h99_cds_url, h99_cds_gz)
+gunzip(h99_cds_gz)
+list.files(genome_dir)
+
+```
+
