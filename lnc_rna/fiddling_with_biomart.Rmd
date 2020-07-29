@@ -1,0 +1,81 @@
+---
+title: "Fiddling With Biomart"
+output: html_document
+---
+
+```{r}
+library(biomartr)
+library(stringr)
+
+```
+
+```{r}
+organismBM()
+organismFilters("H99")
+
+```
+
+```{r}
+listGenomes() %>%
+  as_tibble() %>%
+  filter(str_detect(value, "neof"))
+```
+
+```{r}
+getCollection(
+  db = "ensembl",
+  organism="GCA_000149245",
+  reference = FALSE,
+  path = file.path("_db_downloads", "collections")
+)
+```
+
+```{r}
+getCollection(
+  db = "refseq",
+  organism="GCF_000149245.1",
+  reference = FALSE,
+  path = file.path("_db_downloads", "collections")
+)
+```
+
+
+
+```{r}
+getKingdoms(db= "ensembl")
+getMarts()
+getDatasets("fungi_mart") %>%   filter(str_detect(description,"neo"))
+```
+
+
+```{r}
+is.genome.available(db = "refseq", organism = "H99", details = TRUE)
+
+```
+
+```{r}
+searchDatasets(mart = "fungi_mart", pattern = "h99")
+
+listEnsemblGenomes() 
+and useEnsemblGenomes()
+ensembl_fungi <- useEnsemblGenomes(biomart = "plants_mart")
+
+```
+
+
+file_path <- getGenome( db= "ensembl", 
+             organism = "Arabidopsis thaliana", 
+             path = file.path("_ncbi_downloads","genomes"))
+
+Ath_genome <- read_genome(file_path, format = "fasta")
+
+
+# download the genome of Arabidopsis thaliana from genbank
+# and store the corresponding genome file in '_ncbi_downloads/genomes'
+file_path <- getGenome( db       = "genbank", 
+             organism = "Arabidopsis thaliana", 
+             path = file.path("_ncbi_downloads","genomes"))
+
+Ath_genome <- read_genome(file_path, format = "fasta")
+
+
