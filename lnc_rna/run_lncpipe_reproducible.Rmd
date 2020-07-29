@@ -13,35 +13,81 @@ library(R.utils)
 ```
 
 
-# CPAT Setup
-# http://rna-cpat.sourceforge.net
-# make_hexamer_tab.py -c Human_coding_transcripts_CDS.fa   -n Human_noncoding_transcripts_RNA.fa >Human_Hexamer.tsv
-
-# make_logitModel.py  -x Human_Hexamer.tsv -c Human_coding_transcripts_mRNA.fa -n Human_noncoding_transcripts_RNA.fa -o Human
-
-#or use BED file as input
-# make_logitModel.py  -x Human_Hexamer.tsv -c Human_coding_transcripts_hg19.bed -n Human_noncoding_transcripts_hg19.bed  -r /database/hg19.fa  -o Human
 # ftp://ftp.ensemblgenomes.org/pub/release-46/fungi/fasta/fungi_basidiomycota1_collection/cryptococcus_neoformans_var_grubii_h99_gca_000149245/cds/Cryptococcus_neoformans_var_grubii_h99_gca_000149245.CNA3.cds.all.fa.gz
 # ftp://ftp.ensemblgenomes.org/pub/release-46/fungi/fasta/fungi_basidiomycota1_collection/cryptococcus_neoformans_var_grubii_h99_gca_000149245/ncrna/Cryptococcus_neoformans_var_grubii_h99_gca_000149245.CNA3.ncrna.fa.gz
+
+# Setup
+## Make functions
+```{r}
+ensembl_download <- function(url, download_dir) {
+  url %>%
+    basename %>%
+    file.path(download_dir, .) ->
+    gz_filename
+  
+  gz_filename %>%
+    path_ext_remove ->
+    unziped_filename
+  
+  dir_create(download_dir, recurse = TRUE)
+  download.file(url, gz_filename)
+  gunzip(gz_filename)
+  warning("\n-----should test ensembl checksums------\n")
+
+  return(unziped_filename)
+  }
+```
+
+## Paths
 ```{r}
 scratch_dir="/space/temp/run_lnc_pipe_002"
 genome_dir=file.path(scratch_dir, "genome")
 
+h99_ncrna_url = "ftp://ftp.ensemblgenomes.org/pub/release-46/fungi/fasta/fungi_basidiomycota1_collection/cryptococcus_neoformans_var_grubii_h99_gca_000149245/ncrna/Cryptococcus_neoformans_var_grubii_h99_gca_000149245.CNA3.ncrna.fa.gz"
 h99_cds_url="ftp://ftp.ensemblgenomes.org/pub/release-46/fungi/fasta/fungi_basidiomycota1_collection/cryptococcus_neoformans_var_grubii_h99_gca_000149245/cds/Cryptococcus_neoformans_var_grubii_h99_gca_000149245.CNA3.cds.all.fa.gz"
 
-h99_cds_url %>%
-  basename %>%
-  file.path(genome_dir, .) ->
-  h99_cds_gz
-
-h99_cds_gz %>%
-  path_ext_remove ->
-  h99_cds_file
-
-dir_create(genome_dir, recurse = TRUE)
-download.file(h99_cds_url, h99_cds_gz)
-gunzip(h99_cds_gz)
-list.files(genome_dir)
-
+hexamer_path = file.path(genome_dir,"h99_hexamer.tsv")
+logit_model_prefix = file.path(genome_dir,"h99")
 ```
+
+## Download data
+```{r}
+ncrna_path = ensembl_download(h99_ncrna_url, genome_dir)
+cds_path = ensembl_download(h99_cds_url, genome_dir)
+list.files(genome_dir)
+```
+
+## Download data
+singularity exec --bind $GENOME_DIR:$GENOME_DIR $SINGULARITY_IMAGE STAR \
+    --runMode genomeGenerate \
+    --genomeDir $GENOME_DIR \
+    --genomeFastaFiles ${FA} \
+    --sjdbGTFfile ${GTF} \
+    --genomeSAindexNbases 11
+    
+# make_hexamer_tab.py -c Human_coding_transcripts_CDS.fa   -n Human_noncoding_transcripts_RNA.fa >Human_Hexamer.tsv
+
+# It is unclear if the coding input to make_logitModel.py should be the same as make_hexamer_tab.py
+# make_logitModel.py  -x Human_Hexamer.tsv -c Human_coding_transcripts_mRNA.fa -n Human_noncoding_transcripts_RNA.fa -o Human
+
+```{r}
+print("Run this command")
+cat(paste0("SCRATCH=", scratch_dir), "
+LNCPIPE_DIR=$SCRATCH/lncpipe
+GENOME_DIR=$SCRATCH/genome
+SINGULARITY_IMAGE='docker://bioinformatist/lncpipe'
+
+singularity exec --bind $GENOME_DIR:$GENOME_DIR $SINGULARITY_IMAGE \\
+  make_hexamer_tab.py -c", cds_path, "-n", ncrna_path, ">" , hexamer_path,"
+
+singularity exec --bind $GENOME_DIR:$GENOME_DIR $SINGULARITY_IMAGE \\
+  make_logitModel.py -c", cds_path, "-n", ncrna_path, "-x", hexamer_path, "-o" , logit_model_prefix)
+```
+
+# CPAT Setup
+# http://rna-cpat.sourceforge.net
+
+
+#or use BED file as input
+# make_logitModel.py  -x Human_Hexamer.tsv -c Human_coding_transcripts_hg19.bed -n Human_noncoding_transcripts_hg19.bed  -r /database/hg19.fa  -o Human
 
