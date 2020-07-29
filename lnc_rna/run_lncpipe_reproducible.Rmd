@@ -41,10 +41,16 @@ ensembl_download <- function(url, download_dir) {
 ## Paths
 ```{r}
 scratch_dir="/space/temp/run_lnc_pipe_002"
+bash_script=file.path(scratch_dir,"lncpipe_prep.sh")
 genome_dir=file.path(scratch_dir, "genome")
 
-h99_ncrna_url = "ftp://ftp.ensemblgenomes.org/pub/release-46/fungi/fasta/fungi_basidiomycota1_collection/cryptococcus_neoformans_var_grubii_h99_gca_000149245/ncrna/Cryptococcus_neoformans_var_grubii_h99_gca_000149245.CNA3.ncrna.fa.gz"
-h99_cds_url="ftp://ftp.ensemblgenomes.org/pub/release-46/fungi/fasta/fungi_basidiomycota1_collection/cryptococcus_neoformans_var_grubii_h99_gca_000149245/cds/Cryptococcus_neoformans_var_grubii_h99_gca_000149245.CNA3.cds.all.fa.gz"
+url_prefix="ftp://ftp.ensemblgenomes.org/pub/release-46/fungi"
+url_middle="fungi_basidiomycota1_collection/cryptococcus_neoformans_var_grubii_h99_gca_000149245"
+
+h99_ncrna_url = paste(sep="/", url_prefix, "fasta", url_middle, "ncrna/Cryptococcus_neoformans_var_grubii_h99_gca_000149245.CNA3.ncrna.fa.gz")
+h99_cds_url = paste(sep="/", url_prefix, "fasta", url_middle, "cds/Cryptococcus_neoformans_var_grubii_h99_gca_000149245.CNA3.cds.all.fa.gz")
+h99_genome_url = paste(sep="/", url_prefix, "fasta", url_middle, "dna/Cryptococcus_neoformans_var_grubii_h99_gca_000149245.CNA3.dna.toplevel.fa.gz")
+h99_gtf_url = paste(sep="/", url_prefix, "gtf", url_middle, "Cryptococcus_neoformans_var_grubii_h99_gca_000149245.CNA3.46.gtf.gz")
 
 hexamer_path = file.path(genome_dir,"h99_hexamer.tsv")
 logit_model_prefix = file.path(genome_dir,"h99")
@@ -54,28 +60,33 @@ logit_model_prefix = file.path(genome_dir,"h99")
 ```{r}
 ncrna_path = ensembl_download(h99_ncrna_url, genome_dir)
 cds_path = ensembl_download(h99_cds_url, genome_dir)
+genome_path = ensembl_download(h99_genome_url, genome_dir)
+gtf_path = ensembl_download(h99_gtf_url, genome_dir)
 list.files(genome_dir)
 ```
 
-## Download data
-singularity exec --bind $GENOME_DIR:$GENOME_DIR $SINGULARITY_IMAGE STAR \
-    --runMode genomeGenerate \
-    --genomeDir $GENOME_DIR \
-    --genomeFastaFiles ${FA} \
-    --sjdbGTFfile ${GTF} \
-    --genomeSAindexNbases 11
-    
-# make_hexamer_tab.py -c Human_coding_transcripts_CDS.fa   -n Human_noncoding_transcripts_RNA.fa >Human_Hexamer.tsv
+## Generate Bash script to run stuff in container
 
-# It is unclear if the coding input to make_logitModel.py should be the same as make_hexamer_tab.py
-# make_logitModel.py  -x Human_Hexamer.tsv -c Human_coding_transcripts_mRNA.fa -n Human_noncoding_transcripts_RNA.fa -o Human
+`make_hexamer_tab.py -c Human_coding_transcripts_CDS.fa   -n Human_noncoding_transcripts_RNA.fa >Human_Hexamer.tsv`
+
+It is unclear if the coding input to make_logitModel.py should be the same as make_hexamer_tab.py
+`make_logitModel.py  -x Human_Hexamer.tsv -c Human_coding_transcripts_mRNA.fa -n Human_noncoding_transcripts_RNA.fa -o Human`
 
 ```{r}
-print("Run this command")
-cat(paste0("SCRATCH=", scratch_dir), "
+print(paste("Run", bash_script))
+cat(file=bash_script, 
+paste0("SCRATCH=", scratch_dir), "
 LNCPIPE_DIR=$SCRATCH/lncpipe
 GENOME_DIR=$SCRATCH/genome
 SINGULARITY_IMAGE='docker://bioinformatist/lncpipe'
+
+singularity exec --bind $GENOME_DIR:$GENOME_DIR $SINGULARITY_IMAGE STAR \\
+    --runMode genomeGenerate \\
+    --genomeDir $GENOME_DIR \\
+    --genomeFastaFiles", genome_path," \\
+    --sjdbGTFfile", gtf_path," \\
+    --genomeSAindexNbases 11
+
 
 singularity exec --bind $GENOME_DIR:$GENOME_DIR $SINGULARITY_IMAGE \\
   make_hexamer_tab.py -c", cds_path, "-n", ncrna_path, ">" , hexamer_path,"
