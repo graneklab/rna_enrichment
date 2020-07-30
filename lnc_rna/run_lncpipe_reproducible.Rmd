@@ -10,6 +10,7 @@ knitr::opts_chunk$set(echo = TRUE)
 library(dplyr)
 library(fs)
 library(R.utils)
+library(here)
 ```
 
 
@@ -123,7 +124,7 @@ singularity exec --bind $GENOME_DIR:$GENOME_DIR $SINGULARITY_IMAGE \\
   make_logitModel.py -c", cds_path, "-n", ncrna_path, "-x", hexamer_path, "-o" , logit_model_prefix, "
 
 git clone https://github.com/granek/LncPipe.git $LNCPIPE_DIR
-ln -s $PWD/nextflow.config $LNCPIPE_DIR/my_nextflow.config
+ln -s ", here("lnc_rna/nextflow.config"), "$LNCPIPE_DIR/my_nextflow.config
 
 cd $LNCPIPE_DIR
 git checkout cpat_other_species
