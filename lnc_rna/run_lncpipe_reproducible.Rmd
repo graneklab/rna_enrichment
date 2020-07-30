@@ -62,7 +62,29 @@ ncrna_path = ensembl_download(h99_ncrna_url, genome_dir)
 cds_path = ensembl_download(h99_cds_url, genome_dir)
 genome_path = ensembl_download(h99_genome_url, genome_dir)
 gtf_path = ensembl_download(h99_gtf_url, genome_dir)
+
+gtf_path %>%
+  path_ext_set("protein_coding..gtf") ->
+  protein_coding_gtf
+
+gtf_path %>%
+  path_ext_set("ncRNA..gtf") ->
+  ncrna_gtf
+
+Sys.setenv(GTF=gtf_path)
+Sys.setenv(PROTEIN_CODING_GTF=protein_coding_gtf)
+Sys.setenv(NCRNA_GTF=ncrna_gtf)
+
 list.files(genome_dir)
+```
+
+## Prep GTFs
+```{bash}
+### make protein-coding GTF
+awk '$3 == "exon"' $GTF | awk '$18 ~ "protein_coding"' > $PROTEIN_CODING_GTF
+
+### make ncRNA GTF
+awk '$3 == "exon"' $GTF | awk '$20 ~ "ncRNA"' > $NCRNA_GTF
 ```
 
 ## Generate Bash script to run stuff in container
