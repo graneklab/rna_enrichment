@@ -126,6 +126,7 @@ singularity exec --bind $GENOME_DIR:$GENOME_DIR $SINGULARITY_IMAGE \\
 
 git clone https://github.com/granek/LncPipe.git $LNCPIPE_DIR
 ln -s ", here("lnc_rna/nextflow.config"), "$LNCPIPE_DIR/my_nextflow.config
+# ln -s ", here("lnc_rna/nextflow_short.config"), "$LNCPIPE_DIR/my_nextflow.config
 
 cd $LNCPIPE_DIR
 git checkout cpat_other_species
