@@ -55,6 +55,7 @@ h99_gtf_url = paste(sep="/", url_prefix, "gtf", url_middle, "Cryptococcus_neofor
 
 hexamer_path = file.path(genome_dir,"h99_hexamer.tsv")
 logit_model_prefix = file.path(genome_dir,"h99")
+logit_model_path = paste0(logit_model_prefix, ".logit.RData")
 ```
 
 ## Download data
@@ -128,21 +129,23 @@ ln -s ", here("lnc_rna/nextflow.config"), "$LNCPIPE_DIR/my_nextflow.config
 
 cd $LNCPIPE_DIR
 git checkout cpat_other_species
-")
+
+nextflow run LncRNAanalysisPipe.nf -c my_nextflow.config -with-singularity $SINGULARITY_IMAGE \\
+  --fasta_ref",  genome_path, " \\
+  --known_coding_gtf",  protein_coding_gtf, " \\
+  --known_lncRNA_gtf",  ncrna_gtf, " \\
+  --cpat_hexamer",  hexamer_path, " \\
+  --cpat_logit_model",  logit_model_path
+  )
 
 ```
 
 
-# nextflow run LncRNAanalysisPipe.nf -c my_nextflow.config -with-singularity docker://nfcore/lncpipe
-# nextflow run LncRNAanalysisPipe.nf -c my_nextflow.config -profile standard,singularity
-nextflow run LncRNAanalysisPipe.nf -c my_nextflow.config -with-singularity $SINGULARITY_IMAGE 
+nextflow run LncRNAanalysisPipe.nf -c my_nextflow.config -with-singularity docker://nfcore/lncpipe
+nextflow run LncRNAanalysisPipe.nf -c my_nextflow.config -profile standard,singularity
 
 echo $SCRATCH
 echo "NEED TO AUTO FIX PATHS IN my_nextflow.config"
-
-    fasta_ref = '/space/hts2018/workspace/LncPipe/genome/Cryptococcus_neoformans_var_grubii_h99_gca_000149245.CNA3.dna.toplevel.fa'
-    known_coding_gtf= "/space/hts2018/workspace/LncPipe/genome/Cryptococcus_neoformans_var_grubii_h99_gca_000149245_protein_coding.CNA3.46.gtf"
-    known_lncRNA_gtf= "/space/hts2018/workspace/LncPipe/genome/Cryptococcus_neoformans_var_grubii_h99_gca_000149245_ncRNA.CNA3.46.gtf"
 
 
 
