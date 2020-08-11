@@ -44,7 +44,8 @@ ensembl_download <- function(url, download_dir) {
 scratch_dir="/space/temp/run_lnc_pipe_002"
 bash_script=file.path(scratch_dir,"lncpipe_prep.sh")
 genome_dir=file.path(scratch_dir, "genome")
-lncpipe_out_dir=file.path(scratch_dir, "lncpipe")
+lncpipe_dir=file.path(scratch_dir, "lncpipe")
+lncpipe_out_dir=file.path(scratch_dir, "lncpipe_out")
 dir_create(lncpipe_out_dir)
 
 url_prefix="ftp://ftp.ensemblgenomes.org/pub/release-46/fungi"
@@ -108,8 +109,12 @@ It is unclear if the coding input to make_logitModel.py should be the same as ma
 print(paste("Run", bash_script))
 cat(file=bash_script, 
 paste0("SCRATCH=", scratch_dir,"\n"),
-paste0("LNCPIPE_DIR=", lncpipe_out_dir,"\n"),
+paste0("LNCPIPE_DIR=", lncpipe_dir,"\n"),
 paste0("GENOME_DIR=", genome_dir,"\n"), "
+
+export TMP='/tmp'
+export TMPDIR='/tmp'
+
 SINGULARITY_IMAGE='docker://bioinformatist/lncpipe'
 
 singularity exec --bind $GENOME_DIR:$GENOME_DIR $SINGULARITY_IMAGE STAR \\
@@ -127,8 +132,8 @@ singularity exec --bind $GENOME_DIR:$GENOME_DIR $SINGULARITY_IMAGE \\
   make_logitModel.py -c", cds_path, "-n", ncrna_path, "-x", hexamer_path, "-o" , logit_model_prefix, "
 
 git clone https://github.com/granek/LncPipe.git $LNCPIPE_DIR
-# ln -s ", here("lnc_rna/nextflow.config"), "$LNCPIPE_DIR/my_nextflow.config
-ln -s ", here("lnc_rna/nextflow_short.config"), "$LNCPIPE_DIR/my_nextflow.config
+ln -s ", here("lnc_rna/nextflow.config"), "$LNCPIPE_DIR/my_nextflow.config
+# ln -s ", here("lnc_rna/nextflow_short.config"), "$LNCPIPE_DIR/my_nextflow.config
 
 cd $LNCPIPE_DIR
 git checkout cpat_other_species
