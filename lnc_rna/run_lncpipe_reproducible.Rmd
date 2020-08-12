@@ -197,7 +197,8 @@ nextflow run LncRNAanalysisPipe.nf -c my_nextflow.config -with-singularity $SING
   --known_lncRNA_gtf",  ncrna_gtf, " \\
   --cpat_hexamer",  hexamer_path, " \\
   --cpat_logit_model",  logit_model_path, " \\
-  --out_folder", lncpipe_out_dir
+  --out_folder", lncpipe_out_dir, " \\
+  --star_index $GENOME_DIR"
 )
 
 ```
