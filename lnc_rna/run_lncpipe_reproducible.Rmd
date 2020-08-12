@@ -43,7 +43,7 @@ ensembl_download <- function(url, download_dir) {
 
 ## Paths
 ```{r}
-scratch_dir="/space/temp/run_lnc_pipe_002"
+scratch_dir="/space/lncpipe/run_003"
 bash_script=file.path(scratch_dir,"lncpipe_prep.sh")
 genome_dir=file.path(scratch_dir, "genome")
 lncpipe_dir=file.path(scratch_dir, "lncpipe")
@@ -70,9 +70,10 @@ cds_path = ensembl_download(h99_cds_url, genome_dir)
 genome_path = ensembl_download(h99_genome_url, genome_dir)
 orig_gtf_path = ensembl_download(h99_gtf_url, genome_dir)
 
-orig_gtf_path %>%
-  path_ext_set("hacked..gtf") ->
-  gtf_path
+# orig_gtf_path %>%
+#   path_ext_set("hacked..gtf") ->
+#   gtf_path
+gtf_path = orig_gtf_path
 
 gtf_path %>%
   path_ext_set("protein_coding..gtf") ->
@@ -99,18 +100,37 @@ orig_gtf_path %>%
 ```
 
 ## Prep GTFs
-```{r}
-gtf_path %>%
-  read_tsv(comment = "#", 
-           col_names = c("sequence","source","feature","start","end","score","strand","phase","attributes")) %>%
-  filter(feature=="exon") ->
-  gtf_exon_df
 
-gtf_exon_df %>%
+
+```{r}
+orig_gtf_path %>%
+  read_lines %>%
+  str_subset('gene_biotype "protein_coding"') %>%
+  write_lines(protein_coding_gtf)
+
+orig_gtf_path %>%
+  read_lines %>%
+  str_subset('gene_biotype "ncRNA"') %>%
+  write_lines(ncrna_gtf)
+```
+
+
+```{r eval=FALSE, include=FALSE}
+gtf_path %>%
+  read_tsv(n_max = 20, comment = "#", 
+           col_names = c("sequence","source","feature","start","end","score","strand","phase","attributes")) %>%
   filter(str_detect(attributes, 'gene_biotype "protein_coding"')) %>%
   write.table(protein_coding_gtf, sep="\t", quote=FALSE, col.names = FALSE, row.names = FALSE)
 
-gtf_exon_df %>%
+gtf_path %>%
+  read_tsv(comment = "#", 
+           col_names = c("sequence","source","feature","start","end","score","strand","phase","attributes")) %>%
+  filter(str_detect(attributes, 'gene_biotype "protein_coding"')) %>%
+  write.table(protein_coding_gtf, sep="\t", quote=FALSE, col.names = FALSE, row.names = FALSE)
+
+gtf_path %>%
+  read_tsv(comment = "#", 
+           col_names = c("sequence","source","feature","start","end","score","strand","phase","attributes")) %>%
   filter(str_detect(attributes, 'gene_biotype "ncRNA"')) %>%
   write.table(ncrna_gtf, sep="\t", quote=FALSE, col.names = FALSE, row.names = FALSE)
 ```
