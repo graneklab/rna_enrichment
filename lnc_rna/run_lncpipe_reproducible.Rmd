@@ -48,6 +48,9 @@ bash_script=file.path(scratch_dir,"lncpipe_prep.sh")
 genome_dir=file.path(scratch_dir, "genome")
 lncpipe_dir=file.path(scratch_dir, "lncpipe")
 lncpipe_out_dir=file.path(scratch_dir, "lncpipe_out")
+if(dir_exists(scratch_dir)) {
+  dir_delete(scratch_dir)
+}
 dir_create(lncpipe_out_dir)
 
 url_prefix="ftp://ftp.ensemblgenomes.org/pub/release-46/fungi"
@@ -187,9 +190,9 @@ singularity exec --bind $GENOME_DIR:$GENOME_DIR $SINGULARITY_IMAGE \\
 git clone https://github.com/granek/LncPipe.git $LNCPIPE_DIR
 
 # lnc_rna/nextflow_1sample.config
-# lnc_rna/nextflow_3samples.config
+# lnc_rna/nextflow_3sample.config
 # lnc_rna/nextflow.config
-ln -s ", here("lnc_rna/nextflow_3samples.config"), "$LNCPIPE_DIR/my_nextflow.config
+ln -s ", here("lnc_rna/nextflow_3sample.config"), "$LNCPIPE_DIR/my_nextflow.config
 
 cd $LNCPIPE_DIR
 git checkout cpat_other_species
