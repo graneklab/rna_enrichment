@@ -5,7 +5,7 @@ output: html_document
 
 
 ```{r pressure, echo=FALSE}
-library(fs)
+# library(fs)
 ```
 
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
@@ -15,18 +15,18 @@ Note that the `echo = FALSE` parameter was added to the code chunk to prevent pr
 old_hms_dir = system.file(package = 'hms')
 my_temp = tempdir()
 list.files(my_temp)
-# dir_copy(old_hms_dir, my_temp) 
+file.copy(old_hms_dir, my_temp, recursive = TRUE) 
 list.files(my_temp)
 new_hms = file.path(my_temp, "hms")
 library(hms, lib.loc = my_temp)
 system.file(package = 'hms')
-sessionInfo()
+# sessionInfo()
 ```
 ```{r}
-library(dplyr)
-library(fs)
-library(tibble)
-system.file(package = 'fs')
+# library(dplyr)
+# library(fs)
+# library(tibble)
+# system.file(package = 'fs')
 
 ```
 
