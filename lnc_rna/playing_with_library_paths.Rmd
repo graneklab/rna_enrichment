@@ -46,9 +46,23 @@ system.file(package = 'hms')
 .Library
 ```
 ```{r}
-Sys.getenv("R_LIBS")
+# Sys.getenv("R_LIBS")
 Sys.getenv("R_LIBS_USER")
-Sys.getenv("R_LIBS_SITE")
+# Sys.getenv("R_LIBS_SITE")
+Sys.setenv(TMP_R_LIB=my_temp)
+```
+```{bash}
+Rscript -e "print ('help')"
+Rscript -e "system.file(package = 'hms')"
+export R_LIBS_USER=$TMP_R_LIB
+Rscript -e "system.file(package = 'hms')"
+Rscript -e "library('hms')"
 
+```
+
+
+
+```{r}
+system.file(package = 'rlang')
 ```
 
