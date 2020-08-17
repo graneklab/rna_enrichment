@@ -1,0 +1,19 @@
+---
+title: "test child"
+output: html_document
+---
+
+---
+title: "Main report"
+output: html_document
+---
+# Summary 
+
+```{r test-main, child = 'my_child.Rmd'}
+```
+
+# Conclusion
+
+
+https://github.com/bioinformatist/LncPipeReporter/blob/master/inst/rmd/STAR.Rmd
+https://github.com/bioinformatist/LncPipeReporter/blob/master/inst/rmd/reporter.Rmd
