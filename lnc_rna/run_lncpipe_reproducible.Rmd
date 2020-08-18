@@ -44,7 +44,7 @@ ensembl_download <- function(url, download_dir) {
 ## Paths
 ```{r}
 basedir = "/space"
-scratch_dir=file.path(basedir, "lncpipe/run_rnaseh_tot_rz_01")
+scratch_dir=file.path(basedir, "lncpipe/rnaseh_only_01")
 bash_script=file.path(scratch_dir,"lncpipe_prep.sh")
 genome_dir=file.path(scratch_dir, "genome")
 lncpipe_dir=file.path(scratch_dir, "lncpipe")
@@ -75,7 +75,8 @@ dir_create(fastq_link_dir)
 
 ## Set up links to FASTQs
 need to allow complex selection of fastqs
-```{r}
+### Run on RNaseH, Ribo-Zero, and Total
+```{r eval=FALSE, include=FALSE}
 # get the 2018 files, except the polyA enriched (MA)
 list.files(fastq_2018_dir, pattern = ".fastq.gz", full.names = TRUE) %>%
   str_subset("_MA_", negate = TRUE) ->
@@ -85,10 +86,22 @@ list.files(fastq_2019_dir, pattern = ".fastq.gz", full.names = TRUE) %>%
   str_subset("_M1_", negate = TRUE) ->
   fastq_2019_paths
 
-fastq_2018_paths
-fastq_2019_paths
-
 orig_fastqs = c(fastq_2018_paths, fastq_2019_paths)
+
+orig_fastqs %>%
+  basename %>%
+  file.path(fastq_link_dir,.) ->
+  link_paths
+
+link_create(orig_fastqs, link_paths, symbolic = FALSE)
+```
+
+## Run on RNaseH only
+```{r}
+list.files(fastq_2019_dir, pattern = "_2018_P_H", full.names = TRUE) ->
+  fastq_2019_paths
+
+orig_fastqs = c(fastq_2019_paths)
 
 orig_fastqs %>%
   basename %>%
