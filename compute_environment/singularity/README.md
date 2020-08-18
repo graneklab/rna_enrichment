@@ -19,15 +19,29 @@ If a second user tries on the same server tries to run an RStudio container they
 
 
 
-# Build, Sign, and Push
+# Build and Push
+## Build with fakeroot
 ```
-singularity build --remote --force ~/container_images/mar1_rnaseq_0005.sif \
+IMAGE_NUM=0001
+IMAGE_NAME=rna_enrichment_${IMAGE_NUM}.sif
+IMAGE_PATH=$HOME/container_images/${IMAGE_NAME}
+
+singularity build --force --fakeroot $IMAGE_PATH \
   ~/project_repos/mar1_rnaseq/compute_environment/singularity/Singularity
-singularity push -U ~/container_images/mar1_rnaseq_0005.sif library://granek/default/mar1_rnaseq:latest
+
+singularity push -U $IMAGE_PATH library://granek/published/rna_enrichment:latest
+singularity push -U $IMAGE_PATH library://granek/published/rna_enrichment:${IMAGE_NUM}
 ```
 
-## Build fakeroot
+## Build Remote
 ```
-singularity build --force --fakeroot ~/container_images/mar1_0005.sif \
+IMAGE_NUM=0001
+IMAGE_NAME=rna_enrichment_${IMAGE_NUM}.sif
+IMAGE_PATH=$HOME/container_images/${IMAGE_NAME}
+
+singularity build --remote --force  $IMAGE_PATH \
   ~/project_repos/mar1_rnaseq/compute_environment/singularity/Singularity
+
+singularity push -U $IMAGE_PATH library://granek/published/rna_enrichment:latest
+singularity push -U $IMAGE_PATH library://granek/published/rna_enrichment:${IMAGE_NUM}
 ```
