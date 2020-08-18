@@ -54,13 +54,14 @@ if(dir_exists(scratch_dir)) {
 }
 dir_create(lncpipe_out_dir)
 
-url_prefix="ftp://ftp.ensemblgenomes.org/pub/release-46/fungi"
-url_middle="fungi_basidiomycota1_collection/cryptococcus_neoformans_var_grubii_h99_gca_000149245"
+url_part1="ftp://ftp.ensemblgenomes.org/pub/release-46/fungi"
+url_part2="fungi_basidiomycota1_collection/cryptococcus_neoformans_var_grubii_h99_gca_000149245"
+url_part3="Cryptococcus_neoformans_var_grubii_h99_gca_000149245.CNA3."
 
-h99_ncrna_url = paste(sep="/", url_prefix, "fasta", url_middle, "ncrna/Cryptococcus_neoformans_var_grubii_h99_gca_000149245.CNA3.ncrna.fa.gz")
-h99_cds_url = paste(sep="/", url_prefix, "fasta", url_middle, "cds/Cryptococcus_neoformans_var_grubii_h99_gca_000149245.CNA3.cds.all.fa.gz")
-h99_genome_url = paste(sep="/", url_prefix, "fasta", url_middle, "dna/Cryptococcus_neoformans_var_grubii_h99_gca_000149245.CNA3.dna.toplevel.fa.gz")
-h99_gtf_url = paste(sep="/", url_prefix, "gtf", url_middle, "Cryptococcus_neoformans_var_grubii_h99_gca_000149245.CNA3.46.gtf.gz")
+h99_ncrna_url = paste0(url_part1, "/fasta/", url_part2, "/ncrna/", url_part3, "ncrna.fa.gz")
+h99_cds_url = paste0(url_part1, "/fasta/", url_part2, "/cds/", url_part3, "cds.all.fa.gz")
+h99_genome_url = paste0(url_part1, "/fasta/", url_part2, "/dna/", url_part3, "dna.toplevel.fa.gz")
+h99_gtf_url = paste0(url_part1, "/gtf/", url_part2, "/", "", url_part3, "46.gtf.gz")
 
 hexamer_path = file.path(genome_dir,"h99_hexamer.tsv")
 logit_model_prefix = file.path(genome_dir,"h99")
