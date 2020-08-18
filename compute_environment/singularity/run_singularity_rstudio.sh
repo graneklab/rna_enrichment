@@ -7,7 +7,7 @@ export SINGULARITY_CACHEDIR
 SINGULARITY_PULLFOLDER="$SINGULARITY_DIR/pulldir"
 export SINGULARITY_PULLFOLDER
 
-SINGULARITY_IMAGE="${1:-library://granek/default/mar1:latest}"
+SINGULARITY_IMAGE="${1:-library://granek/published/rna_enrichment:latest}"
 
 DATA_BASE_DIR="${DATA_BASE_DIR:-$HOME}"
 WORKSPACE_BASE_DIR="${WORKSPACE_BASE_DIR:-$HOME}"

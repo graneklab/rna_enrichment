@@ -1,10 +1,10 @@
 BootStrap: library
-From: granek/duke-chsi-informatics/singularity-rnaseq:0001
+From: granek/duke-chsi-informatics/singularity-rnaseq:0004
 
 %labels
     Maintainer Josh Granek
-    Image_Name mar1
-    Image_Version mar1_0008
+    Image_Name rna_enrichment
+    Image_Version rna_enrichment_0001
 
 %environment
   export PATH=/usr/lib/rstudio-server/bin:${PATH}
@@ -15,4 +15,6 @@ From: granek/duke-chsi-informatics/singularity-rnaseq:0001
 
 %post
   # Install extra stuff
+  Rscript -e "install.packages(pkgs = c('rstatix','ggpubr'), repos='https://cran.revolutionanalytics.com/', dependencies=TRUE, clean = TRUE)"
+
   mkdir -p /space
