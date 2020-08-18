@@ -2,6 +2,8 @@
 library(fs)
 library(dplyr)
 
+source("../common_config.R")
+
 # Setup R variables
 threads=3
 max_jobs=4
@@ -30,8 +32,6 @@ RZ_enrich_samples_starout.dir=file.path(RZ_out.dir,"enrich_compare_starout")
 # igv_tarball = file.path(out.dir, "visualize_oligos.tgz")
 # 
 # # genome
-shared_url = "ftp://ftp.ensemblgenomes.org/pub/release-39/fungi/"
-fa_url = paste0(shared_url,"fasta/fungi_basidiomycota1_collection/cryptococcus_neoformans_var_grubii_h99/dna/Cryptococcus_neoformans_var_grubii_h99.CNA3.dna.toplevel.fa.gz")
 # gtf_url = paste0(shared_url,"gtf/fungi_basidiomycota1_collection/cryptococcus_neoformans_var_grubii_h99/Cryptococcus_neoformans_var_grubii_h99.CNA3.39.gtf.gz")
 # 
 # gtf_url %>% 

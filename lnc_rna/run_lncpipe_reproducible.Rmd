@@ -15,10 +15,6 @@ library(readr)
 library(stringr)
 ```
 
-
-# ftp://ftp.ensemblgenomes.org/pub/release-46/fungi/fasta/fungi_basidiomycota1_collection/cryptococcus_neoformans_var_grubii_h99_gca_000149245/cds/Cryptococcus_neoformans_var_grubii_h99_gca_000149245.CNA3.cds.all.fa.gz
-# ftp://ftp.ensemblgenomes.org/pub/release-46/fungi/fasta/fungi_basidiomycota1_collection/cryptococcus_neoformans_var_grubii_h99_gca_000149245/ncrna/Cryptococcus_neoformans_var_grubii_h99_gca_000149245.CNA3.ncrna.fa.gz
-
 # Setup
 ## Make functions
 ```{r}
@@ -43,8 +39,10 @@ ensembl_download <- function(url, download_dir) {
 
 ## Paths
 ```{r}
+source("../common_config.R")
+
 basedir = "/space"
-scratch_dir=file.path(basedir, "lncpipe/rnaseh_only_01")
+scratch_dir=file.path(basedir, "lncpipe/rnaseh_only_genome_39")
 bash_script=file.path(scratch_dir,"lncpipe_prep.sh")
 genome_dir=file.path(scratch_dir, "genome")
 lncpipe_dir=file.path(scratch_dir, "lncpipe")
@@ -53,15 +51,6 @@ if(dir_exists(scratch_dir)) {
   dir_delete(scratch_dir)
 }
 dir_create(lncpipe_out_dir)
-
-url_part1="ftp://ftp.ensemblgenomes.org/pub/release-46/fungi"
-url_part2="fungi_basidiomycota1_collection/cryptococcus_neoformans_var_grubii_h99_gca_000149245"
-url_part3="Cryptococcus_neoformans_var_grubii_h99_gca_000149245.CNA3."
-
-h99_ncrna_url = paste0(url_part1, "/fasta/", url_part2, "/ncrna/", url_part3, "ncrna.fa.gz")
-h99_cds_url = paste0(url_part1, "/fasta/", url_part2, "/cds/", url_part3, "cds.all.fa.gz")
-h99_genome_url = paste0(url_part1, "/fasta/", url_part2, "/dna/", url_part3, "dna.toplevel.fa.gz")
-h99_gtf_url = paste0(url_part1, "/gtf/", url_part2, "/", "", url_part3, "46.gtf.gz")
 
 hexamer_path = file.path(genome_dir,"h99_hexamer.tsv")
 logit_model_prefix = file.path(genome_dir,"h99")
