@@ -58,7 +58,11 @@ cur_range = GRanges(seqnames = "Mt",
                               IRanges(1, 26000), strand = "*")
 
 autoplot(tot_L1_bams, which = cur_range) +
-  xlim(cur_range)
+  xlim(cur_range) ->
+  whole_mito_plot
+
+ggsave(file.path(fig.dir, "whole_mito_rrna_coverage.png"), whole_mito_plot)
+whole_mito_plot
 ```
 
 
@@ -68,7 +72,11 @@ range_21s_region = GRanges(seqnames = short_mito_name,
                               IRanges(6500, 9500), strand = "*")
 
 autoplot(tot_L1_bams, which = range_21s_region) +
-  xlim(range_21s_region)
+  xlim(range_21s_region) ->
+  mito_21S_plot
+
+ggsave(file.path(fig.dir, "mito_21S_rrna_coverage.png"), mito_21S_plot)
+mito_21S_plot
 ```
 
 ## 21s rRNA Left End
@@ -163,7 +171,11 @@ range_15s_region = GRanges(seqnames = short_mito_name,
                               IRanges(16950, 18500), strand = "*")
 
 autoplot(tot_L1_bams, which = range_15s_region) +
-  xlim(range_15s_region)
+  xlim(range_15s_region) ->
+  mito_15S_plot
+
+ggsave(file.path(fig.dir, "mito_15S_rrna_coverage.png"), mito_15S_plot)
+mito_15S_plot
 ```
 
 ## 15s rRNA Left End

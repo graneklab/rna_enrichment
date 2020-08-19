@@ -22,6 +22,8 @@ mosdepth.dir=file.path(out.dir, "mosdepth")
 seq.dir = file.path(out.dir, "seq_out"); dir.create(seq.dir, recursive = TRUE)
 # export final_counts=$data_base/star_counts
 igv_tarball = file.path(out.dir, "visualize_oligos.tgz")
+fig.dir = file.path(out.dir, "figures")
+dir.create(fig.dir)
 
 # genome
 
