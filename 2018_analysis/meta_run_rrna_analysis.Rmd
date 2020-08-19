@@ -36,6 +36,7 @@ list.files(pattern = ".Rmd") ->
 
 ordered_rmds_to_run = c(
   "download_data.Rmd", 
+  "run_qc.Rmd",
   "run_star_on_total_samples.Rmd",
   "map_mito_rrna_genes.Rmd", 
   "generate_rnaseh_oligos.Rmd",
