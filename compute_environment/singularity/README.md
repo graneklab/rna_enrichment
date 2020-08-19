@@ -22,7 +22,7 @@ If a second user tries on the same server tries to run an RStudio container they
 # Build and Push
 ## Build with fakeroot
 ```
-IMAGE_NUM=0002
+IMAGE_NUM=0003
 IMAGE_NAME=rna_enrichment_${IMAGE_NUM}.sif
 IMAGE_PATH=$HOME/container_images/${IMAGE_NAME}
 
@@ -34,14 +34,4 @@ singularity push -U $IMAGE_PATH library://granek/published/rna_enrichment:${IMAG
 ```
 
 ## Build Remote
-```
-IMAGE_NUM=0001
-IMAGE_NAME=rna_enrichment_${IMAGE_NUM}.sif
-IMAGE_PATH=$HOME/container_images/${IMAGE_NAME}
-
-singularity build --remote --force  $IMAGE_PATH \
-  ~/project_repos/mar1_rnaseq/compute_environment/singularity/Singularity
-
-singularity push -U $IMAGE_PATH library://granek/published/rna_enrichment:latest
-singularity push -U $IMAGE_PATH library://granek/published/rna_enrichment:${IMAGE_NUM}
-```
+`--fakeroot` is not enabled on some machines, in this case the `--remote` option can be used instead to build on the Sylabs Cloud.  This requires setting up an account.
