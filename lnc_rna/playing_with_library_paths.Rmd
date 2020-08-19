@@ -12,14 +12,14 @@ Note that the `echo = FALSE` parameter was added to the code chunk to prevent pr
 
 
 ```{r}
-old_hms_dir = system.file(package = 'hms')
+old_fs_dir = system.file(package = 'fs')
 my_temp = tempdir()
 list.files(my_temp)
-file.copy(old_hms_dir, my_temp, recursive = TRUE) 
+file.copy(old_fs_dir, my_temp, recursive = TRUE) 
 list.files(my_temp)
-new_hms = file.path(my_temp, "hms")
-library(hms, lib.loc = my_temp)
-system.file(package = 'hms')
+new_fs = file.path(my_temp, "fs")
+library(fs, lib.loc = my_temp)
+system.file(package = 'fs')
 # sessionInfo()
 ```
 ```{r}
@@ -33,7 +33,7 @@ system.file(package = 'hms')
 
 ```{r}
 .libPaths(my_temp)
-system.file(package = 'hms')
+system.file(package = 'fs')
 ```
 ```{r}
 .libPaths() 
@@ -53,10 +53,10 @@ Sys.setenv(TMP_R_LIB=my_temp)
 ```
 ```{bash}
 Rscript -e "print ('help')"
-Rscript -e "system.file(package = 'hms')"
+Rscript -e "system.file(package = 'fs')"
 export R_LIBS_USER=$TMP_R_LIB
-Rscript -e "system.file(package = 'hms')"
-Rscript -e "library('hms')"
+Rscript -e "system.file(package = 'fs')"
+Rscript -e "library('fs')"
 
 ```
 
