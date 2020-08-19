@@ -1,13 +1,13 @@
 BootStrap: library
-From: granek/duke-chsi-informatics/singularity-rnaseq:0004
+From: granek/duke-chsi-informatics/singularity-rnaseq:0003
 
 %labels
     Maintainer Josh Granek
     Image_Name rna_enrichment
-    Image_Version rna_enrichment_0001
+    Image_Version rna_enrichment_0002
 
 %environment
-  export PATH=/usr/lib/rstudio-server/bin:${PATH}
+  export PATH=$PATH:/usr/lib/rstudio-server/bin/pandoc
   export SHELL=/bin/bash
   export LC_ALL=en_US.UTF-8
   export LANG=en_US.UTF-8

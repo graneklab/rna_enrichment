@@ -22,7 +22,7 @@ If a second user tries on the same server tries to run an RStudio container they
 # Build and Push
 ## Build with fakeroot
 ```
-IMAGE_NUM=0001
+IMAGE_NUM=0002
 IMAGE_NAME=rna_enrichment_${IMAGE_NUM}.sif
 IMAGE_PATH=$HOME/container_images/${IMAGE_NAME}
 
