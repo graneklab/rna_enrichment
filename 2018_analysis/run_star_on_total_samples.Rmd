@@ -25,7 +25,8 @@ ACACTCTTTCCCTACACGACGCTCTTCCGATCT" >  $ADAPTERS
 head $ADAPTERS
 ```
 
-# Download and Index Genome
+# Genome
+## Download Genome
 ```{bash}
 set -u
 mkdir -p $GENOME_DIR
@@ -37,7 +38,7 @@ gunzip -f ${GTF}.gz
 ls ${GENOME_DIR}
 ```
 
-
+## Index Genome
 ```{bash}
 set -u
 mkdir -p ${TOTAL_SAMPLES_STAROUT}
@@ -51,7 +52,7 @@ STAR \
 # --genomeSAindexNbases 6
 ```
 
-
+## Trim and Map Reads
 ```{bash engine.path="/bin/bash"}
 set -u
 mkdir -p ${TOTAL_SAMPLES_STAROUT}
