@@ -42,7 +42,7 @@ ensembl_download <- function(url, download_dir) {
 source("../common_config.R")
 
 basedir = "/space"
-scratch_dir=file.path(basedir, "lncpipe/rnaseh_only_genome_39")
+scratch_dir=file.path(basedir, "lncpipe/rnaseh_tot_rz_genome_39")
 bash_script=file.path(scratch_dir,"lncpipe_prep.sh")
 genome_dir=file.path(scratch_dir, "genome")
 lncpipe_dir=file.path(scratch_dir, "lncpipe")
@@ -66,7 +66,7 @@ dir_create(fastq_link_dir)
 ## Set up links to FASTQs
 need to allow complex selection of fastqs
 ### Run on RNaseH, Ribo-Zero, and Total
-```{r eval=FALSE, include=FALSE}
+```{r}
 # get the 2018 files, except the polyA enriched (MA)
 list.files(fastq_2018_dir, pattern = ".fastq.gz", full.names = TRUE) %>%
   str_subset("_MA_", negate = TRUE) ->
@@ -87,7 +87,7 @@ link_create(orig_fastqs, link_paths, symbolic = FALSE)
 ```
 
 ## Run on RNaseH only
-```{r}
+```{r eval=FALSE, include=FALSE}
 list.files(fastq_2019_dir, pattern = "_2018_P_H", full.names = TRUE) ->
   fastq_2019_paths
 
