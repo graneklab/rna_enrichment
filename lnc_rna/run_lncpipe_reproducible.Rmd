@@ -42,7 +42,7 @@ ensembl_download <- function(url, download_dir) {
 source("../common_config.R")
 
 basedir = "/space"
-dataset="rnaseh_tot_rz" # [rnaseh_only|rnaseh_tot_rz|testset]
+dataset="testset" # [rnaseh_only|rnaseh_tot_rz|testset]
 scratch_dir=file.path(basedir, "rnaseq_enrichment/workspace/lncpipe", dataset)
 bash_script=file.path(scratch_dir,"lncpipe_prep.sh")
 genome_dir=file.path(scratch_dir, "genome")
@@ -67,7 +67,7 @@ dir_create(fastq_link_dir)
 ## Set up links to FASTQs
 need to allow complex selection of fastqs
 ### Run on RNaseH, Ribo-Zero, and Total
-```{r eval=FALSE, include=FALSE}
+```{r}
 if ("rnaseh_tot_rz"==dataset) {
   # get the 2018 files, except the polyA enriched (MA)
   list.files(fastq_2018_dir, pattern = ".fastq.gz", full.names = TRUE) %>%
