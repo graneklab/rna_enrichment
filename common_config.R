@@ -10,3 +10,5 @@ h99_gtf_url= paste0(url_part1, "gtf", url_part2, url_part3, "39.gtf.gz")
 
 fa_url = h99_genome_url
 gtf_url = h99_gtf_url
+
+basedir = "/workspace"

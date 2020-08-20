@@ -12,8 +12,8 @@ SINGULARITY_IMAGE="${1:-library://granek/published/rna_enrichment:latest}"
 DATA_BASE_DIR="${DATA_BASE_DIR:-$HOME}"
 WORKSPACE_BASE_DIR="${WORKSPACE_BASE_DIR:-$HOME}"
 
-DATA="$DATA_BASE_DIR/hts2018/rawdata"
-WORKSPACE="$WORKSPACE_BASE_DIR/hts2018/workspace"
+DATA="$DATA_BASE_DIR/rnaseq_enrichment/rawdata"
+WORKSPACE="$WORKSPACE_BASE_DIR/rnaseq_enrichment/workspace"
 
 SPACE="/space"
 

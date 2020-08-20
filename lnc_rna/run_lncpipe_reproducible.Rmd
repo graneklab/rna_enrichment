@@ -41,7 +41,7 @@ ensembl_download <- function(url, download_dir) {
 ```{r}
 source("../common_config.R")
 
-basedir = "/space"
+basedir = "/workspace"
 scratch_dir=file.path(basedir, "lncpipe/rnaseh_tot_rz_genome_39")
 bash_script=file.path(scratch_dir,"lncpipe_prep.sh")
 genome_dir=file.path(scratch_dir, "genome")
