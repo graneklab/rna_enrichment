@@ -121,7 +121,12 @@ if ("rnaseh_tot_rz"==dataset) {
 ncrna_path = ensembl_download(h99_ncrna_url, genome_dir)
 cds_path = ensembl_download(h99_cds_url, genome_dir)
 genome_path = ensembl_download(h99_genome_url, genome_dir)
-gtf_path = ensembl_download(h99_gtf_url, genome_dir)
+# gtf_path = ensembl_download(h99_gtf_url, genome_dir)
+orig_gtf_path = ensembl_download(h99_gtf_url, genome_dir)
+orig_gtf_path %>%
+  path_ext_set("hacked..gtf") ->
+  gtf_path
+
 
 gtf_path %>%
   path_ext_set("protein_coding..gtf") ->
@@ -138,6 +143,16 @@ Sys.setenv(NCRNA_GTF=ncrna_gtf)
 list.files(genome_dir)
 ```
 
+## Hack GTF to try to make Summary_renaming_and_classification happy
+ It seems that components of Summary_renaming_and_classification are looking for a ?"gene_name"? entry so lets create a "gene_name" from the gene_id value
+```{r}
+ orig_gtf_path %>%
+   read_lines() %>%
+   str_replace_all(pattern='gene_id "(.*?)";',
+                   replacement='gene_id "\\1"; gene_name "\\1";') %>%
+   write_lines(gtf_path)
+```
+ 
 ## Prep GTFs
 ```{r}
 gtf_path %>%
