@@ -22,90 +22,13 @@ library(ggplot2)
 ```
 
 
-# TODO
 1. Use RSamtools to count reads mapping to rRNA genes
 2. Calculate "total_reads" as sum of "second_strand" column
 3. Calculate "strand mapped reads" as sum of "second_strand" column minus "unmapped" reads from that column
 4. calculate rRNA_reads/total_reads and rRNA_reads/strand_mapped_reads for each of the 2018 Total libraries
 
-# 
-
-## 1. Use RSamtools to count reads mapping to rRNA genes
-https://support.bioconductor.org/p/50774/
-
-### Load GTF
-```{r eval=FALSE, include=FALSE}
-import(gtf_with_mito_rrna.file, format="gtf") %>%
-  subset(gene_biotype=="rRNA") %>%
-  subset(type=="exon") ->
-  rrna_granges
-rrna_granges
-```
-
-
-
-
-### Count reads in granges
-```{r eval=FALSE, include=FALSE}
-countBam(oligo_bam.file,
-         param=ScanBamParam(which=rrna_granges)) ->
-  rrna_count_tab
-rrna_count_tab
-
-# rrna_count_total = 
-rrna_count_tab %>%
-  pull(records) %>%
-  sum ->
-  rrna_count_total
-rrna_count_total
-```
-
-
-## 2. Calculate "total_reads" as sum of "second_strand" column
-
-```{r eval=FALSE, include=FALSE}
-star_oligo_readspergene.path = file.path(rrna_oligo_starout.dir,"rrna_oligos_ReadsPerGene.out.tab")
-
-read_tsv(star_oligo_readspergene.path, 
-         col_names = c("gene_id", "unstranded", "first_strand", "second_strand")) ->
-  star_counts
-head(star_counts)
-
-# star_counts %>%
-#   summarise(total = sum(second_strand))%>%
-#   pull(total)
-```
-
-```{r eval=FALSE, include=FALSE}
-star_counts %>%
-  summarise(total = sum(second_strand))%>%
-  pull(total) ->
-  total_reads
-```
-
-### 3. Calculate "strand mapped reads" as sum of "second_strand" column minus "unmapped" reads from that column
-
-```{r eval=FALSE, include=FALSE}
-star_counts %>%
-  filter(gene_id != "N_unmapped") %>%
-  summarise(total = sum(second_strand))%>%
-  pull(total) ->
-  strand_mapped_reads
-
-total_reads
-strand_mapped_reads
-```
-
-### 4. calculate rRNA_reads/total_reads and rRNA_reads/strand_mapped_reads for each of the 2018 Total libraries
-```{r eval=FALSE, include=FALSE}
-cat("rRNA % of Total Reads:", 100 * rrna_count_total/total_reads, fill = TRUE)
-cat("rRNA % of Mapped Reads:", 100 * rrna_count_total/strand_mapped_reads, fill = TRUE)
-
-```
-
-#------------------------------------------
-
 ```{r}
+### Count reads in granges
 countsFromBam <- function(bam_file, gene_granges) {
   countBam(bam_file,
            param=ScanBamParam(which=gene_granges)) ->
@@ -116,7 +39,7 @@ countsFromBam <- function(bam_file, gene_granges) {
     sum %>%
     return
 }
-
+## 2. Calculate "total_reads" as sum of "second_strand" column
 summarizeStarCounts <- function(star_count_file) {
   read_tsv(star_count_file, 
          col_names = c("gene_id", "unstranded", "first_strand", "second_strand")) ->
@@ -140,7 +63,12 @@ summarizeStarCounts <- function(star_count_file) {
   return(c(total_reads=total_reads, mapped_reads=mapped_reads))
 }
 
+## 1. Use RSamtools to count reads mapping to rRNA genes
+# https://support.bioconductor.org/p/50774/
+
+
 percentRRNA = function(gtf_path, star_out_dir){
+  ### Load GTF
   import(gtf_path, format="gtf") %>%
     subset(gene_biotype=="rRNA") %>%
     subset(type=="exon") ->
@@ -169,17 +97,13 @@ percentRRNA = function(gtf_path, star_out_dir){
   
   star_counts
   
+  ### 4. calculate rRNA_reads/total_reads and rRNA_reads/strand_mapped_reads for each of the 2018 Total libraries
   combined_counts = full_join(star_counts, bam_counts, by="sample") %>%
     mutate(rrna_percent_total = 100 * rrna_reads/total_reads,
            rrna_percent_mapped = 100 * rrna_reads/mapped_reads)
 
   # return(list(bam_counts, star_counts))
   return(combined_counts)
-
-# 1. Use RSamtools to count reads mapping to rRNA genes
-# 2. Calculate "total_reads" as sum of "second_strand" column
-# 3. Calculate "strand mapped reads" as sum of "second_strand" column minus "unmapped" reads from that column
-# 4. calculate rRNA_reads/total_reads and rRNA_reads/mapped_reads for each of the 2018 Total libraries
 
 }
 y = percentRRNA(gtf_path=gtf_with_mito_rrna.file, star_out_dir=total_samples_starout.dir)
