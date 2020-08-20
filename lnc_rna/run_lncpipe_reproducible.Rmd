@@ -42,7 +42,7 @@ ensembl_download <- function(url, download_dir) {
 source("../common_config.R")
 
 basedir = "/space"
-dataset="rnaseh_tot" # [rnaseh_only|rnaseh_tot_rz|testset|rnaseh_tot]
+dataset="rnaseh_tot_rz" # [rnaseh_only|rnaseh_tot_rz|testset|rnaseh_tot]
 scratch_dir=file.path(basedir, "rnaseq_enrichment/workspace/lncpipe", dataset)
 bash_script=file.path(scratch_dir,"lncpipe_prep.sh")
 genome_dir=file.path(scratch_dir, "genome")
@@ -228,13 +228,9 @@ singularity exec --bind $GENOME_DIR:$GENOME_DIR $SINGULARITY_IMAGE \\
 
 git clone https://github.com/granek/LncPipe.git $LNCPIPE_DIR
 
-# lnc_rna/nextflow_1sample.config
-# lnc_rna/nextflow_3sample.config
-# lnc_rna/nextflow.config
 ln -s ", here("lnc_rna/nextflow.config"), "$LNCPIPE_DIR/my_nextflow.config
 
 cd $LNCPIPE_DIR
-# git checkout cpat_other_species
 
 nextflow run LncRNAanalysisPipe.nf -c my_nextflow.config -with-singularity $SINGULARITY_IMAGE \\
   --fasta_ref",  genome_path, " \\
