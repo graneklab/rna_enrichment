@@ -140,14 +140,14 @@ if ("rnaseh_tot_rz"==dataset) {
 ncrna_path = ensembl_download(h99_ncrna_url, genome_dir)
 cds_path = ensembl_download(h99_cds_url, genome_dir)
 genome_path = ensembl_download(h99_genome_url, genome_dir)
-orig_gtf_path = "../info/Cryptococcus_neoformans_var_grubii_h99.CNA3.39__with_mito_rrna.gtf"
+
 # orig_gtf_path = ensembl_download(h99_gtf_url, genome_dir)
+orig_gtf_path = here("info/Cryptococcus_neoformans_var_grubii_h99.CNA3.39__with_mito_rrna.gtf")
 orig_gtf_path %>%
   path_ext_set("hacked..gtf") %>%
-  basename %>%
+  path_file %>%
   file.path(genome_dir, .) ->
   gtf_path
-
 
 gtf_path %>%
   path_ext_set("protein_coding..gtf") ->
@@ -183,7 +183,7 @@ gtf_path %>%
 
 gtf_path %>%
   read_lines %>%
-  str_subset('gene_biotype "ncRNA"') %>%
+  str_subset('gene_biotype "(ncRNA|rRNA|tRNA)"') %>%
   write_lines(ncrna_gtf)
 ```
 
