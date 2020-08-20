@@ -41,8 +41,8 @@ ensembl_download <- function(url, download_dir) {
 ```{r}
 source("../common_config.R")
 
-basedir = "/workspace"
-scratch_dir=file.path(basedir, "lncpipe/rnaseh_tot_rz_genome_39")
+basedir = "/space"
+scratch_dir=file.path(basedir, "rnaseq_enrichment/workspace/lncpipe/testset_genome_39")
 bash_script=file.path(scratch_dir,"lncpipe_prep.sh")
 genome_dir=file.path(scratch_dir, "genome")
 lncpipe_dir=file.path(scratch_dir, "lncpipe")
@@ -56,7 +56,7 @@ hexamer_path = file.path(genome_dir,"h99_hexamer.tsv")
 logit_model_prefix = file.path(genome_dir,"h99")
 logit_model_path = paste0(logit_model_prefix, ".logit.RData")
 
-fastq_basedir = file.path(basedir, "hts2018/rawdata")
+fastq_basedir = file.path(basedir, "rnaseq_enrichment/rawdata")
 fastq_2018_dir = file.path(fastq_basedir, "hts_2018_data/hts2018_pilot_rawdata")
 fastq_2019_dir = file.path(fastq_basedir, "hts_2019_data/hts2019_pilot_rawdata")
 fastq_link_dir = file.path(scratch_dir, "fastq_links")
