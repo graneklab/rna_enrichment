@@ -15,7 +15,7 @@ library(rtracklayer)
 ```
 
 ```{r}
-data_base_dir= "/space/rnaseq_enrichment/workspace/lncpipe/rnaseh_tot/lncpipe_out/Result"
+data_base_dir= "/space/rnaseq_enrichment/workspace/lncpipe/rnaseh_tot_rz/lncpipe_out/Result"
 input_gtf= file.path(data_base_dir, "Identified_lncRNA/final_all.gtf")
 tpm_tsv= file.path(data_base_dir,"Quantification/kallisto.tpm.txt")
 out_table_csv = "/space/rnaseq_enrichment/workspace/lncpipe/lncrna_summary_table.csv"
@@ -43,8 +43,7 @@ novel_lncrna_granges
 novel_lncrna_granges %>%
   as.data.frame %>%
   group_by(gene_id) %>%
-  summarise(num_exons = n(), gene_start=min(start), gene_end=max(end), chrom=seqnames[1], tot_exon_len=sum(width)) %>%
-  arrange(chrom, gene_start) ->
+  summarise(num_exons = n(), gene_start=min(start), gene_end=max(end), chrom=seqnames[1], tot_exon_len=sum(width)) ->
   gtf_summary_df
 
 gtf_summary_df
@@ -71,13 +70,14 @@ tpm_summary_df
 # Combine Tables
 ```{r}
 full_join(tpm_summary_df, gtf_summary_df, by=c("ID"="gene_id")) %>%
+  arrange(chrom, gene_start) %>%
   dplyr::select(Name=ID,
                 Chromosome=chrom,
                 Start=gene_start,
                 End=gene_end,
                 `# Exons`=num_exons,
                 gene_start,gene_end,chrom,
-                `Total Exon Length`=tot_exon_len,
+                `Total Exonic Length`=tot_exon_len,
                 `Mean TPM`=tpm_mean,
                 `Median TPM`=tpm_median
                 ) ->
