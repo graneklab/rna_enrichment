@@ -18,6 +18,7 @@ library(rtracklayer)
 data_base_dir= "/space/rnaseq_enrichment/workspace/lncpipe/rnaseh_tot/lncpipe_out/Result"
 input_gtf= file.path(data_base_dir, "Identified_lncRNA/final_all.gtf")
 tpm_tsv= file.path(data_base_dir,"Quantification/kallisto.tpm.txt")
+out_table_csv = "/space/rnaseq_enrichment/workspace/lncpipe/lncrna_summary_table.csv"
 
 tpm_tsv %>%
   read_tsv %>%
@@ -47,6 +48,8 @@ novel_lncrna_granges %>%
   gtf_summary_df
 
 gtf_summary_df
+
+# This runs fine in RStudio, but knitting dies in this chunk (in group_by?) with "check_dots_used”
 ```
 
 
@@ -77,13 +80,16 @@ full_join(tpm_summary_df, gtf_summary_df, by=c("ID"="gene_id")) %>%
                 `Total Exon Length`=tot_exon_len,
                 `Mean TPM`=tpm_mean,
                 `Median TPM`=tpm_median
-                )
+                ) ->
+  final_lncrna_table
 
+final_lncrna_table %>%
+  write_csv(out_table_csv)
+
+final_lncrna_table
 
 # "ID,Type,tpm_mean,tpm_median,num_exons,gene_start,gene_end,chrom,tot_exon_len"
 ```
-
-
 
 ## Mean/Median TPM across all samples?
 ## Rank among all ncRNA (for Average TPM)?
