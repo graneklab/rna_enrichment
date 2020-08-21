@@ -1,0 +1,59 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+```{r}
+library(dplyr)
+library(fs)
+library(R.utils)
+library(here)
+library(readr)
+library(stringr)
+```
+
+# Setup
+## Make functions
+```{r}
+ensembl_download <- function(url, download_dir) {
+  url %>%
+    basename %>%
+    file.path(download_dir, .) ->
+    gz_filename
+  
+  gz_filename %>%
+    path_ext_remove ->
+    unziped_filename
+  
+  if (!file_exists(unziped_filename)){
+    dir_create(download_dir, recurse = TRUE)
+    download.file(url, gz_filename)
+    gunzip(gz_filename)
+  }
+
+  warning("\n-----should test ensembl checksums------\n")
+
+  return(unziped_filename)
+  }
+```
+
+## Paths
+```{r}
+source("common_config.R")
+
+genome_dir=file.path(basedir, "genome")
+dir_create(genome_dir)
+```
+
+## Download data
+```{r}
+ncrna_path = ensembl_download(h99_ncrna_url, genome_dir)
+cds_path = ensembl_download(h99_cds_url, genome_dir)
+genome_path = ensembl_download(h99_genome_url, genome_dir)
+gtf_path = ensembl_download(h99_gtf_url, genome_dir)
+
+list.files(genome_dir)
+```
