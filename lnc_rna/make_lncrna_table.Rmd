@@ -1,0 +1,50 @@
+---
+title: "Make lncRNA Table"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(readr)
+library(dplyr)
+```
+
+```{r}
+input_gtf="/space/rnaseq_enrichment/workspace/lncpipe/rnaseh_tot/lncpipe_out/Result/Identified_lncRNA/final_all.gtf"
+tpm_tsv="/space/rnaseq_enrichment/workspace/lncpipe/rnaseh_tot/lncpipe_out/Result/Quantification/kallisto.tpm.txt"
+
+tpm_table_tsv %>%
+  read_tsv %>%
+  filter(Type=="novel") ->
+  novel_tpm_df
+
+```
+
+```{r}
+novel_tpm_df %>%
+  mutate(tpm_sum=rowSums(select_at(., vars(starts_with("X")))),
+         tpm_mean=rowMeans(select_at(., vars(starts_with("X"))))
+         )
+
+# select_at(mtcars, vars(-contains("ar"), starts_with("c")), toupper)
+
+```
+
+
+# Average TPM across all samples?
+# Rank among all ncRNA (for Average TPM)?
+# Rank among all genes (for Average TPM)?
+# Total length of the lncrna
+
+
+```{r}
+by_species <- iris %>%
+  group_by(Species)
+
+by_species %>%
+  summarise(across(everything(), list(min = min, max = max)))
+```
+
