@@ -13,16 +13,17 @@ library(dplyr)
 ```
 
 ```{r}
-input_gtf="/space/rnaseq_enrichment/workspace/lncpipe/rnaseh_tot/lncpipe_out/Result/Identified_lncRNA/final_all.gtf"
-tpm_tsv="/space/rnaseq_enrichment/workspace/lncpipe/rnaseh_tot/lncpipe_out/Result/Quantification/kallisto.tpm.txt"
+data_base_dir= "/space/rnaseq_enrichment/workspace/lncpipe/rnaseh_tot/lncpipe_out/Result"
+input_gtf= file.path(data_base_dir, "Identified_lncRNA/final_all.gtf")
+tpm_tsv= file.path(data_base_dir,"Quantification/kallisto.tpm.txt")
 
 tpm_table_tsv %>%
   read_tsv %>%
   filter(Type=="novel") ->
   novel_tpm_df
-
 ```
 
+# Summarize Kallisto TPM Data
 ```{r}
 novel_tpm_df %>%
   mutate(tpm_sum=rowSums(select_at(., vars(starts_with("X")))),
@@ -35,12 +36,60 @@ novel_tpm_df %>%
 tpm_summary_df
 ```
 
+# Summarize GTF Data
+```{r}
+read_tsv(input_gtf, col_names = FALSE)
+```
 
-# Mean/Median TPM across all samples?
-# Rank among all ncRNA (for Average TPM)?
-# Rank among all genes (for Average TPM)?
-# Total length of the lncrna
-# number of exons
-# chrom, start, stop
+
+```{r}
+import(input_gtf, format="gtf") %>%
+  subset(type=="exon") %>%
+  subset(source=="novel") ->
+  novel_lncrna_granges
+novel_lncrna_granges
+```
+```{r}
+novel_lncrna_granges %>%
+  as.data.frame
+```
+
+
+```{r}
+novel_lncrna_granges %>%
+  as.data.frame %>%
+  group_by(gene_id) %>%
+  summarise(num_exons = n(), gene_start=min(start), gene_end=max(end), chrom=seqnames[1], tot_exon_len=sum(width)) %>%
+  arrange(chrom, gene_start) ->
+  gtf_summary_df
+gtf_summary_df
+```
+
+# Combine Tables
+```{r}
+full_join(tpm_summary_df, gtf_summary_df, by=c("ID"="gene_id")) %>%
+  dplyr::select(Name=ID,
+                Chromosome=chrom,
+                Start=gene_start,
+                End=gene_end,
+                `# Exons`=num_exons,
+                gene_start,gene_end,chrom,
+                `Total Exon Length`=tot_exon_len,
+                `Mean TPM`=tpm_mean,
+                `Median TPM`=tpm_median
+                )
+
+
+# "ID,Type,tpm_mean,tpm_median,num_exons,gene_start,gene_end,chrom,tot_exon_len"
+```
+
+
+
+## Mean/Median TPM across all samples?
+## Rank among all ncRNA (for Average TPM)?
+## Rank among all genes (for Average TPM)?
+## Total length of the lncrna
+## number of exons
+## chrom, start, stop
 
 
