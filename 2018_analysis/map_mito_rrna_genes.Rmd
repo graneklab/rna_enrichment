@@ -39,6 +39,21 @@ small_mito_rrna_id = "15s_mito_rrna"
 large_mito_rrna_id = "21s_mito_rrna"
 ```
 
+## Define Genomic Ranges
+```{r}
+whole_mito_gr = GRanges(seqnames = "Mt", 
+                        IRanges(1, 24919), strand = "*")
+
+range_21s_region = GRanges(seqnames = short_mito_name, 
+                              IRanges(6500, 9500), strand = "*")
+
+range_15s_region = GRanges(seqnames = short_mito_name, 
+                              IRanges(16950, 18500), strand = "*")
+```
+
+
+
+
 
 
 ```{r}
@@ -54,11 +69,10 @@ tot_L1_bam_files
 ```
 # Whole Genome
 ```{r}
-cur_range = GRanges(seqnames = "Mt", 
-                              IRanges(1, 26000), strand = "*")
-
-autoplot(tot_L1_bams, which = cur_range) +
-  xlim(cur_range) ->
+autoplot(tot_L1_bams, which = whole_mito_gr) +
+  xlim(whole_mito_gr) +
+  xlab("Position on Mitochondrial Chromosome") +
+  theme_classic() ->
   whole_mito_plot
 
 ggsave(file.path(fig.dir, "whole_mito_rrna_coverage.png"), whole_mito_plot)
@@ -68,9 +82,6 @@ whole_mito_plot
 
 # 21s rRNA region
 ```{r}
-range_21s_region = GRanges(seqnames = short_mito_name, 
-                              IRanges(6500, 9500), strand = "*")
-
 autoplot(tot_L1_bams, which = range_21s_region) +
   xlim(range_21s_region) ->
   mito_21S_plot
@@ -167,9 +178,6 @@ names(gene_21s) = "large_MTrRNA"
 
 # 15s rRNA region
 ```{r}
-range_15s_region = GRanges(seqnames = short_mito_name, 
-                              IRanges(16950, 18500), strand = "*")
-
 autoplot(tot_L1_bams, which = range_15s_region) +
   xlim(range_15s_region) ->
   mito_15S_plot
@@ -397,6 +405,21 @@ grep -i rRNA /workspace/2018_tot_samples/genome/Cryptococcus_neoformans_var_grub
 ```{bash}
 grep CNAG_10500 $TOTAL_SAMPLES_STAROUT/*_L001_ReadsPerGene.out.tab
 ```
+
+# Figures for Manuscript
+## Whole Genome
+```{r}
+autoplot(tot_L1_bams[[1]], which = whole_mito_gr) +
+  xlim(whole_mito_gr) +
+  xlab("Position on Mitochondrial Chromosome") +
+  ylab("Read Coverage") +
+  theme_classic() ->
+  whole_mito_plot
+
+whole_mito_plot
+ggbio::ggsave(file.path(fig.dir, "whole_mito_rrna_coverage.png"), plot=whole_mito_plot)
+```
+
 
 # Notes
 ## BioPlots
