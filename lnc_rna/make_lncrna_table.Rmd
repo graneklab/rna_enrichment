@@ -26,25 +26,21 @@ tpm_table_tsv %>%
 ```{r}
 novel_tpm_df %>%
   mutate(tpm_sum=rowSums(select_at(., vars(starts_with("X")))),
-         tpm_mean=rowMeans(select_at(., vars(starts_with("X"))))
-         )
+         tpm_mean=rowMeans(select_at(., vars(starts_with("X")))),
+         tpm_median=rowMedians(as.matrix(select_at(., vars(starts_with("X")))))
+         ) %>%
+  dplyr::select(ID, Type, tpm_mean, tpm_median) ->
+  tpm_summary_df
 
-# select_at(mtcars, vars(-contains("ar"), starts_with("c")), toupper)
-
+tpm_summary_df
 ```
 
 
-# Average TPM across all samples?
+# Mean/Median TPM across all samples?
 # Rank among all ncRNA (for Average TPM)?
 # Rank among all genes (for Average TPM)?
 # Total length of the lncrna
+# number of exons
+# chrom, start, stop
 
-
-```{r}
-by_species <- iris %>%
-  group_by(Species)
-
-by_species %>%
-  summarise(across(everything(), list(min = min, max = max)))
-```
 
