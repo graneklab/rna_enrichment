@@ -10,6 +10,8 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r}
 library(readr)
 library(dplyr)
+library(matrixStats)
+library(rtracklayer)
 ```
 
 ```{r}
@@ -17,11 +19,37 @@ data_base_dir= "/space/rnaseq_enrichment/workspace/lncpipe/rnaseh_tot/lncpipe_ou
 input_gtf= file.path(data_base_dir, "Identified_lncRNA/final_all.gtf")
 tpm_tsv= file.path(data_base_dir,"Quantification/kallisto.tpm.txt")
 
-tpm_table_tsv %>%
+tpm_tsv %>%
   read_tsv %>%
   filter(Type=="novel") ->
   novel_tpm_df
 ```
+
+
+
+# Summarize GTF Data
+```{r}
+import(input_gtf, format="gtf") %>%
+  subset(type=="exon") %>%
+  subset(source=="novel") ->
+  novel_lncrna_granges
+novel_lncrna_granges
+```
+
+
+
+```{r}
+novel_lncrna_granges %>%
+  as.data.frame %>%
+  group_by(gene_id) %>%
+  summarise(num_exons = n(), gene_start=min(start), gene_end=max(end), chrom=seqnames[1], tot_exon_len=sum(width)) %>%
+  arrange(chrom, gene_start) ->
+  gtf_summary_df
+
+gtf_summary_df
+```
+
+
 
 # Summarize Kallisto TPM Data
 ```{r}
@@ -36,34 +64,6 @@ novel_tpm_df %>%
 tpm_summary_df
 ```
 
-# Summarize GTF Data
-```{r}
-read_tsv(input_gtf, col_names = FALSE)
-```
-
-
-```{r}
-import(input_gtf, format="gtf") %>%
-  subset(type=="exon") %>%
-  subset(source=="novel") ->
-  novel_lncrna_granges
-novel_lncrna_granges
-```
-```{r}
-novel_lncrna_granges %>%
-  as.data.frame
-```
-
-
-```{r}
-novel_lncrna_granges %>%
-  as.data.frame %>%
-  group_by(gene_id) %>%
-  summarise(num_exons = n(), gene_start=min(start), gene_end=max(end), chrom=seqnames[1], tot_exon_len=sum(width)) %>%
-  arrange(chrom, gene_start) ->
-  gtf_summary_df
-gtf_summary_df
-```
 
 # Combine Tables
 ```{r}
