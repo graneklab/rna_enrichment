@@ -22,6 +22,7 @@ library(readr)
 library(stringr)
 library(Rsamtools)
 library(DESeq2)
+library(tibble)
 ```
 
 ## Load STAR Count Data
@@ -338,38 +339,69 @@ dplyr::summarize(gp, cor(a, b))
 
 # Analysis with Normalized Counts
 
-```{r}
-genecounts_lanes_combined[,1:6]
-```
 
+## Load Data in DESeq2
+
+### Make Count Matrix for DESeq
 ```{r}
-genecounts_lanes_combined %>%
-  dplyr::select(-c("enrichment_method", "RNA_sample_num")) %>%
-  column_to_rownames(var="library") %>%
+genecounts %>%
+  column_to_rownames(var="expid") %>%
   as.matrix %>%
   t ->
   genecounts_for_desesq
-head(genecounts_for_desesq)
+genecounts_for_desesq[1:6,1:6]
 ```
 
+### Make Metadata dataframe for DESeq
 ```{r}
-genecounts_lanes_combined %>%
-  dplyr::select(library, enrichment_method, RNA_sample_num) %>%
+# read_tsv(metadata.file) %>%
+#   dplyr::select(Label, enrichment_method, RNA_sample_num) ->
+#   metadata.df
+
+genecounts %>%
+  select(expid) %>%
+  mutate(library=str_extract(expid, "^\\d+_[A-Z]+_[A-Z]")) %>%
+  left_join(metadata.df, by=c("library"="Label")) %>%
   mutate(enrichment_method=factor(enrichment_method, 
                                   levels = c("TOT", "MA", "RZ"))) %>%
-  column_to_rownames(var="library") ->
+  column_to_rownames(var="expid") ->
   sample_df
-sample_df
+head(sample_df)
 ```
 
+
 ```{r}
-# Confirm that sample metadata and count columns are in the same order
-all(rownames(sample_df) == colnames(genecounts_for_desesq))
-dds <- DESeqDataSetFromMatrix(countData = genecounts_for_desesq,
-                              colData = sample_df,
-                              design = ~ enrichment_method)
-dds <- DESeq(dds)
+stop("Drop rRNA? before making ")
 ```
+
+
+### Make DESeq object
+#### Confirm that sample metadata and count columns are in the same order
+```{r}
+all(rownames(sample_df) == colnames(genecounts_for_desesq))
+```
+
+#### Make DESeqDataSet
+```{r}
+DESeqDataSetFromMatrix(countData = genecounts_for_desesq,
+                       colData = sample_df,
+                       design = ~ enrichment_method) ->
+  dds
+colData(dds)
+
+# Collapse Replicates
+dds %>% collapseReplicates(object=., 
+                           groupby=colData(.) %>% 
+                             as.tibble %>%
+                             pull(library)) ->
+  dds
+
+dds
+```
+
+
+## Work
+
 
 ```{r}
 rld <- rlog(dds, blind=TRUE)
@@ -391,3 +423,7 @@ rlog(dds, blind=TRUE) %>%
   
 ```
 
+
+
+
+# Add metadata 
