@@ -21,6 +21,7 @@ library(gridExtra)
 library(readr)
 library(stringr)
 library(Rsamtools)
+library(DESeq2)
 ```
 
 ## Load STAR Count Data
@@ -333,5 +334,60 @@ gp = group_by(xx, group)
 dplyr::summarize(gp, cor(a, b))
 
 # https://www.sixhat.net/how-to-plot-multpile-data-series-with-ggplot.html
+```
+
+# Analysis with Normalized Counts
+
+```{r}
+genecounts_lanes_combined[,1:6]
+```
+
+```{r}
+genecounts_lanes_combined %>%
+  dplyr::select(-c("enrichment_method", "RNA_sample_num")) %>%
+  column_to_rownames(var="library") %>%
+  as.matrix %>%
+  t ->
+  genecounts_for_desesq
+head(genecounts_for_desesq)
+```
+
+```{r}
+genecounts_lanes_combined %>%
+  dplyr::select(library, enrichment_method, RNA_sample_num) %>%
+  mutate(enrichment_method=factor(enrichment_method, 
+                                  levels = c("TOT", "MA", "RZ"))) %>%
+  column_to_rownames(var="library") ->
+  sample_df
+sample_df
+```
+
+```{r}
+# Confirm that sample metadata and count columns are in the same order
+all(rownames(sample_df) == colnames(genecounts_for_desesq))
+dds <- DESeqDataSetFromMatrix(countData = genecounts_for_desesq,
+                              colData = sample_df,
+                              design = ~ enrichment_method)
+dds <- DESeq(dds)
+```
+
+```{r}
+rld <- rlog(dds, blind=TRUE)
+rld
+```
+
+```{r}
+counts(dds,normalized=TRUE)
+```
+
+counts(dds, normalized=TRUE)
+
+Heatmap of the count matrix
+
+
+```{r}
+rlog(dds, blind=TRUE) %>%
+  counts
+  
 ```
 
