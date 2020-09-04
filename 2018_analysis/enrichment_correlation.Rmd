@@ -345,6 +345,7 @@ dplyr::summarize(gp, cor(a, b))
 ### Make Count Matrix for DESeq
 ```{r}
 genecounts %>%
+  select(-strand_specific_rrna_homologs) %>% # drop rRNA and rRNA homologs
   column_to_rownames(var="expid") %>%
   as.matrix %>%
   t ->
@@ -369,12 +370,6 @@ genecounts %>%
 head(sample_df)
 ```
 
-
-```{r}
-stop("Drop rRNA? before making ")
-```
-
-
 ### Make DESeq object
 #### Confirm that sample metadata and count columns are in the same order
 ```{r}
@@ -395,9 +390,77 @@ dds %>% collapseReplicates(object=.,
                              as.tibble %>%
                              pull(library)) ->
   dds
-
 dds
 ```
+
+```{r}
+dds <- DESeq(dds)
+counts(dds,normalized=TRUE)
+results(dds, contrast = c("enrichment_method", "MA", "MA"))
+```
+```{r}
+dds %>%
+  counts(normalized=TRUE) ->
+  norm_counts
+
+norm_counts %>%
+  as_tibble(rownames = "geneid") %>%
+  mutate(ma_mean = rowMeans(select(., contains("MA"))),
+         rz_mean = rowMeans(select(., contains("RZ"))),
+         tot_mean = rowMeans(select(., contains("TOT")))) ->
+  norm_counts_wmeans
+
+
+norm_counts_wmeans %>%
+  ggplot(aes(x=tot_mean, y=rz_mean)) +
+  geom_point()
+
+norm_counts_wmeans %>%
+  {cor(pull(., tot_mean), pull(., rz_mean))} ->
+  rz_cor
+
+norm_counts_wmeans %>%
+  {cor(pull(., tot_mean), pull(., ma_mean))} ->
+  ma_cor
+```
+
+```{r}
+
+norm_counts_wmeans %>%
+  summarise(max(ma_mean), max(rz_mean)) %>%
+  max -> ymax
+
+
+norm_counts_wmeans %>%
+  ggplot(aes(x=tot_mean, y=value, color=variable, alpha = 1/2)) + 
+  geom_point(aes(y=ma_mean, color="ma_mean"), size=1) +
+  geom_point(aes(y=rz_mean, color="rz_mean"), size=1) +
+  theme_classic() +
+  annotate("text", x=0, y = ymax, 
+           label = paste("MA R=", round(ma_cor,2), "\nRZ R=", round(rz_cor,2)),
+           hjust="inward",
+           vjust="inward", 
+           color="black")
+```
+
+
+
+
+
+
+```{r}
+sapply(levels(dds$enrichment_method), 
+       function(lvl) rowMeans( counts(dds,normalized=TRUE)[,dds$enrichment_method == lvl, drop=F] ) )
+```
+
+
+```{r}
+dds %>%
+  counts(normalized=TRUE) %>%
+  rowMeans
+
+```
+
 
 
 ## Work
