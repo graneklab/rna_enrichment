@@ -5,7 +5,7 @@ output:
     toc: false
 ---
 
-```{r load_libraries}
+```{r}
 source("run_config_2019.R")
 ```
 
