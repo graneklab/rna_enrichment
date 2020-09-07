@@ -30,7 +30,20 @@ source("combined_config.R")
 
 ## Load STAR Count Data
 ```{r}
-countfiles = list.files(enrich_compare_starout.dir, pattern = paste0(count_suffix,"$"), full.names = TRUE)
+starout_2019_dir
+```
+
+
+```{r}
+list.files(starout_2019_dir)
+           
+           
+           
+           , pattern = paste0(count_suffix,"$"), full.names = TRUE)
+
+
+
+countfiles = list.files(starout_2019_dir, pattern = paste0(count_suffix,"$"), full.names = TRUE)
 countfiles
 ```
 

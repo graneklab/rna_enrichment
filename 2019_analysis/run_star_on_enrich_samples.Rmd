@@ -5,7 +5,7 @@ output:
     toc: false
 ---
 
-```{r}
+```{r load_libraries_rs}
 source("run_config_2019.R")
 library(tools)
 ```
@@ -34,7 +34,7 @@ mkdir -p $GENOME_WITH_MITO_RRNA_DIR
 wget --no-verbose --directory-prefix ${GENOME_WITH_MITO_RRNA_DIR} ${FA_URL} 
 gunzip -f ${FA_WITH_MITO_RRNA}.gz
 ```
-```{r}
+```{r check_md5_rs}
 stopifnot(md5sum(fa_for_mito_rrna.file) == "77e35feb6e9fb4deb279df882d933f7d")
 
 ```
@@ -116,6 +116,6 @@ parallel --jobs $MAX_JOBS trim_and_star_func ::: $RAW_FASTQS/*.fastq.gz
 ```
 
 # SessionInfo
-```{r}
+```{r session_info_rs}
 sessionInfo()
 ```

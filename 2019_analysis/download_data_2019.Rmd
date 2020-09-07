@@ -5,7 +5,7 @@ output:
     toc: false
 ---
 
-```{r}
+```{r load_libraries_dd}
 source("run_config_2019.R")
 ```
 
@@ -98,6 +98,6 @@ md5sum -c md5_checksum.txt
 
 
 # SessionInfo
-```{r}
+```{r session_info_dd}
 sessionInfo()
 ```

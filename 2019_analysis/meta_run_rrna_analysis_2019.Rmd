@@ -8,7 +8,7 @@ output:
 Rscript -e "rmarkdown::render('meta_run_rrna_analysis_2019.Rmd')"
 
 
-```{r}
+```{r setup_metarun}
 source("run_config_2019.R")
 
 library(knitr)
