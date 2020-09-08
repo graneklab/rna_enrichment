@@ -3,7 +3,7 @@ title: "Enrichment Correlation"
 output: html_document
 ---
 
-```{r global_options, include=FALSE}
+```{r global_options, include=TRUE, echo=TRUE}
 library(knitr)
 knitr::opts_chunk$set(echo=FALSE, include=FALSE)
 ```
@@ -15,17 +15,17 @@ source("combined_config.R")
 
 # source("run_config.R")
 # library(foreach)
-# library(dplyr)
+library(dplyr)
 # library(tidyr)
 # library(magrittr)
 # library(rtracklayer)
-# library(ggplot2)
+library(ggplot2)
 # library(gridExtra)
 # library(readr)
 # library(stringr)
 # library(Rsamtools)
-# library(DESeq2)
-# library(tibble)
+library(DESeq2)
+library(tibble)
 ```
 
 
@@ -75,7 +75,7 @@ genecounts_lanes_combined[,1:6]
 
 #### Find all genes that are mapped by rRNA reads
 ##### Load GTF
-```{r}
+```{r eval=FALSE, include=FALSE}
 import(gtf_with_mito_rrna.file, format="gtf") %>%
   subset(type=="exon") ->
   h99_granges
@@ -327,36 +327,21 @@ starout_2018_dir %>%
 
 ## Load Data in DESeq2
 
-
-### Make Count Matrix for DESeq
-```{r}
-bind_rows(genecounts_2018_run, genecounts_2019_run) %>%
-  # drop rRNA and rRNA homologs
-  select(-all_of(strand_specific_rrna_homologs)) %>%
-  column_to_rownames(var="expid") %>%
-  as.matrix %>%
-  t ->
-  genecounts_for_desesq
-genecounts_for_desesq[1:6,1:6]
-```
-
 ### Make Metadata dataframe for DESeq
 ```{r}
-# read_tsv(metadata.file) %>%
-#   dplyr::select(Label, enrichment_method, RNA_sample_num) ->
-#   metadata.df
-
 genecounts_2018_run %>%
-  select(expid) %>%
-  mutate(library=str_extract(expid, "^\\d+_[A-Z]+_[A-Z]"),
+  dplyr::select(expid) %>%
+  dplyr::mutate(library=str_extract(expid, "^\\d+_[A-Z]+_[A-Z]"),
          exp_year=2018,
          enrichment_rep="1") %>%
-  separate(library, 
+  tidyr::separate(library, 
            into = c("RNA_sample_num", "enrichment_method",NA),
            sep="_", remove=FALSE) ->
   sample_df_2018
-sample_df_2018
+
+knitr::kable(sample_df_2018)
 ```
+
 
 ```{r}
 genecounts_2019_run %>%
@@ -370,7 +355,7 @@ genecounts_2019_run %>%
            into = c("enrichment_method", "enrichment_rep"),
            sep=1) ->
   sample_df_2019
-sample_df_2019
+knitr::kable(sample_df_2019)
  
 
 bind_rows(sample_df_2018, sample_df_2019) %>%
@@ -382,8 +367,24 @@ bind_rows(sample_df_2018, sample_df_2019) %>%
                                   levels = c("Total", "RNaseH", "RiboZero", "PolyA"))) %>%
   column_to_rownames(var="expid") ->
   sample_df
-sample_df
+knitr::kable(sample_df)
 ```
+
+### Make Count Matrix for DESeq
+```{r}
+bind_rows(genecounts_2018_run, genecounts_2019_run) %>%
+  # drop rRNA and rRNA homologs
+  select(-all_of(strand_specific_rrna_homologs)) %>%
+  column_to_rownames(var="expid") %>%
+  as.matrix %>%
+  t ->
+  genecounts_for_desesq
+# genecounts_for_desesq[1:6,1:6]
+```
+
+
+
+
 
 
 
@@ -410,30 +411,34 @@ dds
 
 ```{r}
 dds <- DESeq(dds)
-# counts(dds,normalized=TRUE)
+#counts(dds,normalized=TRUE)
 # results(dds, contrast = c("enrichment_method", "MA", "MA"))
 ```
 
 
-```{r}
+```{r eval=FALSE, include=FALSE}
+dds %>%
+  counts(normalized=TRUE) ->
+  norm_counts
+
 norm_counts %>%
   as_tibble(rownames = "geneid") %>%
   select(., matches("_MA_|_M1"))
 ```
 
-```{r}
+```{r eval=FALSE, include=FALSE}
 norm_counts %>%
   as_tibble(rownames = "geneid") %>%
   select(., matches("_H[12]"))
 ```
 
-```{r}
+```{r eval=FALSE, include=FALSE}
 norm_counts %>%
   as_tibble(rownames = "geneid") %>%
   select(., matches("_TOT_|_T1"))
 ```
 
-```{r}
+```{r eval=FALSE, include=FALSE}
 norm_counts %>%
   as_tibble(rownames = "geneid") %>%
   select(., matches("_RZ_"))
@@ -473,7 +478,7 @@ norm_counts_wmeans %>%
   rh_cor
 ```
 
-```{r}
+```{r include=TRUE}
 
 norm_counts_wmeans %>%
   summarise(max(ma_mean), max(rz_mean), max(rh_mean)) %>%
@@ -506,13 +511,13 @@ correlation_scatterplot +
 
 
 
-```{r}
+```{r eval=FALSE, include=FALSE}
 sapply(levels(dds$enrichment_method), 
        function(lvl) rowMeans( counts(dds,normalized=TRUE)[,dds$enrichment_method == lvl, drop=F] ) )
 ```
 
 
-```{r}
+```{r eval=FALSE, include=FALSE}
 dds %>%
   counts(normalized=TRUE) %>%
   rowMeans
@@ -524,12 +529,12 @@ dds %>%
 ## Work
 
 
-```{r}
+```{r eval=FALSE, include=FALSE}
 rld <- rlog(dds, blind=TRUE)
 rld
 ```
 
-```{r}
+```{r eval=FALSE, include=FALSE}
 counts(dds,normalized=TRUE)
 ```
 
@@ -538,7 +543,7 @@ counts(dds, normalized=TRUE)
 Heatmap of the count matrix
 
 
-```{r}
+```{r eval=FALSE, include=FALSE}
 rlog(dds, blind=TRUE) %>%
   counts
   
