@@ -3,9 +3,9 @@ title: "Enrichment Correlation"
 output: html_document
 ---
 
-```{r global_options, include=TRUE, echo=TRUE}
+```{r global_options, include=FALSE, echo=FALSE}
 library(knitr)
-knitr::opts_chunk$set(echo=FALSE, include=FALSE)
+knitr::opts_chunk$set(echo=TRUE, include=TRUE)
 ```
 
 # Load paths and libraries
@@ -13,304 +13,14 @@ knitr::opts_chunk$set(echo=FALSE, include=FALSE)
 source("shared_functions.R")
 source("combined_config.R")
 
-# source("run_config.R")
-# library(foreach)
 library(dplyr)
-# library(tidyr)
-# library(magrittr)
-# library(rtracklayer)
 library(ggplot2)
-# library(gridExtra)
-# library(readr)
-# library(stringr)
-# library(Rsamtools)
 library(DESeq2)
 library(tibble)
 ```
 
-
-### Load STAR Count tables into a single dataframe
-Loading code borrowed from https://gitlab.oit.duke.edu/HTS2018/HTS2018-notebooks/blob/master/pilot/01_Read_Counts.ipynb
-```{r eval=FALSE, include=FALSE}
-countfile_paths %>%
-  loadStarCounts()  ->
-  genecounts
-
-
-
-genecounts[1:6,1:6]
-```
-
-### Extract library specific label
-```{r eval=FALSE, include=FALSE}
-genecounts %>%
-  mutate(Label=str_extract(expid, "^\\d+_[A-Z]+_[A-Z]")) %>%
-  dplyr::select(Label, everything()) %>%
-  dplyr::select(-expid) ->
-  genecounts_with_label
-genecounts_with_label[1:8,1:6]
-```
-
-### Combine per library counts across lanes
-```{r eval=FALSE, include=FALSE}
-genecounts_with_label %>%
-  group_by(Label) %>%
-  summarise_all(funs(sum)) ->
-  genecounts_lanes_combined
-
-# Add metadata 
-read_tsv(metadata.file) %>%
-  dplyr::select(Label, enrichment_method, RNA_sample_num) ->
-  metadata.df
-
-genecounts_lanes_combined %<>%
-  left_join(metadata.df, by="Label") %>%
-  dplyr::select(library=Label, enrichment_method, RNA_sample_num, everything())
-genecounts_lanes_combined[,1:6]
-```
-
-## Compare library preps
-
-### Drop rRNA genes and genes with rRNA homology
-
-#### Find all genes that are mapped by rRNA reads
-##### Load GTF
-```{r eval=FALSE, include=FALSE}
-import(gtf_with_mito_rrna.file, format="gtf") %>%
-  subset(type=="exon") ->
-  h99_granges
-```
-
-
-##### Find all genes that overlap with rRNA reads
-https://bioinformatics.stackexchange.com/questions/874/intersection-of-two-genomic-ranges-to-keep-metadata
-```{r eval=FALSE, include=FALSE}
-scanBam(oligo_bam.file) %>%
-  as.data.frame %>%
-  mutate(end=pos+qwidth) %>%
-  dplyr::select(chr=rname, start=pos, end, strand) %>%
-  makeGRangesFromDataFrame(ignore.strand = TRUE) %>%
-  invertStrand -> # we invert the strand since the oligos are antisense
-  oligo_bam.gr
-
-# %>% rev
-  # oligo_gene_counts
-
-o = findOverlaps(h99_granges, oligo_bam.gr)
-grl1 = split(h99_granges[queryHits(o)], 1:length(o)) # You can't mendoapply on a GRanges object
-grl2 = split(oligo_bam.gr[subjectHits(o)], 1:length(o))
-foo = function(x, y) {
-  rv = x
-  start(rv) = max(start(x), start(y))
-  end(rv) = min(end(x), end(y))
-  return(rv)
-}
-
-unlist(mendoapply(foo, grl1, y=grl2)) %>%
-  as.data.frame %>%
-  pull(gene_id) %>%
-  unique ->
-  all_rrna_homologs
-
-all_rrna_homologs
-```
-
-##### Find STRAND-SPECIFIC genes that overlap with rRNA reads
-```{r eval=FALSE, include=FALSE}
-scanBam(oligo_bam.file) %>%
-  as.data.frame %>%
-  mutate(end=pos+qwidth) %>%
-  dplyr::select(chr=rname, start=pos, end, strand) %>%
-  makeGRangesFromDataFrame %>%
-  invertStrand -> # we invert the strand since the oligos are antisense
-  oligo_bam.gr
-
-# %>% rev
-  # oligo_gene_counts
-
-o = findOverlaps(h99_granges, oligo_bam.gr)
-grl1 = split(h99_granges[queryHits(o)], 1:length(o)) # You can't mendoapply on a GRanges object
-grl2 = split(oligo_bam.gr[subjectHits(o)], 1:length(o))
-foo = function(x, y) {
-  rv = x
-  start(rv) = max(start(x), start(y))
-  end(rv) = min(end(x), end(y))
-  return(rv)
-}
-
-unlist(mendoapply(foo, grl1, y=grl2)) %>%
-  as.data.frame %>%
-  pull(gene_id) %>%
-  unique ->
-  strand_specific_rrna_homologs
-
-strand_specific_rrna_homologs
-```
-
-#### Drop genes from count table
-
-```{r eval=FALSE, include=FALSE}
-# genes_to_drop = intersect(colnames(genecounts_lanes_combined), 
-#                           strand_specific_rrna_homologs)
-genecounts_lanes_combined %>%
-  dplyr::select(strand_specific_rrna_homologs) ->
-  check_select
-
-check_select[,1:6]
-
-genecounts_lanes_combined %>%
-  dplyr::select(-strand_specific_rrna_homologs) ->
-  genecounts_lanes_combined_no_rrna
-
-genecounts_lanes_combined_no_rrna[,1:6]
-
-dim(check_select)
-dim(genecounts_lanes_combined)
-dim(genecounts_lanes_combined_no_rrna)
-
-dplyr::select(genecounts_lanes_combined,small_MTrRNA)
-# dplyr::select(genecounts_lanes_combined_no_rrna,small_MTrRNA)
-
-```
-
-
-### Generate scatterplots for MA vs TOT and RZ vs TOT
-```{r eval=FALSE, include=FALSE}
-genecounts_lanes_combined_no_rrna[,1:6]
-
-```
-
-```{r eval=FALSE, include=FALSE}
-
-cur_sample_num = 2
-
-genecounts_lanes_combined_no_rrna %>%
-  filter(RNA_sample_num == cur_sample_num) %>%
-  dplyr::select(-c(library,RNA_sample_num)) %>%
-  gather(gene_id, reads, 2:ncol(.)) %>%
-  spread(enrichment_method,reads) ->
-  cur_sample.tidy
-  
-title_text = paste0("Sample #", cur_sample_num, collapse=" ")
-
-cur_sample.tidy %>%
-  summarise(max(MA), max(RZ)) %>%
-  max -> ymax
-
-tot_vs_ma = ggplot(cur_sample.tidy, aes(TOT, MA)) + 
-  geom_point(alpha = 1/2, color="red", size=1) +
-  ggtitle(title_text) +
-  theme_bw() +
-  ylim(0, ymax)
-tot_vs_rz = ggplot(cur_sample.tidy, aes(TOT, RZ)) + 
-  geom_point(alpha = 1/2, color="red", size=1) +
-  ggtitle(title_text) +
-  theme_bw() +
-  ylim(0, ymax)
-
-grid.arrange(tot_vs_ma, tot_vs_rz, nrow = 1)
-
-#------------------------------------------------------------------
-ma_cor = paste("MA R =", 
-               cor(cur_sample.tidy[["TOT"]],
-                   cur_sample.tidy[["MA"]]) %>%
-                 round(2))
-
-rz_cor = paste("RZ R =", 
-               cor(cur_sample.tidy[["TOT"]],
-                   cur_sample.tidy[["RZ"]]) %>%
-                 round(2))
-ma_cor
-rz_cor
-cat(paste(ma_cor, rz_cor, sep="\n"))
-#------------------------------------------------------------------
-ggplot(cur_sample.tidy, aes(TOT, y=value, color=variable, alpha = 1/2)) + 
-  geom_point(aes(y=MA, color="MA"), size=1) +
-  geom_point(aes(y=RZ, color="RZ"), size=1) +
-  ggtitle(title_text) +
-  theme_bw() +
-  annotate("text", x=0, y = ymax*0.95, 
-           label = paste(ma_cor, rz_cor, sep="\n"),
-           hjust="inward",
-           just="inward", 
-           color="red")
-
-#------------------------------------------------------------------
-
-ggplot(cur_sample.tidy, alpha = 1/2) +
-  geom_point(aes(TOT, MA), color="red", size=1) + 
-  geom_smooth(aes(TOT, MA), method=lm, se=FALSE, color="red") +
-  geom_point(aes(TOT, RZ), color="blue", size=1) +
-  geom_smooth(aes(TOT, RZ), method=lm, se=FALSE, color="blue") +
-  ggtitle(title_text) +
-  theme_bw() 
-
-
-```
-
-```{r eval=FALSE, include=FALSE}
-makeScatterPlot = function(genecounts_lanes_combined_no_rrna, cur_sample_num) {
-  
-genecounts_lanes_combined_no_rrna %>%
-  filter(RNA_sample_num == cur_sample_num) %>%
-  dplyr::select(-c(library,RNA_sample_num)) %>%
-  gather(gene_id, reads, 2:ncol(.)) %>%
-  spread(enrichment_method,reads) ->
-  cur_sample.tidy
-  
-title_text = paste0("Sample #", cur_sample_num, collapse=" ")
-
-cur_sample.tidy %>%
-  summarise(max(MA), max(RZ)) %>%
-  max -> ymax
-
-#------------------------------------------------------------------
-ma_cor = paste("MA R =", 
-               cor(cur_sample.tidy[["TOT"]],
-                   cur_sample.tidy[["MA"]]) %>%
-                 round(2))
-
-rz_cor = paste("RZ R =", 
-               cor(cur_sample.tidy[["TOT"]],
-                   cur_sample.tidy[["RZ"]]) %>%
-                 round(2))
-#------------------------------------------------------------------
-ggplot(cur_sample.tidy, aes(TOT, y=value, color=variable, alpha = 1/2)) + 
-  geom_point(aes(y=MA, color="MA"), size=1) +
-  geom_point(aes(y=RZ, color="RZ"), size=1) +
-  ggtitle(title_text) +
-  theme_bw() +
-  annotate("text", x=0, y = ymax, 
-           label = paste(ma_cor, rz_cor, sep="\n"),
-           hjust="inward",
-           vjust="inward", 
-           color="black")
-}
-for (cur_sample in 2:4) {
-  print(makeScatterPlot(genecounts_lanes_combined_no_rrna, cur_sample))
-}
-```
-
-
-```{r eval=FALSE, include=FALSE}
-# Trying to generalize plotting 
-require(dplyr)
-set.seed(123)
-xx = data.frame(group = rep(1:4, 100), a = rnorm(400) , b = rnorm(400))
-
-xx
-gp = group_by(xx, group)
-dplyr::summarize(gp, cor(a, b))
-
-# https://www.sixhat.net/how-to-plot-multpile-data-series-with-ggplot.html
-```
-
 # Analysis with Normalized Counts
-
-
-
 ## Load STAR Count Data
-
 ```{r}
 starout_2019_dir %>%
   list.files(pattern = paste0("_2018_.*",count_suffix,"$"), full.names = TRUE) %>%
@@ -321,12 +31,9 @@ starout_2018_dir %>%
   list.files(pattern = paste0(count_suffix,"$"), full.names = TRUE) %>%
   loadStarCounts ->
   genecounts_2018_run
-
-
 ```
 
 ## Load Data in DESeq2
-
 ### Make Metadata dataframe for DESeq
 ```{r}
 genecounts_2018_run %>%
@@ -341,7 +48,6 @@ genecounts_2018_run %>%
 
 knitr::kable(sample_df_2018)
 ```
-
 
 ```{r}
 genecounts_2019_run %>%
@@ -382,15 +88,7 @@ bind_rows(genecounts_2018_run, genecounts_2019_run) %>%
 # genecounts_for_desesq[1:6,1:6]
 ```
 
-
-
-
-
-
-
 ### Make DESeq object
-
-#### Make DESeqDataSet
 ```{r}
 stopifnot(all(rownames(sample_df) == colnames(genecounts_for_desesq))) # Confirm that sample metadata and count columns are in the same order
 
@@ -411,10 +109,9 @@ dds
 
 ```{r}
 dds <- DESeq(dds)
-#counts(dds,normalized=TRUE)
-# results(dds, contrast = c("enrichment_method", "MA", "MA"))
 ```
 
+## Calculate Group Mean of Normalized counts
 
 ```{r eval=FALSE, include=FALSE}
 dds %>%
@@ -444,9 +141,6 @@ norm_counts %>%
   select(., matches("_RZ_"))
 ```
 
-
-
-
 ```{r}
 dds %>%
   counts(normalized=TRUE) ->
@@ -460,11 +154,17 @@ norm_counts %>%
          tot_mean = rowMeans(select(., matches("_TOT_|_T1")))) ->
   norm_counts_wmeans
 
+```
 
+```{r eval=FALSE, include=FALSE}
 norm_counts_wmeans %>%
   ggplot(aes(x=tot_mean, y=rz_mean)) +
   geom_point()
 
+```
+
+## Calculate Pearson Correlations
+```{r}
 norm_counts_wmeans %>%
   {cor(pull(., tot_mean), pull(., rz_mean))} ->
   rz_cor
@@ -478,6 +178,7 @@ norm_counts_wmeans %>%
   rh_cor
 ```
 
+## Make Scatter Plots
 ```{r include=TRUE}
 
 norm_counts_wmeans %>%
@@ -506,50 +207,8 @@ correlation_scatterplot +
   scale_y_log10()
 ```
 
-
-
-
-
-
-```{r eval=FALSE, include=FALSE}
-sapply(levels(dds$enrichment_method), 
-       function(lvl) rowMeans( counts(dds,normalized=TRUE)[,dds$enrichment_method == lvl, drop=F] ) )
+# SessionInfo
+```{r}
+sessionInfo()
 ```
 
-
-```{r eval=FALSE, include=FALSE}
-dds %>%
-  counts(normalized=TRUE) %>%
-  rowMeans
-
-```
-
-
-
-## Work
-
-
-```{r eval=FALSE, include=FALSE}
-rld <- rlog(dds, blind=TRUE)
-rld
-```
-
-```{r eval=FALSE, include=FALSE}
-counts(dds,normalized=TRUE)
-```
-
-counts(dds, normalized=TRUE)
-
-Heatmap of the count matrix
-
-
-```{r eval=FALSE, include=FALSE}
-rlog(dds, blind=TRUE) %>%
-  counts
-  
-```
-
-
-
-
-# Add metadata 
