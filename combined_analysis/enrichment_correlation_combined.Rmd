@@ -28,28 +28,10 @@ source("combined_config.R")
 # library(tibble)
 ```
 
-## Load STAR Count Data
-```{r}
-starout_2019_dir
-```
-
-
-```{r}
-list.files(starout_2019_dir)
-           
-           
-           
-           , pattern = paste0(count_suffix,"$"), full.names = TRUE)
-
-
-
-countfiles = list.files(starout_2019_dir, pattern = paste0(count_suffix,"$"), full.names = TRUE)
-countfiles
-```
 
 ### Load STAR Count tables into a single dataframe
 Loading code borrowed from https://gitlab.oit.duke.edu/HTS2018/HTS2018-notebooks/blob/master/pilot/01_Read_Counts.ipynb
-```{r}
+```{r eval=FALSE, include=FALSE}
 countfile_paths %>%
   loadStarCounts()  ->
   genecounts
@@ -60,7 +42,7 @@ genecounts[1:6,1:6]
 ```
 
 ### Extract library specific label
-```{r}
+```{r eval=FALSE, include=FALSE}
 genecounts %>%
   mutate(Label=str_extract(expid, "^\\d+_[A-Z]+_[A-Z]")) %>%
   dplyr::select(Label, everything()) %>%
@@ -70,7 +52,7 @@ genecounts_with_label[1:8,1:6]
 ```
 
 ### Combine per library counts across lanes
-```{r}
+```{r eval=FALSE, include=FALSE}
 genecounts_with_label %>%
   group_by(Label) %>%
   summarise_all(funs(sum)) ->
@@ -102,7 +84,7 @@ import(gtf_with_mito_rrna.file, format="gtf") %>%
 
 ##### Find all genes that overlap with rRNA reads
 https://bioinformatics.stackexchange.com/questions/874/intersection-of-two-genomic-ranges-to-keep-metadata
-```{r}
+```{r eval=FALSE, include=FALSE}
 scanBam(oligo_bam.file) %>%
   as.data.frame %>%
   mutate(end=pos+qwidth) %>%
@@ -167,7 +149,7 @@ strand_specific_rrna_homologs
 
 #### Drop genes from count table
 
-```{r}
+```{r eval=FALSE, include=FALSE}
 # genes_to_drop = intersect(colnames(genecounts_lanes_combined), 
 #                           strand_specific_rrna_homologs)
 genecounts_lanes_combined %>%
@@ -193,12 +175,12 @@ dplyr::select(genecounts_lanes_combined,small_MTrRNA)
 
 
 ### Generate scatterplots for MA vs TOT and RZ vs TOT
-```{r}
+```{r eval=FALSE, include=FALSE}
 genecounts_lanes_combined_no_rrna[,1:6]
 
 ```
 
-```{r}
+```{r eval=FALSE, include=FALSE}
 
 cur_sample_num = 2
 
@@ -266,7 +248,7 @@ ggplot(cur_sample.tidy, alpha = 1/2) +
 
 ```
 
-```{r include=TRUE}
+```{r eval=FALSE, include=FALSE}
 makeScatterPlot = function(genecounts_lanes_combined_no_rrna, cur_sample_num) {
   
 genecounts_lanes_combined_no_rrna %>%
@@ -310,7 +292,7 @@ for (cur_sample in 2:4) {
 ```
 
 
-```{r}
+```{r eval=FALSE, include=FALSE}
 # Trying to generalize plotting 
 require(dplyr)
 set.seed(123)
@@ -326,12 +308,31 @@ dplyr::summarize(gp, cor(a, b))
 # Analysis with Normalized Counts
 
 
+
+## Load STAR Count Data
+
+```{r}
+starout_2019_dir %>%
+  list.files(pattern = paste0("_2018_.*",count_suffix,"$"), full.names = TRUE) %>%
+  loadStarCounts ->
+  genecounts_2019_run
+
+starout_2018_dir %>%
+  list.files(pattern = paste0(count_suffix,"$"), full.names = TRUE) %>%
+  loadStarCounts ->
+  genecounts_2018_run
+
+
+```
+
 ## Load Data in DESeq2
+
 
 ### Make Count Matrix for DESeq
 ```{r}
-genecounts %>%
-  select(-strand_specific_rrna_homologs) %>% # drop rRNA and rRNA homologs
+bind_rows(genecounts_2018_run, genecounts_2019_run) %>%
+  # drop rRNA and rRNA homologs
+  select(-strand_specific_rrna_homologs) %>%
   column_to_rownames(var="expid") %>%
   as.matrix %>%
   t ->
