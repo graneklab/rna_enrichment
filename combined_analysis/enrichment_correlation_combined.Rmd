@@ -116,7 +116,7 @@ all_rrna_homologs
 ```
 
 ##### Find STRAND-SPECIFIC genes that overlap with rRNA reads
-```{r}
+```{r eval=FALSE, include=FALSE}
 scanBam(oligo_bam.file) %>%
   as.data.frame %>%
   mutate(end=pos+qwidth) %>%
@@ -332,7 +332,7 @@ starout_2018_dir %>%
 ```{r}
 bind_rows(genecounts_2018_run, genecounts_2019_run) %>%
   # drop rRNA and rRNA homologs
-  select(-strand_specific_rrna_homologs) %>%
+  select(-all_of(strand_specific_rrna_homologs)) %>%
   column_to_rownames(var="expid") %>%
   as.matrix %>%
   t ->
@@ -346,25 +346,53 @@ genecounts_for_desesq[1:6,1:6]
 #   dplyr::select(Label, enrichment_method, RNA_sample_num) ->
 #   metadata.df
 
-genecounts %>%
+genecounts_2018_run %>%
   select(expid) %>%
-  mutate(library=str_extract(expid, "^\\d+_[A-Z]+_[A-Z]")) %>%
-  left_join(metadata.df, by=c("library"="Label")) %>%
-  mutate(enrichment_method=factor(enrichment_method, 
-                                  levels = c("TOT", "MA", "RZ"))) %>%
-  column_to_rownames(var="expid") ->
-  sample_df
-head(sample_df)
+  mutate(library=str_extract(expid, "^\\d+_[A-Z]+_[A-Z]"),
+         exp_year=2018,
+         enrichment_rep="1") %>%
+  separate(library, 
+           into = c("RNA_sample_num", "enrichment_method",NA),
+           sep="_", remove=FALSE) ->
+  sample_df_2018
+sample_df_2018
 ```
 
-### Make DESeq object
-#### Confirm that sample metadata and count columns are in the same order
 ```{r}
-all(rownames(sample_df) == colnames(genecounts_for_desesq))
+genecounts_2019_run %>%
+  select(expid) %>%
+  mutate(library=str_extract(expid, "^\\d+_2018_[A-Z]+_[HMT]\\d"),
+         exp_year=2019) %>%
+  separate(library, 
+           into = c("RNA_sample_num", NA, NA,"method_rep"),
+           sep="_", remove=FALSE) %>%
+  separate(method_rep, 
+           into = c("enrichment_method", "enrichment_rep"),
+           sep=1) ->
+  sample_df_2019
+sample_df_2019
+ 
+
+bind_rows(sample_df_2018, sample_df_2019) %>%
+  mutate(enrichment_method = case_when(enrichment_method == "H" ~ "RNaseH",
+                                       enrichment_method %in% c("T","TOT") ~ "Total",
+                                       enrichment_method %in% c("M","MA") ~ "PolyA",
+                                       enrichment_method == "RZ" ~ "RiboZero")) %>%
+  mutate(enrichment_method=factor(enrichment_method, 
+                                  levels = c("Total", "RNaseH", "RiboZero", "PolyA"))) %>%
+  column_to_rownames(var="expid") ->
+  sample_df
+sample_df
 ```
+
+
+
+### Make DESeq object
 
 #### Make DESeqDataSet
 ```{r}
+stopifnot(all(rownames(sample_df) == colnames(genecounts_for_desesq))) # Confirm that sample metadata and count columns are in the same order
+
 DESeqDataSetFromMatrix(countData = genecounts_for_desesq,
                        colData = sample_df,
                        design = ~ enrichment_method) ->
@@ -374,7 +402,7 @@ colData(dds)
 # Collapse Replicates
 dds %>% collapseReplicates(object=., 
                            groupby=colData(.) %>% 
-                             as.tibble %>%
+                             as_tibble %>%
                              pull(library)) ->
   dds
 dds
@@ -382,9 +410,38 @@ dds
 
 ```{r}
 dds <- DESeq(dds)
-counts(dds,normalized=TRUE)
-results(dds, contrast = c("enrichment_method", "MA", "MA"))
+# counts(dds,normalized=TRUE)
+# results(dds, contrast = c("enrichment_method", "MA", "MA"))
 ```
+
+
+```{r}
+norm_counts %>%
+  as_tibble(rownames = "geneid") %>%
+  select(., matches("_MA_|_M1"))
+```
+
+```{r}
+norm_counts %>%
+  as_tibble(rownames = "geneid") %>%
+  select(., matches("_H[12]"))
+```
+
+```{r}
+norm_counts %>%
+  as_tibble(rownames = "geneid") %>%
+  select(., matches("_TOT_|_T1"))
+```
+
+```{r}
+norm_counts %>%
+  as_tibble(rownames = "geneid") %>%
+  select(., matches("_RZ_"))
+```
+
+
+
+
 ```{r}
 dds %>%
   counts(normalized=TRUE) ->
@@ -392,9 +449,10 @@ dds %>%
 
 norm_counts %>%
   as_tibble(rownames = "geneid") %>%
-  mutate(ma_mean = rowMeans(select(., contains("MA"))),
-         rz_mean = rowMeans(select(., contains("RZ"))),
-         tot_mean = rowMeans(select(., contains("TOT")))) ->
+  mutate(ma_mean = rowMeans(select(., matches("_MA_|_M1"))),
+         rz_mean = rowMeans(select(., matches("_RZ_"))),
+         rh_mean = rowMeans(select(., matches("_H[12]"))),
+         tot_mean = rowMeans(select(., matches("_TOT_|_T1")))) ->
   norm_counts_wmeans
 
 
@@ -409,25 +467,38 @@ norm_counts_wmeans %>%
 norm_counts_wmeans %>%
   {cor(pull(., tot_mean), pull(., ma_mean))} ->
   ma_cor
+
+norm_counts_wmeans %>%
+  {cor(pull(., tot_mean), pull(., rh_mean))} ->
+  rh_cor
 ```
 
 ```{r}
 
 norm_counts_wmeans %>%
-  summarise(max(ma_mean), max(rz_mean)) %>%
+  summarise(max(ma_mean), max(rz_mean), max(rh_mean)) %>%
   max -> ymax
 
 
 norm_counts_wmeans %>%
-  ggplot(aes(x=tot_mean, y=value, color=variable, alpha = 1/2)) + 
+  ggplot(aes(x=tot_mean, y=value, color=variable)) + 
   geom_point(aes(y=ma_mean, color="ma_mean"), size=1) +
   geom_point(aes(y=rz_mean, color="rz_mean"), size=1) +
+  geom_point(aes(y=rh_mean, color="rh_mean"), size=1) +
   theme_classic() +
   annotate("text", x=0, y = ymax, 
-           label = paste("MA R=", round(ma_cor,2), "\nRZ R=", round(rz_cor,2)),
+           label = paste("\nRNase H   R=", round(rh_cor,2), "\nRibo Zero R=", round(rz_cor,2), "\nPoly A      R=", round(ma_cor,2)),
            hjust="inward",
            vjust="inward", 
-           color="black")
+           color="black") +
+  scale_colour_brewer(palette = "Set1") ->
+  correlation_scatterplot
+
+correlation_scatterplot
+
+correlation_scatterplot +
+  scale_x_log10() + 
+  scale_y_log10()
 ```
 
 
