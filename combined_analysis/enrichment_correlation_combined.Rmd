@@ -255,6 +255,71 @@ dds %>%
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
 ```
 
+# Scatter Facet
+```{r}
+mg <- ggplot(mtcars, aes(x = mpg, y = wt)) + geom_point()
+mg + facet_grid(vs + am ~ gear, margins = TRUE)
+```
+
+```{r}
+mtcars
+```
+
+
+```{r}
+norm_counts_wmeans %>%
+  colnames
+```
+
+
+```{r}
+norm_counts_wmeans %>%
+  select(-ma_mean, -rz_mean, -rh_mean) %>%
+  pivot_longer(
+    cols = c(-geneid, -tot_mean),
+    names_to = "library",
+    values_to = "norm_count"
+  ) ->
+  norm_counts_long
+
+dds %>%
+  colData %>%
+  as_tibble %>%
+  select(-sizeFactor) %>%
+  left_join(norm_counts_long, by="library") ->
+  norm_counts_long
+
+norm_counts_long
+```
+```{r}
+norm_counts_long %>%
+  filter(enrichment_rep != 2) %>%
+  filter(!(enrichment_method %in% c("PolyA","Total") &
+             exp_year == 2018)) %>%
+  select(RNA_sample_num, enrichment_method, exp_year, enrichment_rep) %>%
+  table
+```
+
+
+```{r}
+norm_counts_long %>%
+  # only plot one tech rep per library: remove RNAseH rep2 and PolyA and Total from 2018
+  filter(enrichment_rep != 2) %>%
+  filter(!(enrichment_method %in% c("PolyA","Total") &
+             exp_year == 2018)) %>%
+  ggplot(aes(x=tot_mean, y=norm_count)) +
+  facet_grid(enrichment_method ~ RNA_sample_num) +
+  geom_point(aes(color=enrichment_method)) +
+  geom_abline() +
+  scale_colour_brewer(palette = fig_palette, guide = FALSE) +
+  theme_bw() +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) ->
+  all_library_scatterplot
+
+all_library_scatterplot
+```
+
+
 
 # SessionInfo
 ```{r}
