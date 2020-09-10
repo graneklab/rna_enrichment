@@ -17,6 +17,8 @@ library(dplyr)
 library(ggplot2)
 library(DESeq2)
 library(tibble)
+
+fig_palette="Dark2"
 ```
 
 # Analysis with Normalized Counts
@@ -197,7 +199,7 @@ norm_counts_wmeans %>%
            hjust="inward",
            vjust="inward", 
            color="black") +
-  scale_colour_brewer(palette = "Set1") ->
+  scale_colour_brewer(palette = fig_palette) ->
   correlation_scatterplot
 
 correlation_scatterplot
@@ -206,6 +208,58 @@ correlation_scatterplot +
   scale_x_log10() + 
   scale_y_log10()
 ```
+# Correlations of all Libraries with Average Total
+## Pearson R Correlation
+```{r}
+set.seed(3)
+norm_counts_wmeans %>%
+  select(-geneid) %>%
+  summarise_all(.funs=cor, y=pull(., tot_mean)) %>%
+  t %>%
+  as_tibble(rownames = "library") %>%
+  dplyr::rename(cor_with_total="V1") ->
+  pearson_df
+
+dds %>%
+  colData %>%
+  as_tibble %>%
+  left_join(pearson_df, by="library") %>%
+  ggplot(aes(x=enrichment_method, y=cor_with_total, color=enrichment_method)) +
+  geom_boxplot(fill=NA, color="grey70",outlier.color = NA, width=0.5) +
+  geom_jitter(width=0.2, height=0, size = 4, stroke = 1, alpha=0.5) +
+  scale_colour_brewer(palette = fig_palette, guide = FALSE) +
+  ylab("Correlation") +
+  theme_minimal() +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
+```
+
+Values in this figure were determined by first normalizing the per gene read counts for each library.  An "average total" was then determined by averaging the norrmalized read counts for each gene across all total samples.  The Pearson correlation was then calculated between the average total and the normalized gene counts for each library.  All total libraries are highly correlated with the average total, indicating that biological and technical replicates are all very similar.  The RNaseH libraries are better correlated with the average total than Ribo Zero libraries and Poly A libraries, with Poly A libraries having the worst correlation.
+
+## Kendall's Tau Correlation  
+```{r}
+set.seed(3)
+norm_counts_wmeans %>%
+  select(-geneid) %>%
+  summarise_all(.funs=cor, y=pull(., tot_mean), method="kendall") %>%
+  t %>%
+  as_tibble(rownames = "library") %>%
+  dplyr::rename(cor_with_total="V1") ->
+  kendall_df
+
+dds %>%
+  colData %>%
+  as_tibble %>%
+  left_join(kendall_df, by="library") %>%
+  ggplot(aes(x=enrichment_method, y=cor_with_total, color=enrichment_method)) +
+  geom_boxplot(fill=NA, color="grey70",outlier.color = NA, width=0.5) +
+  geom_jitter(width=0.2, height=0, size = 4, stroke = 1, alpha=0.5) +
+  scale_colour_brewer(palette = fig_palette, guide = FALSE) +
+  ylab("Correlation") +
+  ggtitle("Correlation with Average Total") +
+  theme_minimal() +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
+```
+
 
 # SessionInfo
 ```{r}
