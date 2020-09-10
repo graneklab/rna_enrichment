@@ -166,28 +166,24 @@ norm_counts_wmeans %>%
 ```
 
 ## Make Scatter Plots
-```{r include=TRUE}
-
+```{r}
 norm_counts_wmeans %>%
-  summarise(max(ma_mean), max(rz_mean), max(rh_mean)) %>%
-  max -> ymax
+  select(geneid, contains("mean")) %>%
+  pivot_longer(
+    cols = c(-geneid, -tot_mean),
+    names_to = "enrich_method",
+    values_to = "mean_count"
+  ) ->
+  means_long
 
-
-norm_counts_wmeans %>%
-  ggplot(aes(x=tot_mean, y=value, color=variable)) + 
-  geom_point(aes(y=ma_mean, color="ma_mean"), size=1) +
-  geom_point(aes(y=rz_mean, color="rz_mean"), size=1) +
-  geom_point(aes(y=rh_mean, color="rh_mean"), size=1) +
+means_long %>%
+  ggplot(aes(x=tot_mean, y=mean_count, color=enrich_method)) +
+  geom_point() +
   theme_classic() +
-  scale_colour_brewer(palette = fig_palette) ->
-  correlation_scatterplot
-
-correlation_scatterplot
-
-correlation_scatterplot +
-  scale_x_log10() + 
-  scale_y_log10()
+  scale_colour_brewer(palette = fig_palette)
 ```
+
+
 # Correlations of all Libraries with Average Total
 ## Pearson R Correlation
 ```{r}
