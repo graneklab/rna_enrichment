@@ -274,8 +274,8 @@ norm_counts_long %>%
   filter(enrichment_rep != 2) %>%
   filter(!(enrichment_method %in% c("PolyA","Total") &
              exp_year == 2018)) %>%
-  ggplot(aes(x=tot_mean, y=norm_count)) +
-  geom_point(aes(color=enrichment_method)) +
+  ggplot(aes(x=tot_mean, y=norm_count, color=enrichment_method)) +
+  geom_point(alpha=0.3) +
   labs(x = "Average Normalized Count in Total", y= "Normalized Count") +
   theme_bw() +
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) ->
