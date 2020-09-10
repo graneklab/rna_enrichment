@@ -165,21 +165,6 @@ norm_counts_wmeans %>%
 
 ```
 
-## Calculate Pearson Correlations
-```{r}
-norm_counts_wmeans %>%
-  {cor(pull(., tot_mean), pull(., rz_mean))} ->
-  rz_cor
-
-norm_counts_wmeans %>%
-  {cor(pull(., tot_mean), pull(., ma_mean))} ->
-  ma_cor
-
-norm_counts_wmeans %>%
-  {cor(pull(., tot_mean), pull(., rh_mean))} ->
-  rh_cor
-```
-
 ## Make Scatter Plots
 ```{r include=TRUE}
 
@@ -256,21 +241,6 @@ dds %>%
 ```
 
 # Scatter Facet
-```{r eval=FALSE, include=FALSE}
-mg <- ggplot(mtcars, aes(x = mpg, y = wt)) + geom_point()
-mg + facet_grid(vs + am ~ gear, margins = TRUE)
-```
-
-```{r eval=FALSE, include=FALSE}
-mtcars
-```
-
-
-```{r eval=FALSE, include=FALSE}
-norm_counts_wmeans %>%
-  colnames
-```
-
 ## Prep data for plotting
 ```{r}
 norm_counts_wmeans %>%
@@ -315,8 +285,6 @@ norm_counts_long %>%
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) ->
   all_library_scatterplot
 ```
-
-
 
 ```{r fig.width=8, fig.height=10}  
 all_library_scatterplot +
