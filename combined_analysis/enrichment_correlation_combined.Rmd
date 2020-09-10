@@ -194,11 +194,6 @@ norm_counts_wmeans %>%
   geom_point(aes(y=rz_mean, color="rz_mean"), size=1) +
   geom_point(aes(y=rh_mean, color="rh_mean"), size=1) +
   theme_classic() +
-  annotate("text", x=0, y = ymax, 
-           label = paste("\nRNase H   R=", round(rh_cor,2), "\nRibo Zero R=", round(rz_cor,2), "\nPoly A      R=", round(ma_cor,2)),
-           hjust="inward",
-           vjust="inward", 
-           color="black") +
   scale_colour_brewer(palette = fig_palette) ->
   correlation_scatterplot
 
