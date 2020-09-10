@@ -67,12 +67,12 @@ knitr::kable(sample_df_2019)
  
 
 bind_rows(sample_df_2018, sample_df_2019) %>%
-  mutate(enrichment_method = case_when(enrichment_method == "H" ~ "RNaseH",
-                                       enrichment_method %in% c("T","TOT") ~ "Total",
-                                       enrichment_method %in% c("M","MA") ~ "PolyA",
-                                       enrichment_method == "RZ" ~ "RiboZero")) %>%
+  mutate(enrichment_method = case_when(enrichment_method == "H" ~ "RNase H",
+                                       enrichment_method %in% c("T","TOT") ~ "Unenriched",
+                                       enrichment_method %in% c("M","MA") ~ "Poly A",
+                                       enrichment_method == "RZ" ~ "Ribo-Zero")) %>%
   mutate(enrichment_method=factor(enrichment_method, 
-                                  levels = c("Total", "RNaseH", "RiboZero", "PolyA"))) %>%
+                                  levels = c("Unenriched", "RNase H", "Ribo-Zero", "Poly A"))) %>%
   column_to_rownames(var="expid") ->
   sample_df
 # knitr::kable(sample_df)
@@ -177,7 +177,7 @@ means_long %>%
 ```
 
 
-# Correlations of all Libraries with Average Total
+# Correlations of all Libraries with Average Unenriched
 ## Pearson R Correlation
 ```{r}
 set.seed(3)
@@ -186,22 +186,25 @@ norm_counts_wmeans %>%
   summarise_all(.funs=cor, y=pull(., tot_mean)) %>%
   t %>%
   as_tibble(rownames = "library", .name_repair="universal") %>%
-  dplyr::rename(cor_with_total="...1") ->
+  dplyr::rename(cor_with_unenriched="...1") ->
   pearson_df
 
 dds %>%
   colData %>%
   as_tibble %>%
   left_join(pearson_df, by="library") %>%
-  ggplot(aes(x=enrichment_method, y=cor_with_total, color=enrichment_method)) +
+  ggplot(aes(x=enrichment_method, y=cor_with_unenriched, color=enrichment_method)) +
   geom_boxplot(fill=NA, color="grey70",outlier.color = NA, width=0.5) +
   geom_jitter(width=0.2, height=0, size = 4, stroke = 1, alpha=0.5) +
   scale_colour_brewer(palette = fig_palette, guide = FALSE) +
-  ylab("Correlation") +
+  labs(x="Enrichment Method", y="Correlation") +
   theme_minimal() +
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
 ```
-Values in this figure were determined by first normalizing the per gene read counts for each library.  An "average total" was then determined by averaging the norrmalized read counts for each gene across all total samples.  The Pearson correlation was then calculated between the average total and the normalized gene counts for each library.  All total libraries are highly correlated with the average total, indicating that biological and technical replicates are all very similar.  The RNaseH libraries are better correlated with the average total than Ribo Zero libraries and Poly A libraries, with Poly A libraries having the worst correlation.
+
+Pearson correlation of each library with the "Gold Standard".
+
+For each library per gene read counts were normalized by that library's total reads mapped to annotated genes (excluding rRNA genes and genes that recruit rRNA reads). An "gold standard" per gene read count was calculated as the average normalized count across the six unenriched libraries.  The Pearson correlation was then calculated between this gold standard and the normalized gene counts for each library.  All unenriched libraries are highly correlated with the gold standard unenriched, indicating that biological and technical replicates are all very similar.  The RNase H libraries are better correlated with the gold standard than Ribo Zero libraries and Poly A libraries, with Poly A libraries having the worst correlation.
 
 ## Kendall's Tau Correlation  
 ```{r}
@@ -211,24 +214,28 @@ norm_counts_wmeans %>%
   summarise_all(.funs=cor, y=pull(., tot_mean), method="kendall") %>%
   t %>%
   as_tibble(rownames = "library") %>%
-  dplyr::rename(cor_with_total="V1") ->
+  dplyr::rename(cor_with_unenriched="V1") ->
   kendall_df
 
 dds %>%
   colData %>%
   as_tibble %>%
   left_join(kendall_df, by="library") %>%
-  ggplot(aes(x=enrichment_method, y=cor_with_total, color=enrichment_method)) +
+  ggplot(aes(x=enrichment_method, y=cor_with_unenriched, color=enrichment_method)) +
   geom_boxplot(fill=NA, color="grey70",outlier.color = NA, width=0.5) +
   geom_jitter(width=0.2, height=0, size = 4, stroke = 1, alpha=0.5) +
   scale_colour_brewer(palette = fig_palette, guide = FALSE) +
-  ylab("Correlation") +
-  ggtitle("Correlation with Average Total") +
+  labs(x="Enrichment Method", y="Correlation") +
+  ggtitle("Correlation with Average Unenriched") +
   theme_minimal() +
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
 ```
 
-# Scatter Facet
+Kendall's Tau Correlation  of each library with the "Gold Standard".
+
+For each library per gene read counts were normalized by that library's total reads mapped to annotated genes (excluding rRNA genes and genes that recruit rRNA reads). An "gold standard" per gene read count was calculated as the average normalized count across the six unenriched libraries.  The Kendall's Tau was then calculated between this gold standard and the normalized gene counts for each library.  All unenriched libraries are highly correlated with the gold standard unenriched, indicating that biological and technical replicates are all very similar.  The RNase H libraries are better correlated with the gold standard than Ribo Zero libraries and Poly A libraries, with Poly A libraries having the worst correlation.
+
+# Supplementary Scatter Facet
 ## Prep data for plotting
 ```{r}
 norm_counts_wmeans %>%
@@ -253,7 +260,7 @@ dds %>%
 ```{r}
 norm_counts_long %>%
   filter(enrichment_rep != 2) %>%
-  filter(!(enrichment_method %in% c("PolyA","Total") &
+  filter(!(enrichment_method %in% c("Poly A","Unenriched") &
              exp_year == 2018)) %>%
   select(RNA_sample_num, enrichment_method, exp_year, enrichment_rep) %>%
   table
@@ -262,17 +269,19 @@ norm_counts_long %>%
 ## Make Plots
 ```{r}
 norm_counts_long %>%
-  # only plot one tech rep per library: remove RNAseH rep2 and PolyA and Total from 2018
+  # only plot one tech rep per library: remove RNAseH rep2 and Poly A and Unenriched from 2018
   filter(enrichment_rep != 2) %>%
-  filter(!(enrichment_method %in% c("PolyA","Total") &
+  filter(!(enrichment_method %in% c("Poly A","Unenriched") &
              exp_year == 2018)) %>%
   ggplot(aes(x=tot_mean, y=norm_count, color=enrichment_method)) +
   geom_point(alpha=0.3) +
-  labs(x = "Average Normalized Count in Total", y= "Normalized Count") +
+  labs(x = "Average Normalized Count in Unenriched", y= "Normalized Count") +
   theme_bw() +
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) ->
   all_library_scatterplot
 ```
+
+### Sample x Enrichment Facetted Scatter Plot (Option #1)
 
 ```{r fig.width=8, fig.height=10}  
 all_library_scatterplot +
@@ -281,10 +290,13 @@ all_library_scatterplot +
   geom_abline()
 ```
 
+For each library per gene read counts were normalized by that library's total reads mapped to annotated genes (excluding rRNA genes and genes that recruit rRNA reads). A "gold standard" per gene read count was calculated as the average normalized count across the six unenriched libraries.  Libraries for each enrichment method applied to each biological replicate are ploted (technical replicates are not shown).  Each point represents a gene with the gold standard count as the x value, and the normalized count from a library as the y value.
+
+### Sample Facetted Scatter Plot (Option #2)
 ```{r fig.width=8, fig.height=10}  
 all_library_scatterplot +
   facet_grid(rows="RNA_sample_num") +
-  scale_colour_brewer(palette = fig_palette, guide = "legend") +
+  scale_colour_brewer(palette = fig_palette, guide = "legend", name="Enrichment Method") +
   geom_abline()
 ```
 
