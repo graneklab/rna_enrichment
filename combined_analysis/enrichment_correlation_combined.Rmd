@@ -256,22 +256,22 @@ dds %>%
 ```
 
 # Scatter Facet
-```{r}
+```{r eval=FALSE, include=FALSE}
 mg <- ggplot(mtcars, aes(x = mpg, y = wt)) + geom_point()
 mg + facet_grid(vs + am ~ gear, margins = TRUE)
 ```
 
-```{r}
+```{r eval=FALSE, include=FALSE}
 mtcars
 ```
 
 
-```{r}
+```{r eval=FALSE, include=FALSE}
 norm_counts_wmeans %>%
   colnames
 ```
 
-
+## Prep data for plotting
 ```{r}
 norm_counts_wmeans %>%
   select(-ma_mean, -rz_mean, -rh_mean) %>%
@@ -288,9 +288,10 @@ dds %>%
   select(-sizeFactor) %>%
   left_join(norm_counts_long, by="library") ->
   norm_counts_long
-
-norm_counts_long
+# knitr::kable(norm_counts_long)
 ```
+
+## Check technical replicates
 ```{r}
 norm_counts_long %>%
   filter(enrichment_rep != 2) %>%
@@ -300,7 +301,7 @@ norm_counts_long %>%
   table
 ```
 
-
+## Make Plots
 ```{r}
 norm_counts_long %>%
   # only plot one tech rep per library: remove RNAseH rep2 and PolyA and Total from 2018
@@ -308,18 +309,28 @@ norm_counts_long %>%
   filter(!(enrichment_method %in% c("PolyA","Total") &
              exp_year == 2018)) %>%
   ggplot(aes(x=tot_mean, y=norm_count)) +
-  facet_grid(enrichment_method ~ RNA_sample_num) +
   geom_point(aes(color=enrichment_method)) +
-  geom_abline() +
-  scale_colour_brewer(palette = fig_palette, guide = FALSE) +
+  labs(x = "Average Normalized Count in Total", y= "Normalized Count") +
   theme_bw() +
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) ->
   all_library_scatterplot
-
-all_library_scatterplot
 ```
 
 
+
+```{r fig.width=8, fig.height=10}  
+all_library_scatterplot +
+  facet_grid(rows="RNA_sample_num") +
+  scale_colour_brewer(palette = fig_palette, guide = "legend") +
+  geom_abline()
+```
+
+```{r fig.width=8, fig.height=10}  
+all_library_scatterplot +
+  facet_grid(enrichment_method ~ RNA_sample_num) +
+  scale_colour_brewer(palette = fig_palette, guide = FALSE) +
+  geom_abline()
+```
 
 # SessionInfo
 ```{r}
