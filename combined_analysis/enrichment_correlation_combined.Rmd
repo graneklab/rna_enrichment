@@ -281,7 +281,7 @@ norm_counts_long %>%
   all_library_scatterplot
 ```
 
-### Sample x Enrichment Facetted Scatter Plot (Option #1)
+### Sample x Enrichment Facetted Scatter Plot
 
 ```{r fig.width=8, fig.height=10}  
 all_library_scatterplot +
@@ -292,8 +292,7 @@ all_library_scatterplot +
 
 For each library per gene read counts were normalized by that library's total reads mapped to annotated genes (excluding rRNA genes and genes that recruit rRNA reads). A "gold standard" per gene read count was calculated as the average normalized count across the six unenriched libraries.  Libraries for each enrichment method applied to each biological replicate are ploted (technical replicates are not shown).  Each point represents a gene with the gold standard count as the x value, and the normalized count from a library as the y value.
 
-### Sample Facetted Scatter Plot (Option #2)
-```{r fig.width=8, fig.height=10}  
+```{r eval=FALSE, fig.height=10, fig.width=8, include=FALSE}
 all_library_scatterplot +
   facet_grid(rows="RNA_sample_num") +
   scale_colour_brewer(palette = fig_palette, guide = "legend", name="Enrichment Method") +
