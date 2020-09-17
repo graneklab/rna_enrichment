@@ -69,10 +69,10 @@ knitr::kable(sample_df_2019)
 bind_rows(sample_df_2018, sample_df_2019) %>%
   mutate(enrichment_method = case_when(enrichment_method == "H" ~ "RNase H",
                                        enrichment_method %in% c("T","TOT") ~ "Unenriched",
-                                       enrichment_method %in% c("M","MA") ~ "Poly A",
+                                       enrichment_method %in% c("M","MA") ~ "Poly(A)",
                                        enrichment_method == "RZ" ~ "Ribo-Zero")) %>%
   mutate(enrichment_method=factor(enrichment_method, 
-                                  levels = c("Unenriched", "RNase H", "Ribo-Zero", "Poly A"))) %>%
+                                  levels = c("Unenriched", "RNase H", "Ribo-Zero", "Poly(A)"))) %>%
   column_to_rownames(var="expid") ->
   sample_df
 # knitr::kable(sample_df)
@@ -340,7 +340,7 @@ dds %>%
 ```{r}
 norm_counts_long %>%
   filter(enrichment_rep != 2) %>%
-  filter(!(enrichment_method %in% c("Poly A","Unenriched") &
+  filter(!(enrichment_method %in% c("Poly(A)","Unenriched") &
              exp_year == 2018)) %>%
   select(RNA_sample_num, enrichment_method, exp_year, enrichment_rep) %>%
   table
@@ -351,7 +351,7 @@ norm_counts_long %>%
 norm_counts_long %>%
   # only plot one tech rep per library: remove RNAseH rep2 and Poly A and Unenriched from 2018
   filter(enrichment_rep != 2) %>%
-  filter(!(enrichment_method %in% c("Poly A","Unenriched") &
+  filter(!(enrichment_method %in% c("Poly(A)","Unenriched") &
              exp_year == 2018)) %>%
   ggplot(aes(x=tot_mean, y=norm_count, color=enrichment_method)) +
   geom_point(alpha=0.3) +
