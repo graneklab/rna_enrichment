@@ -238,11 +238,18 @@ dds %>%
 ### Plot Correlations
 ```{r}
 # Find range of R values so plots have the same y-range
-bind_rows(unenriched_cor, pearson_df) %>%
+bind_rows(unenriched_cor, pearson_df) ->
+  all_sample_correlations
+
+all_sample_correlations %>%
   pull(cor_with_unenriched) %>%
   range ->
   r_range
 
+all_sample_correlations %>%
+  group_by(enrichment_method) %>%
+  summarise(min_r = min(cor_with_unenriched),
+            max_r = max(cor_with_unenriched))
 
 dds %>%
   colData %>%
