@@ -206,7 +206,37 @@ Pearson correlation of each library with the "Gold Standard".
 
 For each library per gene read counts were normalized by that library's total reads mapped to annotated genes (excluding rRNA genes and genes that recruit rRNA reads). An "gold standard" per gene read count was calculated as the average normalized count across the six unenriched libraries.  The Pearson correlation was then calculated between this gold standard and the normalized gene counts for each library.  All unenriched libraries are highly correlated with the gold standard unenriched, indicating that biological and technical replicates are all very similar.  The RNase H libraries are better correlated with the gold standard than Ribo Zero libraries and Poly A libraries, with Poly A libraries having the worst correlation.
 
+## Leave-one-out Correlation for Unenriched
+do "cross validation" mean
+calculate mean of leave one out set, then correlate the left out with with mean of other 5
+```{r}
+norm_counts %>%
+  as_tibble(rownames = "geneid") %>%
+  select(., matches("_TOT_|_T1")) ->
+  unenriched_norm_counts
+```
+### Calculate Cross Correlations
+```{r}
+
+data.frame(row.names = colnames(unenriched_norm_counts),
+       cross_cor = rep(-1, ncol(unenriched_norm_counts))) ->
+  unenriched_cor
+
+for (cur_sample in colnames(unenriched_norm_counts)){
+  print(cur_sample)
+  unenriched_norm_counts %>%
+    select(-cur_sample) %>%
+    rowMeans %>%
+    cor(select(unenriched_norm_counts, cur_sample)) ->
+    unenriched_cor[cur_sample,"cross_cor"]
+}
+unenriched_cor
+```
+
 ## Kendall's Tau Correlation  
+
+> Kendall's Tau is not "Correlation" it is Concordance.  Pearson depends on marginal distribution of x and y
+
 ```{r}
 set.seed(3)
 norm_counts_wmeans %>%
