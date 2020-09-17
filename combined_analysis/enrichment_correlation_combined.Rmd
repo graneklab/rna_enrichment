@@ -243,22 +243,31 @@ bind_rows(unenriched_cor, pearson_df) %>%
   range ->
   r_range
 
+
+dds %>%
+  colData %>%
+  as_tibble %>%
+  pull(enrichment_method) %>%
+  levels ->
+  enrich_levels
+
 set.seed(3)
 unenriched_cor %>%
   ggplot(aes(x=enrichment_method, y=cor_with_unenriched, color=enrichment_method)) +
   geom_boxplot(fill=NA, color="grey70",outlier.color = NA, width=0.5) +
   geom_jitter(width=0.2, height=0, size = 4, stroke = 1, alpha=0.5) +
-  scale_colour_brewer(palette = fig_palette, guide = FALSE) +
+  scale_colour_brewer(palette = fig_palette, guide = FALSE, drop=TRUE, limits = enrich_levels) +
   labs(x="Enrichment Method", y="Correlation") +
   theme_minimal() +
   ylim(r_range) +
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
 
+set.seed(3)
 pearson_df %>%  
   ggplot(aes(x=enrichment_method, y=cor_with_unenriched, color=enrichment_method)) +
   geom_boxplot(fill=NA, color="grey70",outlier.color = NA, width=0.5) +
   geom_jitter(width=0.2, height=0, size = 4, stroke = 1, alpha=0.5) +
-  scale_colour_brewer(palette = fig_palette, guide = FALSE) +
+  scale_colour_brewer(palette = fig_palette, guide = FALSE, drop=TRUE, limits = enrich_levels) +
   labs(x="Enrichment Method", y="Correlation") +
   theme_minimal() +
   ylim(r_range) +
