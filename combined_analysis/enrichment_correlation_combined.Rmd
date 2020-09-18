@@ -217,11 +217,11 @@ data.frame(row.names = colnames(unenriched_norm_counts),
   unenriched_cor
 
 for (cur_sample in colnames(unenriched_norm_counts)){
-  print(cur_sample)
+  # print(cur_sample)
   unenriched_norm_counts %>%
     select(-cur_sample) %>%
     rowMeans %>%
-    cor(select(unenriched_norm_counts, cur_sample)) ->
+    cor(select(unenriched_norm_counts, all_of(cur_sample))) ->
     unenriched_cor[cur_sample,"cor_with_unenriched"]
 }
 unenriched_cor %>%
@@ -246,11 +246,6 @@ all_sample_correlations %>%
   range ->
   r_range
 
-all_sample_correlations %>%
-  group_by(enrichment_method) %>%
-  summarise(min_r = min(cor_with_unenriched),
-            max_r = max(cor_with_unenriched))
-
 dds %>%
   colData %>%
   as_tibble %>%
@@ -267,7 +262,8 @@ unenriched_cor %>%
   labs(x="Enrichment Method", y="Correlation") +
   theme_minimal() +
   ylim(r_range) +
-  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) ->
+  unenriched_plot
 
 set.seed(3)
 pearson_df %>%  
@@ -278,7 +274,24 @@ pearson_df %>%
   labs(x="Enrichment Method", y="Correlation") +
   theme_minimal() +
   ylim(r_range) +
-  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) ->
+  enriched_plot
+```
+
+```{r}
+all_sample_correlations %>%
+  group_by(enrichment_method) %>%
+  summarise(min_r = min(cor_with_unenriched),
+            max_r = max(cor_with_unenriched)) %>%
+  kable
+```
+
+```{r fig.width=2, fig.height=5}  
+unenriched_plot
+```
+
+```{r fig.width=4, fig.height=5}  
+enriched_plot
 ```
 
 
@@ -287,7 +300,7 @@ pearson_df %>%
 
 > Kendall's Tau is not "Correlation" it is Concordance.  Pearson depends on marginal distribution of x and y
 
-```{r}
+```{r eval=FALSE, include=FALSE}
 set.seed(3)
 norm_counts_wmeans %>%
   select(-geneid) %>%
