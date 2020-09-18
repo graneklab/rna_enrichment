@@ -107,6 +107,15 @@ dds %>% collapseReplicates(object=.,
                              as_tibble %>%
                              pull(library)) ->
   dds
+
+# extract levels to use for color palettes
+dds %>%
+  colData %>%
+  as_tibble %>%
+  pull(enrichment_method) %>%
+  levels ->
+  enrich_levels
+
 dds
 ```
 
@@ -195,24 +204,17 @@ calculateCrossCorrelation <- function(unenriched_norm_counts, dds) {
   
   return(unenriched_cor)
 }
-calculateCrossCorrelation(unenriched_norm_counts, dds)
+unenriched_cor = calculateCrossCorrelation(unenriched_norm_counts, dds)
 ```
 
 ### Plot Correlations
 ```{r}
 # Find range of R values so plots have the same y-range
-plotCorrelationValues <- function(unenriched_cor, enriched_cor, dds, fig_palette) {
+plotCorrelationValues <- function(unenriched_cor, enriched_cor, dds, fig_palette, enrich_levels) {
   bind_rows(unenriched_cor, pearson_df) %>%
     pull(cor_with_unenriched) %>%
     range ->
     r_range
-  
-  dds %>%
-    colData %>%
-    as_tibble %>%
-    pull(enrichment_method) %>%
-    levels ->
-    enrich_levels
   
   set.seed(3)
   unenriched_cor %>%
@@ -244,15 +246,19 @@ plotCorrelationValues <- function(unenriched_cor, enriched_cor, dds, fig_palette
             label_size = 12)
 }
 
-
-plotCorrelationValues(unenriched_cor, pearson_df, dds, fig_palette)
+plotCorrelationValues(unenriched_cor, pearson_df, dds, fig_palette, enrich_levels)
 ```
 
 ```{r}
-bind_rows(unenriched_cor, pearson_df) %>%
+correlationRanges <- function(unenriched_cor, enriched_cor){
+  bind_rows(unenriched_cor, pearson_df) %>%
   group_by(enrichment_method) %>%
   summarise(min_r = min(cor_with_unenriched),
             max_r = max(cor_with_unenriched)) %>%
+    return
+}
+
+correlationRanges(unenriched_cor, pearson_df) %>%
   kable
 ```
 
