@@ -149,15 +149,15 @@ enrichedCorrelationToGoldStandard <- function(norm_counts_wmeans, dds) {
     t %>%
     as_tibble(rownames = "library", .name_repair="universal") %>%
     dplyr::rename(cor_with_unenriched="...1") ->
-    pearson_df
+    enriched_cor
   
   dds %>%
     colData %>%
     as_tibble %>%
-    left_join(pearson_df, by="library") %>%
+    left_join(enriched_cor, by="library") %>%
     filter(enrichment_method!="Unenriched") ->
-  pearson_df
-  return(pearson_df)
+  enriched_cor
+  return(enriched_cor)
 }
 ```
 
@@ -210,7 +210,7 @@ calculateCrossCorrelation <- function(unenriched_norm_counts, dds) {
 ```{r}
 # Find range of R values so plots have the same y-range
 plotCorrelationValues <- function(unenriched_cor, enriched_cor, dds, fig_palette, enrich_levels) {
-  bind_rows(unenriched_cor, pearson_df) %>%
+  bind_rows(unenriched_cor, enriched_cor) %>%
     pull(cor_with_unenriched) %>%
     range ->
     r_range
@@ -228,7 +228,7 @@ plotCorrelationValues <- function(unenriched_cor, enriched_cor, dds, fig_palette
     unenriched_plot
   
   set.seed(3)
-  pearson_df %>%  
+  enriched_cor %>%  
     ggplot(aes(x=enrichment_method, y=cor_with_unenriched, color=enrichment_method)) +
     geom_boxplot(fill=NA, color="grey70",outlier.color = NA, width=0.5) +
     geom_jitter(width=0.2, height=0, size = 4, stroke = 1, alpha=0.5) +
@@ -248,7 +248,7 @@ plotCorrelationValues <- function(unenriched_cor, enriched_cor, dds, fig_palette
 
 ```{r}
 correlationRanges <- function(unenriched_cor, enriched_cor){
-  bind_rows(unenriched_cor, pearson_df) %>%
+  bind_rows(unenriched_cor, enriched_cor) %>%
   group_by(enrichment_method) %>%
   summarise(min_r = min(cor_with_unenriched),
             max_r = max(cor_with_unenriched)) %>%
@@ -333,14 +333,14 @@ unenriched_norm_counts %>%
   calculateCrossCorrelation(dds) ->
   unenriched_cor
 
-pearson_df = enrichedCorrelationToGoldStandard(norm_counts_wmeans, dds)
+enriched_cor = enrichedCorrelationToGoldStandard(norm_counts_wmeans, dds)
 
-correlationRanges(unenriched_cor, pearson_df) %>%
+correlationRanges(unenriched_cor, enriched_cor) %>%
   kable
 ```
 
 ```{r}
-plotCorrelationValues(unenriched_cor, pearson_df, dds, fig_palette, enrich_levels)
+plotCorrelationValues(unenriched_cor, enriched_cor, dds, fig_palette, enrich_levels)
 ```
 
 ```{r fig.width=8, fig.height=8}  
@@ -372,6 +372,7 @@ norm_counts_wmeans %>%
 
 correlationRanges(protein_coding_unenriched_cor, protein_coding_enriched_cor) %>%
   kable
+
 ```
 
 ```{r}
