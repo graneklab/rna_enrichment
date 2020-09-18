@@ -157,8 +157,6 @@ enrichedCorrelationToGoldStandard <- function(norm_counts_wmeans, dds) {
   pearson_df
   return(pearson_df)
 }
-
-pearson_df = enrichedCorrelationToGoldStandard(norm_counts_wmeans, dds)
 ```
 
 
@@ -204,7 +202,6 @@ calculateCrossCorrelation <- function(unenriched_norm_counts, dds) {
   
   return(unenriched_cor)
 }
-unenriched_cor = calculateCrossCorrelation(unenriched_norm_counts, dds)
 ```
 
 ### Plot Correlations
@@ -245,8 +242,6 @@ plotCorrelationValues <- function(unenriched_cor, enriched_cor, dds, fig_palette
             labels = c('A', 'B'), 
             label_size = 12)
 }
-
-plotCorrelationValues(unenriched_cor, pearson_df, dds, fig_palette, enrich_levels)
 ```
 
 ```{r}
@@ -257,9 +252,6 @@ correlationRanges <- function(unenriched_cor, enriched_cor){
             max_r = max(cor_with_unenriched)) %>%
     return
 }
-
-correlationRanges(unenriched_cor, pearson_df) %>%
-  kable
 ```
 
 
@@ -320,6 +312,21 @@ makeEnrichmentScatterplot <- function(norm_counts_long, fig_palette, enrich_leve
     geom_abline() %>%
     return
 }
+```
+
+
+# All Plots
+## All Genes
+```{r}
+unenriched_cor = calculateCrossCorrelation(unenriched_norm_counts, dds)
+pearson_df = enrichedCorrelationToGoldStandard(norm_counts_wmeans, dds)
+
+correlationRanges(unenriched_cor, pearson_df) %>%
+  kable
+```
+
+```{r}
+plotCorrelationValues(unenriched_cor, pearson_df, dds, fig_palette, enrich_levels)
 ```
 
 ```{r fig.width=8, fig.height=8}  
