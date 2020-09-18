@@ -5,7 +5,6 @@ output: html_document
 
 ```{r global_options, include=FALSE, echo=FALSE}
 library(knitr)
-library(cowplot)
 knitr::opts_chunk$set(echo=TRUE, include=TRUE)
 ```
 
@@ -18,6 +17,9 @@ library(dplyr)
 library(ggplot2)
 library(DESeq2)
 library(tibble)
+library(cowplot)
+library(rtracklayer)
+library(here)
 
 fig_palette="Dark2"
 ```
@@ -172,7 +174,7 @@ calculate mean of leave one out set, then correlate the left out with with mean 
 ```{r}
 norm_counts %>%
   as_tibble(rownames = "geneid") %>%
-  select(., matches("_TOT_|_T1")) ->
+  select(geneid, matches("_TOT_|_T1")) ->
   unenriched_norm_counts
 ```
 
@@ -315,10 +317,22 @@ makeEnrichmentScatterplot <- function(norm_counts_long, fig_palette, enrich_leve
 ```
 
 
+# Load GTF info
+```{r}
+import(gtf_with_mito_rrna.file, format="gtf") %>%
+  subset(type=="exon") %>% 
+  as.data.frame ->
+  h99_granges
+```
+
 # All Plots
 ## All Genes
 ```{r}
-unenriched_cor = calculateCrossCorrelation(unenriched_norm_counts, dds)
+unenriched_norm_counts %>%
+  select(-geneid) %>%
+  calculateCrossCorrelation(dds) ->
+  unenriched_cor
+
 pearson_df = enrichedCorrelationToGoldStandard(norm_counts_wmeans, dds)
 
 correlationRanges(unenriched_cor, pearson_df) %>%
@@ -335,6 +349,42 @@ makeEnrichmentScatterplot(norm_counts_long_noreps, fig_palette, enrich_levels)
 
 For each library per gene read counts were normalized by that library's total reads mapped to annotated genes (excluding rRNA genes and genes that recruit rRNA reads). A "gold standard" per gene read count was calculated as the average normalized count across the six unenriched libraries.  Libraries for each enrichment method applied to each biological replicate are ploted (technical replicates are not shown).  Each point represents a gene with the gold standard count as the x value, and the normalized count from a library as the y value.
 
+
+## Protein Coding Genes
+
+```{r}
+h99_granges %>% 
+  filter(gene_biotype == "protein_coding") %>%
+  pull(gene_id) %>%
+  unique ->
+  protein_coding_geneids
+
+unenriched_norm_counts %>%
+  filter(geneid %in% protein_coding_geneids) %>%
+  select(-geneid) %>%
+  calculateCrossCorrelation(dds) ->
+  protein_coding_unenriched_cor
+
+norm_counts_wmeans %>%
+  filter(geneid %in% protein_coding_geneids) %>%
+  enrichedCorrelationToGoldStandard(dds) ->
+  protein_coding_enriched_cor
+
+correlationRanges(protein_coding_unenriched_cor, protein_coding_enriched_cor) %>%
+  kable
+```
+
+```{r}
+plotCorrelationValues(protein_coding_unenriched_cor, 
+                      protein_coding_enriched_cor, 
+                      dds, fig_palette, enrich_levels)
+```
+
+```{r fig.width=8, fig.height=8}  
+norm_counts_long_noreps %>%
+  filter(geneid %in% protein_coding_geneids) %>%
+  makeEnrichmentScatterplot(fig_palette, enrich_levels)
+```
 
 # SessionInfo
 ```{r}
