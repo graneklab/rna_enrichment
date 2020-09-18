@@ -201,60 +201,61 @@ calculateCrossCorrelation(unenriched_norm_counts, dds)
 ### Plot Correlations
 ```{r}
 # Find range of R values so plots have the same y-range
-bind_rows(unenriched_cor, pearson_df) ->
-  all_sample_correlations
+plotCorrelationValues <- function(unenriched_cor, enriched_cor, dds, fig_palette) {
+  bind_rows(unenriched_cor, pearson_df) %>%
+    pull(cor_with_unenriched) %>%
+    range ->
+    r_range
+  
+  dds %>%
+    colData %>%
+    as_tibble %>%
+    pull(enrichment_method) %>%
+    levels ->
+    enrich_levels
+  
+  set.seed(3)
+  unenriched_cor %>%
+    ggplot(aes(x=enrichment_method, y=cor_with_unenriched, color=enrichment_method)) +
+    geom_boxplot(fill=NA, color="grey70",outlier.color = NA, width=0.5) +
+    geom_jitter(width=0.2, height=0, size = 4, stroke = 1, alpha=0.5) +
+    scale_colour_brewer(palette = fig_palette, guide = FALSE, drop=TRUE, limits = enrich_levels) +
+    labs(x="Enrichment Method", y="Correlation") +
+    theme_minimal() +
+    ylim(r_range) +
+    theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) ->
+    unenriched_plot
+  
+  set.seed(3)
+  pearson_df %>%  
+    ggplot(aes(x=enrichment_method, y=cor_with_unenriched, color=enrichment_method)) +
+    geom_boxplot(fill=NA, color="grey70",outlier.color = NA, width=0.5) +
+    geom_jitter(width=0.2, height=0, size = 4, stroke = 1, alpha=0.5) +
+    scale_colour_brewer(palette = fig_palette, guide = FALSE, drop=TRUE, limits = enrich_levels) +
+    labs(x="Enrichment Method", y="Correlation") +
+    theme_minimal() +
+    ylim(r_range) +
+    theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) ->
+    enriched_plot
+  
+  plot_grid(unenriched_plot, enriched_plot, 
+            rel_widths = c(1, 2),
+            labels = c('A', 'B'), 
+            label_size = 12)
+}
 
-all_sample_correlations %>%
-  pull(cor_with_unenriched) %>%
-  range ->
-  r_range
 
-dds %>%
-  colData %>%
-  as_tibble %>%
-  pull(enrichment_method) %>%
-  levels ->
-  enrich_levels
-
-set.seed(3)
-unenriched_cor %>%
-  ggplot(aes(x=enrichment_method, y=cor_with_unenriched, color=enrichment_method)) +
-  geom_boxplot(fill=NA, color="grey70",outlier.color = NA, width=0.5) +
-  geom_jitter(width=0.2, height=0, size = 4, stroke = 1, alpha=0.5) +
-  scale_colour_brewer(palette = fig_palette, guide = FALSE, drop=TRUE, limits = enrich_levels) +
-  labs(x="Enrichment Method", y="Correlation") +
-  theme_minimal() +
-  ylim(r_range) +
-  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) ->
-  unenriched_plot
-
-set.seed(3)
-pearson_df %>%  
-  ggplot(aes(x=enrichment_method, y=cor_with_unenriched, color=enrichment_method)) +
-  geom_boxplot(fill=NA, color="grey70",outlier.color = NA, width=0.5) +
-  geom_jitter(width=0.2, height=0, size = 4, stroke = 1, alpha=0.5) +
-  scale_colour_brewer(palette = fig_palette, guide = FALSE, drop=TRUE, limits = enrich_levels) +
-  labs(x="Enrichment Method", y="Correlation") +
-  theme_minimal() +
-  ylim(r_range) +
-  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) ->
-  enriched_plot
+plotCorrelationValues(unenriched_cor, pearson_df, dds, fig_palette)
 ```
 
 ```{r}
-all_sample_correlations %>%
+bind_rows(unenriched_cor, pearson_df) %>%
   group_by(enrichment_method) %>%
   summarise(min_r = min(cor_with_unenriched),
             max_r = max(cor_with_unenriched)) %>%
   kable
 ```
 
-```{r}
-plot_grid(unenriched_plot, enriched_plot, 
-          rel_widths = c(1, 2),
-          labels = c('A', 'B'), 
-          label_size = 12)
-```
 
 TODO:
 1. Make correlation and scatter plots for ncRNA and protein_coding
