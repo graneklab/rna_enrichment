@@ -5,6 +5,7 @@ output: html_document
 
 ```{r global_options, include=FALSE, echo=FALSE}
 library(knitr)
+library(cowplot)
 knitr::opts_chunk$set(echo=TRUE, include=TRUE)
 ```
 
@@ -248,12 +249,11 @@ all_sample_correlations %>%
   kable
 ```
 
-```{r fig.width=2, fig.height=5}  
-unenriched_plot
-```
-
-```{r fig.width=4, fig.height=5}  
-enriched_plot
+```{r}
+plot_grid(unenriched_plot, enriched_plot, 
+          rel_widths = c(1, 2),
+          labels = c('A', 'B'), 
+          label_size = 12)
 ```
 
 TODO:
