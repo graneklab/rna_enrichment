@@ -270,12 +270,12 @@ TODO:
 # Supplementary Scatter Facet
 ## Prep data for plotting
 ```{r}
+
 norm_counts_wmeans %>%
   pivot_longer(
     cols = c(-geneid, -gold_mean),
     names_to = "library",
-    values_to = "norm_count"
-  ) ->
+    values_to = "norm_count") ->
   norm_counts_long
 
 dds %>%
@@ -285,6 +285,14 @@ dds %>%
   left_join(norm_counts_long, by="library") ->
   norm_counts_long
 # knitr::kable(norm_counts_long)
+
+norm_counts_long %>%
+    # only plot one tech rep per library: remove RNAseH rep2 and Poly A and Unenriched from 2018
+    filter(enrichment_rep != 2) %>%
+    filter(!(enrichment_method %in% c("Poly(A)","Unenriched") &
+               exp_year == 2018)) %>%
+    filter(enrichment_method!="Unenriched") ->
+  norm_counts_long_noreps
 ```
 
 ## Check technical replicates
@@ -297,29 +305,25 @@ norm_counts_long %>%
   table
 ```
 
-## Make Plots
+## Make Sample x Enrichment Facetted Scatter Plot
+
 ```{r}
-norm_counts_long %>%
-  # only plot one tech rep per library: remove RNAseH rep2 and Poly A and Unenriched from 2018
-  filter(enrichment_rep != 2) %>%
-  filter(!(enrichment_method %in% c("Poly(A)","Unenriched") &
-             exp_year == 2018)) %>%
-  filter(enrichment_method!="Unenriched") %>%
-  ggplot(aes(x=gold_mean, y=norm_count, color=enrichment_method)) +
-  geom_point(alpha=0.3) +
-  labs(x = "Average Normalized Count in Unenriched", y= "Normalized Count") +
-  theme_bw() +
-  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) ->
-  all_library_scatterplot
+makeEnrichmentScatterplot <- function(norm_counts_long, fig_palette, enrich_levels) {
+  norm_counts_long %>%
+    ggplot(aes(x=gold_mean, y=norm_count, color=enrichment_method)) +
+    geom_point(alpha=0.3) +
+    labs(x = "Average Normalized Count in Unenriched", y= "Normalized Count") +
+    theme_bw() +
+    theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())  +
+    facet_grid(enrichment_method ~ RNA_sample_num) +
+    scale_colour_brewer(palette = fig_palette, guide = FALSE, drop=TRUE, limits = enrich_levels) +
+    geom_abline() %>%
+    return
+}
 ```
 
-### Sample x Enrichment Facetted Scatter Plot
-
 ```{r fig.width=8, fig.height=8}  
-all_library_scatterplot +
-  facet_grid(enrichment_method ~ RNA_sample_num) +
-  scale_colour_brewer(palette = fig_palette, guide = FALSE, drop=TRUE, limits = enrich_levels) +
-  geom_abline()
+makeEnrichmentScatterplot(norm_counts_long_noreps, fig_palette, enrich_levels)
 ```
 
 For each library per gene read counts were normalized by that library's total reads mapped to annotated genes (excluding rRNA genes and genes that recruit rRNA reads). A "gold standard" per gene read count was calculated as the average normalized count across the six unenriched libraries.  Libraries for each enrichment method applied to each biological replicate are ploted (technical replicates are not shown).  Each point represents a gene with the gold standard count as the x value, and the normalized count from a library as the y value.
