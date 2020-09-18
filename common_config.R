@@ -14,6 +14,7 @@ fa_url = h99_genome_url
 gtf_url = h99_gtf_url
 
 basedir = "/workspace"
+out.dir=file.path(basedir, "2018_tot_samples")
 
 # The following are determined in 2018_analysis/enrichment_correlation.Rmd 
 all_rrna_homologs = c("CNAG_12438","CNAG_07466","CNAG_10500",
@@ -31,3 +32,6 @@ gtf_url %>%
   paste0("__with_mito_rrna.gtf") %>%
   file.path(here("info"), .) ->
   gtf_with_mito_rrna.file
+
+fig.dir = file.path(out.dir, "figures")
+dir.create(fig.dir)

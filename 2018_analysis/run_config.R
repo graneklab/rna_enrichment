@@ -12,7 +12,6 @@ raw_fastq.dir="/data/hts_2018_data/hts2018_pilot_rawdata"
 metadata.file=file.path(raw_fastq.dir, "2018_pilot_metadata.tsv")
 
 # output
-out.dir="/workspace/2018_tot_samples"
 info.dir=file.path(out.dir, "info")
 adapters.file= file.path(info.dir, "neb_e7600_adapters_withrc.fasta")
 trimmed.dir=file.path(out.dir, "trimmed_fastqs")
@@ -22,8 +21,6 @@ mosdepth.dir=file.path(out.dir, "mosdepth")
 seq.dir = file.path(out.dir, "seq_out"); dir.create(seq.dir, recursive = TRUE)
 # export final_counts=$data_base/star_counts
 igv_tarball = file.path(out.dir, "visualize_oligos.tgz")
-fig.dir = file.path(out.dir, "figures")
-dir.create(fig.dir)
 
 # genome
 
