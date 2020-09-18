@@ -115,34 +115,6 @@ dds <- DESeq(dds)
 
 ## Calculate Group Mean of Normalized counts
 
-```{r eval=FALSE, include=FALSE}
-dds %>%
-  counts(normalized=TRUE) ->
-  norm_counts
-
-norm_counts %>%
-  as_tibble(rownames = "geneid") %>%
-  select(., matches("_MA_|_M1"))
-```
-
-```{r eval=FALSE, include=FALSE}
-norm_counts %>%
-  as_tibble(rownames = "geneid") %>%
-  select(., matches("_H[12]"))
-```
-
-```{r eval=FALSE, include=FALSE}
-norm_counts %>%
-  as_tibble(rownames = "geneid") %>%
-  select(., matches("_TOT_|_T1"))
-```
-
-```{r eval=FALSE, include=FALSE}
-norm_counts %>%
-  as_tibble(rownames = "geneid") %>%
-  select(., matches("_RZ_"))
-```
-
 ```{r}
 dds %>%
   counts(normalized=TRUE) ->
@@ -150,32 +122,9 @@ dds %>%
 
 norm_counts %>%
   as_tibble(rownames = "geneid") %>%
-  mutate(ma_mean = rowMeans(select(., matches("_MA_|_M1"))),
-         rz_mean = rowMeans(select(., matches("_RZ_"))),
-         rh_mean = rowMeans(select(., matches("_H[12]"))),
-         tot_mean = rowMeans(select(., matches("_TOT_|_T1")))) ->
+  mutate(tot_mean = rowMeans(select(., matches("_TOT_|_T1")))) ->
   norm_counts_wmeans
-
 ```
-
-## Make Scatter Plots
-```{r eval=FALSE, include=FALSE}
-norm_counts_wmeans %>%
-  select(geneid, contains("mean")) %>%
-  pivot_longer(
-    cols = c(-geneid, -tot_mean),
-    names_to = "enrich_method",
-    values_to = "mean_count"
-  ) ->
-  means_long
-
-means_long %>%
-  ggplot(aes(x=tot_mean, y=mean_count, color=enrich_method)) +
-  geom_point() +
-  theme_classic() +
-  scale_colour_brewer(palette = fig_palette)
-```
-
 
 # Correlations of all Libraries with Average Unenriched
 ## Pearson R Correlation
@@ -298,43 +247,10 @@ TODO:
 1. Make correlation and scatter plots for ncRNA and protein_coding
   A. wrap plotting in function(s)
 
-## Kendall's Tau Correlation  
-
-> Kendall's Tau is not "Correlation" it is Concordance.  Pearson depends on marginal distribution of x and y
-
-```{r eval=FALSE, include=FALSE}
-set.seed(3)
-norm_counts_wmeans %>%
-  select(-geneid) %>%
-  summarise_all(.funs=cor, y=pull(., tot_mean), method="kendall") %>%
-  t %>%
-  as_tibble(rownames = "library") %>%
-  dplyr::rename(cor_with_unenriched="V1") ->
-  kendall_df
-
-dds %>%
-  colData %>%
-  as_tibble %>%
-  left_join(kendall_df, by="library") %>%
-  ggplot(aes(x=enrichment_method, y=cor_with_unenriched, color=enrichment_method)) +
-  geom_boxplot(fill=NA, color="grey70",outlier.color = NA, width=0.5) +
-  geom_jitter(width=0.2, height=0, size = 4, stroke = 1, alpha=0.5) +
-  scale_colour_brewer(palette = fig_palette, guide = FALSE) +
-  labs(x="Enrichment Method", y="Correlation") +
-  ggtitle("Correlation with Average Unenriched") +
-  theme_minimal() +
-  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
-```
-
-Kendall's Tau Correlation  of each library with the "Gold Standard".
-
-For each library per gene read counts were normalized by that library's total reads mapped to annotated genes (excluding rRNA genes and genes that recruit rRNA reads). An "gold standard" per gene read count was calculated as the average normalized count across the six unenriched libraries.  The Kendall's Tau was then calculated between this gold standard and the normalized gene counts for each library.  All unenriched libraries are highly correlated with the gold standard unenriched, indicating that biological and technical replicates are all very similar.  The RNase H libraries are better correlated with the gold standard than Ribo Zero libraries and Poly A libraries, with Poly A libraries having the worst correlation.
-
 # Supplementary Scatter Facet
 ## Prep data for plotting
 ```{r}
 norm_counts_wmeans %>%
-  select(-ma_mean, -rz_mean, -rh_mean) %>%
   pivot_longer(
     cols = c(-geneid, -tot_mean),
     names_to = "library",
@@ -387,13 +303,6 @@ all_library_scatterplot +
 ```
 
 For each library per gene read counts were normalized by that library's total reads mapped to annotated genes (excluding rRNA genes and genes that recruit rRNA reads). A "gold standard" per gene read count was calculated as the average normalized count across the six unenriched libraries.  Libraries for each enrichment method applied to each biological replicate are ploted (technical replicates are not shown).  Each point represents a gene with the gold standard count as the x value, and the normalized count from a library as the y value.
-
-```{r eval=FALSE, fig.height=10, fig.width=8, include=FALSE}
-all_library_scatterplot +
-  facet_grid(rows="RNA_sample_num") +
-  scale_colour_brewer(palette = fig_palette, guide = "legend", name="Enrichment Method") +
-  geom_abline()
-```
 
 
 # SessionInfo
