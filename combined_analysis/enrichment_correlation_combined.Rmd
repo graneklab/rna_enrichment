@@ -166,28 +166,35 @@ norm_counts %>%
   as_tibble(rownames = "geneid") %>%
   select(., matches("_TOT_|_T1")) ->
   unenriched_norm_counts
+```
 
-data.frame(row.names = colnames(unenriched_norm_counts),
-       cor_with_unenriched = rep(-1, ncol(unenriched_norm_counts))) ->
-  unenriched_cor
-
-for (cur_sample in colnames(unenriched_norm_counts)){
-  # print(cur_sample)
-  unenriched_norm_counts %>%
-    select(-cur_sample) %>%
-    rowMeans %>%
-    cor(select(unenriched_norm_counts, all_of(cur_sample))) ->
-    unenriched_cor[cur_sample,"cor_with_unenriched"]
+```{r}
+calculateCrossCorrelation <- function(unenriched_norm_counts, dds) {
+  data.frame(row.names = colnames(unenriched_norm_counts),
+         cor_with_unenriched = rep(-1, ncol(unenriched_norm_counts))) ->
+    unenriched_cor
+  
+  for (cur_sample in colnames(unenriched_norm_counts)){
+    # print(cur_sample)
+    unenriched_norm_counts %>%
+      select(-cur_sample) %>%
+      rowMeans %>%
+      cor(select(unenriched_norm_counts, all_of(cur_sample))) ->
+      unenriched_cor[cur_sample,"cor_with_unenriched"]
+  }
+  unenriched_cor %>%
+    as_tibble(rownames = "library", .name_repair="universal") ->
+    unenriched_cor
+  
+  dds %>%
+    colData %>%
+    as_tibble %>%
+    right_join(unenriched_cor, by="library") ->
+    unenriched_cor
+  
+  return(unenriched_cor)
 }
-unenriched_cor %>%
-  as_tibble(rownames = "library", .name_repair="universal") ->
-  unenriched_cor
-
-dds %>%
-  colData %>%
-  as_tibble %>%
-  right_join(unenriched_cor, by="library") ->
-  unenriched_cor
+calculateCrossCorrelation(unenriched_norm_counts, dds)
 ```
 
 ### Plot Correlations
