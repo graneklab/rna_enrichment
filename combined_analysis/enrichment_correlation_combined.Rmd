@@ -122,29 +122,35 @@ dds %>%
 
 norm_counts %>%
   as_tibble(rownames = "geneid") %>%
-  mutate(tot_mean = rowMeans(select(., matches("_TOT_|_T1")))) ->
+  mutate(gold_mean = rowMeans(select(., matches("_TOT_|_T1")))) ->
   norm_counts_wmeans
 ```
 
 # Correlations of all Libraries with Average Unenriched
 ## Pearson R Correlation
-```{r}
-set.seed(3)
-norm_counts_wmeans %>%
-  select(-geneid) %>%
-  summarise_all(.funs=cor, y=pull(., tot_mean)) %>%
-  t %>%
-  as_tibble(rownames = "library", .name_repair="universal") %>%
-  dplyr::rename(cor_with_unenriched="...1") ->
-  pearson_df
 
-dds %>%
-  colData %>%
-  as_tibble %>%
-  left_join(pearson_df, by="library") %>%
-  filter(enrichment_method!="Unenriched") ->
-pearson_df
+```{r}
+enrichedCorrelationToGoldStandard <- function(norm_counts_wmeans, dds) {
+  norm_counts_wmeans %>%
+    select(-geneid) %>%
+    summarise_all(.funs=cor, y=pull(., gold_mean)) %>%
+    t %>%
+    as_tibble(rownames = "library", .name_repair="universal") %>%
+    dplyr::rename(cor_with_unenriched="...1") ->
+    pearson_df
+  
+  dds %>%
+    colData %>%
+    as_tibble %>%
+    left_join(pearson_df, by="library") %>%
+    filter(enrichment_method!="Unenriched") ->
+  pearson_df
+  return(pearson_df)
+}
+
+pearson_df = enrichedCorrelationToGoldStandard(norm_counts_wmeans, dds)
 ```
+
 
 Pearson correlation of each library with the "Gold Standard".
 
@@ -252,7 +258,7 @@ TODO:
 ```{r}
 norm_counts_wmeans %>%
   pivot_longer(
-    cols = c(-geneid, -tot_mean),
+    cols = c(-geneid, -gold_mean),
     names_to = "library",
     values_to = "norm_count"
   ) ->
@@ -285,7 +291,7 @@ norm_counts_long %>%
   filter(!(enrichment_method %in% c("Poly(A)","Unenriched") &
              exp_year == 2018)) %>%
   filter(enrichment_method!="Unenriched") %>%
-  ggplot(aes(x=tot_mean, y=norm_count, color=enrichment_method)) +
+  ggplot(aes(x=gold_mean, y=norm_count, color=enrichment_method)) +
   geom_point(alpha=0.3) +
   labs(x = "Average Normalized Count in Unenriched", y= "Normalized Count") +
   theme_bw() +
