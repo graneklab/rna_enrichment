@@ -294,7 +294,9 @@ unenriched_plot
 enriched_plot
 ```
 
-
+TODO:
+1. Make correlation and scatter plots for ncRNA and protein_coding
+  A. wrap plotting in function(s)
 
 ## Kendall's Tau Correlation  
 
@@ -366,6 +368,7 @@ norm_counts_long %>%
   filter(enrichment_rep != 2) %>%
   filter(!(enrichment_method %in% c("Poly(A)","Unenriched") &
              exp_year == 2018)) %>%
+  filter(enrichment_method!="Unenriched") %>%
   ggplot(aes(x=tot_mean, y=norm_count, color=enrichment_method)) +
   geom_point(alpha=0.3) +
   labs(x = "Average Normalized Count in Unenriched", y= "Normalized Count") +
@@ -376,10 +379,10 @@ norm_counts_long %>%
 
 ### Sample x Enrichment Facetted Scatter Plot
 
-```{r fig.width=8, fig.height=10}  
+```{r fig.width=8, fig.height=8}  
 all_library_scatterplot +
   facet_grid(enrichment_method ~ RNA_sample_num) +
-  scale_colour_brewer(palette = fig_palette, guide = FALSE) +
+  scale_colour_brewer(palette = fig_palette, guide = FALSE, drop=TRUE, limits = enrich_levels) +
   geom_abline()
 ```
 
