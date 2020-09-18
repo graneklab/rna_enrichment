@@ -387,6 +387,46 @@ norm_counts_long_noreps %>%
   makeEnrichmentScatterplot(fig_palette, enrich_levels)
 ```
 
+
+## ncRNA Genes
+
+```{r}
+h99_granges %>% 
+  filter(gene_biotype == "ncRNA") %>%
+  pull(gene_id) %>%
+  unique ->
+  ncrna_geneids
+
+unenriched_norm_counts %>%
+  filter(geneid %in% ncrna_geneids) %>%
+  select(-geneid) %>%
+  calculateCrossCorrelation(dds) ->
+  ncrna_unenriched_cor
+
+norm_counts_wmeans %>%
+  filter(geneid %in% ncrna_geneids) %>%
+  enrichedCorrelationToGoldStandard(dds) ->
+  ncrna_enriched_cor
+
+correlationRanges(ncrna_unenriched_cor, ncrna_enriched_cor) %>%
+  kable
+
+```
+
+```{r}
+plotCorrelationValues(ncrna_unenriched_cor, 
+                      ncrna_enriched_cor, 
+                      dds, fig_palette, enrich_levels)
+```
+
+```{r fig.width=8, fig.height=8}  
+norm_counts_long_noreps %>%
+  filter(geneid %in% ncrna_geneids) %>%
+  makeEnrichmentScatterplot(fig_palette, enrich_levels)
+```
+
+
+
 # SessionInfo
 ```{r}
 sessionInfo()
