@@ -54,7 +54,7 @@ fa_url %>%
 #   file.path(seq.dir, .) ->
 #   gtf_with_mito_rrna.file
 
-gtf_with_mito_rrna.file="../info/Cryptococcus_neoformans_var_grubii_h99.CNA3.39__with_mito_rrna.gtf"
+# gtf_with_mito_rrna.file="../info/Cryptococcus_neoformans_var_grubii_h99.CNA3.39__with_mito_rrna.gtf"
 # 
 # rrna_oligos.file = file.path(seq.dir, "rrna_oligos.tsv")
 # rrna_oligos.fastq = file.path(seq.dir, "rrna_oligos.fastq")

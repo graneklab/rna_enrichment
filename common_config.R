@@ -1,4 +1,6 @@
 # Genome URLs
+library(here)
+
 url_part1="ftp://ftp.ensemblgenomes.org/pub/release-39/fungi/"
 url_part2="/fungi_basidiomycota1_collection/cryptococcus_neoformans_var_grubii_h99/"
 url_part3="Cryptococcus_neoformans_var_grubii_h99.CNA3."
@@ -21,3 +23,11 @@ all_rrna_homologs = c("CNAG_12438","CNAG_07466","CNAG_10500",
 strand_specific_rrna_homologs = c("CNAG_10500","CNAG_10501","CNAG_10502",
                                   "CNAG_10503","CNAG_13073","small_MTrRNA",
                                   "large_MTrRNA")
+
+gtf_url %>% 
+  basename %>%
+  path_ext_remove %>%
+  path_ext_remove %>%
+  paste0("__with_mito_rrna.gtf") %>%
+  file.path(here("info"), .) ->
+  gtf_with_mito_rrna.file
