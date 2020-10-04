@@ -17,6 +17,9 @@ library(dplyr)
 library(ggplot2)
 library(DESeq2)
 library(tibble)
+library(cowplot)
+library(rtracklayer)
+library(here)
 
 fig_palette="Dark2"
 ```
@@ -69,10 +72,10 @@ knitr::kable(sample_df_2019)
 bind_rows(sample_df_2018, sample_df_2019) %>%
   mutate(enrichment_method = case_when(enrichment_method == "H" ~ "RNase H",
                                        enrichment_method %in% c("T","TOT") ~ "Unenriched",
-                                       enrichment_method %in% c("M","MA") ~ "Poly A",
+                                       enrichment_method %in% c("M","MA") ~ "Poly(A)",
                                        enrichment_method == "RZ" ~ "Ribo-Zero")) %>%
   mutate(enrichment_method=factor(enrichment_method, 
-                                  levels = c("Unenriched", "RNase H", "Ribo-Zero", "Poly A"))) %>%
+                                  levels = c("Unenriched", "RNase H", "Ribo-Zero", "Poly(A)"))) %>%
   column_to_rownames(var="expid") ->
   sample_df
 # knitr::kable(sample_df)
@@ -106,6 +109,15 @@ dds %>% collapseReplicates(object=.,
                              as_tibble %>%
                              pull(library)) ->
   dds
+
+# extract levels to use for color palettes
+dds %>%
+  colData %>%
+  as_tibble %>%
+  pull(enrichment_method) %>%
+  levels ->
+  enrich_levels
+
 dds
 ```
 
@@ -115,34 +127,6 @@ dds <- DESeq(dds)
 
 ## Calculate Group Mean of Normalized counts
 
-```{r eval=FALSE, include=FALSE}
-dds %>%
-  counts(normalized=TRUE) ->
-  norm_counts
-
-norm_counts %>%
-  as_tibble(rownames = "geneid") %>%
-  select(., matches("_MA_|_M1"))
-```
-
-```{r eval=FALSE, include=FALSE}
-norm_counts %>%
-  as_tibble(rownames = "geneid") %>%
-  select(., matches("_H[12]"))
-```
-
-```{r eval=FALSE, include=FALSE}
-norm_counts %>%
-  as_tibble(rownames = "geneid") %>%
-  select(., matches("_TOT_|_T1"))
-```
-
-```{r eval=FALSE, include=FALSE}
-norm_counts %>%
-  as_tibble(rownames = "geneid") %>%
-  select(., matches("_RZ_"))
-```
-
 ```{r}
 dds %>%
   counts(normalized=TRUE) ->
@@ -150,101 +134,142 @@ dds %>%
 
 norm_counts %>%
   as_tibble(rownames = "geneid") %>%
-  mutate(ma_mean = rowMeans(select(., matches("_MA_|_M1"))),
-         rz_mean = rowMeans(select(., matches("_RZ_"))),
-         rh_mean = rowMeans(select(., matches("_H[12]"))),
-         tot_mean = rowMeans(select(., matches("_TOT_|_T1")))) ->
+  mutate(gold_mean = rowMeans(select(., matches("_TOT_|_T1")))) ->
   norm_counts_wmeans
-
 ```
-
-## Make Scatter Plots
-```{r eval=FALSE, include=FALSE}
-norm_counts_wmeans %>%
-  select(geneid, contains("mean")) %>%
-  pivot_longer(
-    cols = c(-geneid, -tot_mean),
-    names_to = "enrich_method",
-    values_to = "mean_count"
-  ) ->
-  means_long
-
-means_long %>%
-  ggplot(aes(x=tot_mean, y=mean_count, color=enrich_method)) +
-  geom_point() +
-  theme_classic() +
-  scale_colour_brewer(palette = fig_palette)
-```
-
 
 # Correlations of all Libraries with Average Unenriched
 ## Pearson R Correlation
-```{r}
-set.seed(3)
-norm_counts_wmeans %>%
-  select(-geneid) %>%
-  summarise_all(.funs=cor, y=pull(., tot_mean)) %>%
-  t %>%
-  as_tibble(rownames = "library", .name_repair="universal") %>%
-  dplyr::rename(cor_with_unenriched="...1") ->
-  pearson_df
 
-dds %>%
-  colData %>%
-  as_tibble %>%
-  left_join(pearson_df, by="library") %>%
-  ggplot(aes(x=enrichment_method, y=cor_with_unenriched, color=enrichment_method)) +
-  geom_boxplot(fill=NA, color="grey70",outlier.color = NA, width=0.5) +
-  geom_jitter(width=0.2, height=0, size = 4, stroke = 1, alpha=0.5) +
-  scale_colour_brewer(palette = fig_palette, guide = FALSE) +
-  labs(x="Enrichment Method", y="Correlation") +
-  theme_minimal() +
-  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
+```{r}
+enrichedCorrelationToGoldStandard <- function(norm_counts_wmeans, dds) {
+  norm_counts_wmeans %>%
+    select(-geneid) %>%
+    summarise_all(.funs=cor, y=pull(., gold_mean)) %>%
+    t %>%
+    as_tibble(rownames = "library", .name_repair="universal") %>%
+    dplyr::rename(cor_with_unenriched="...1") ->
+    enriched_cor
+  
+  dds %>%
+    colData %>%
+    as_tibble %>%
+    left_join(enriched_cor, by="library") %>%
+    filter(enrichment_method!="Unenriched") ->
+  enriched_cor
+  return(enriched_cor)
+}
 ```
+
 
 Pearson correlation of each library with the "Gold Standard".
 
 For each library per gene read counts were normalized by that library's total reads mapped to annotated genes (excluding rRNA genes and genes that recruit rRNA reads). An "gold standard" per gene read count was calculated as the average normalized count across the six unenriched libraries.  The Pearson correlation was then calculated between this gold standard and the normalized gene counts for each library.  All unenriched libraries are highly correlated with the gold standard unenriched, indicating that biological and technical replicates are all very similar.  The RNase H libraries are better correlated with the gold standard than Ribo Zero libraries and Poly A libraries, with Poly A libraries having the worst correlation.
 
-## Kendall's Tau Correlation  
-```{r}
-set.seed(3)
-norm_counts_wmeans %>%
-  select(-geneid) %>%
-  summarise_all(.funs=cor, y=pull(., tot_mean), method="kendall") %>%
-  t %>%
-  as_tibble(rownames = "library") %>%
-  dplyr::rename(cor_with_unenriched="V1") ->
-  kendall_df
+## Leave-one-out Correlation for Unenriched
+do "cross validation" mean
+calculate mean of leave one out set, then correlate the left out with with mean of other 5
 
-dds %>%
-  colData %>%
-  as_tibble %>%
-  left_join(kendall_df, by="library") %>%
-  ggplot(aes(x=enrichment_method, y=cor_with_unenriched, color=enrichment_method)) +
-  geom_boxplot(fill=NA, color="grey70",outlier.color = NA, width=0.5) +
-  geom_jitter(width=0.2, height=0, size = 4, stroke = 1, alpha=0.5) +
-  scale_colour_brewer(palette = fig_palette, guide = FALSE) +
-  labs(x="Enrichment Method", y="Correlation") +
-  ggtitle("Correlation with Average Unenriched") +
-  theme_minimal() +
-  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
+### Calculate Cross Correlations
+```{r}
+norm_counts %>%
+  as_tibble(rownames = "geneid") %>%
+  select(geneid, matches("_TOT_|_T1")) ->
+  unenriched_norm_counts
 ```
 
-Kendall's Tau Correlation  of each library with the "Gold Standard".
+```{r}
+calculateCrossCorrelation <- function(unenriched_norm_counts, dds) {
+  data.frame(row.names = colnames(unenriched_norm_counts),
+         cor_with_unenriched = rep(-1, ncol(unenriched_norm_counts))) ->
+    unenriched_cor
+  
+  for (cur_sample in colnames(unenriched_norm_counts)){
+    # print(cur_sample)
+    unenriched_norm_counts %>%
+      select(-cur_sample) %>%
+      rowMeans %>%
+      cor(select(unenriched_norm_counts, all_of(cur_sample))) ->
+      unenriched_cor[cur_sample,"cor_with_unenriched"]
+  }
+  unenriched_cor %>%
+    as_tibble(rownames = "library", .name_repair="universal") ->
+    unenriched_cor
+  
+  dds %>%
+    colData %>%
+    as_tibble %>%
+    right_join(unenriched_cor, by="library") ->
+    unenriched_cor
+  
+  return(unenriched_cor)
+}
+```
 
-For each library per gene read counts were normalized by that library's total reads mapped to annotated genes (excluding rRNA genes and genes that recruit rRNA reads). An "gold standard" per gene read count was calculated as the average normalized count across the six unenriched libraries.  The Kendall's Tau was then calculated between this gold standard and the normalized gene counts for each library.  All unenriched libraries are highly correlated with the gold standard unenriched, indicating that biological and technical replicates are all very similar.  The RNase H libraries are better correlated with the gold standard than Ribo Zero libraries and Poly A libraries, with Poly A libraries having the worst correlation.
+### Plot Correlations
+```{r}
+# Find range of R values so plots have the same y-range
+plotCorrelationValues <- function(unenriched_cor, enriched_cor, dds, fig_palette, enrich_levels) {
+  bind_rows(unenriched_cor, enriched_cor) %>%
+    pull(cor_with_unenriched) %>%
+    range ->
+    r_range
+  
+  set.seed(3)
+  unenriched_cor %>%
+    ggplot(aes(x=enrichment_method, y=cor_with_unenriched, color=enrichment_method)) +
+    geom_boxplot(fill=NA, color="grey70",outlier.color = NA, width=0.5) +
+    geom_jitter(width=0.2, height=0, size = 4, stroke = 1, alpha=0.5) +
+    scale_colour_brewer(palette = fig_palette, guide = FALSE, drop=TRUE, limits = enrich_levels) +
+    labs(x="Enrichment Method", y="Correlation") +
+    theme_minimal() +
+    ylim(r_range) +
+    theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) ->
+    unenriched_plot
+  
+  set.seed(3)
+  enriched_cor %>%  
+    ggplot(aes(x=enrichment_method, y=cor_with_unenriched, color=enrichment_method)) +
+    geom_boxplot(fill=NA, color="grey70",outlier.color = NA, width=0.5) +
+    geom_jitter(width=0.2, height=0, size = 4, stroke = 1, alpha=0.5) +
+    scale_colour_brewer(palette = fig_palette, guide = FALSE, drop=TRUE, limits = enrich_levels) +
+    labs(x="Enrichment Method", y="Correlation") +
+    theme_minimal() +
+    ylim(r_range) +
+    theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) ->
+    enriched_plot
+  
+  plot_grid(unenriched_plot, enriched_plot, 
+            rel_widths = c(1, 2),
+            labels = c('A', 'B'), 
+            label_size = 12)
+}
+```
+
+```{r}
+correlationRanges <- function(unenriched_cor, enriched_cor){
+  bind_rows(unenriched_cor, enriched_cor) %>%
+  group_by(enrichment_method) %>%
+  summarise(min_r = min(cor_with_unenriched),
+            max_r = max(cor_with_unenriched)) %>%
+    return
+}
+```
+
+
+TODO:
+1. Make correlation and scatter plots for ncRNA and protein_coding
+  A. wrap plotting in function(s)
 
 # Supplementary Scatter Facet
 ## Prep data for plotting
 ```{r}
+
 norm_counts_wmeans %>%
-  select(-ma_mean, -rz_mean, -rh_mean) %>%
   pivot_longer(
-    cols = c(-geneid, -tot_mean),
+    cols = c(-geneid, -gold_mean),
     names_to = "library",
-    values_to = "norm_count"
-  ) ->
+    values_to = "norm_count") ->
   norm_counts_long
 
 dds %>%
@@ -254,51 +279,156 @@ dds %>%
   left_join(norm_counts_long, by="library") ->
   norm_counts_long
 # knitr::kable(norm_counts_long)
+
+norm_counts_long %>%
+    # only plot one tech rep per library: remove RNAseH rep2 and Poly A and Unenriched from 2018
+    filter(enrichment_rep != 2) %>%
+    filter(!(enrichment_method %in% c("Poly(A)","Unenriched") &
+               exp_year == 2018)) %>%
+    filter(enrichment_method!="Unenriched") ->
+  norm_counts_long_noreps
 ```
 
 ## Check technical replicates
 ```{r}
 norm_counts_long %>%
   filter(enrichment_rep != 2) %>%
-  filter(!(enrichment_method %in% c("Poly A","Unenriched") &
+  filter(!(enrichment_method %in% c("Poly(A)","Unenriched") &
              exp_year == 2018)) %>%
   select(RNA_sample_num, enrichment_method, exp_year, enrichment_rep) %>%
   table
 ```
 
-## Make Plots
+## Make Sample x Enrichment Facetted Scatter Plot
+
 ```{r}
-norm_counts_long %>%
-  # only plot one tech rep per library: remove RNAseH rep2 and Poly A and Unenriched from 2018
-  filter(enrichment_rep != 2) %>%
-  filter(!(enrichment_method %in% c("Poly A","Unenriched") &
-             exp_year == 2018)) %>%
-  ggplot(aes(x=tot_mean, y=norm_count, color=enrichment_method)) +
-  geom_point(alpha=0.3) +
-  labs(x = "Average Normalized Count in Unenriched", y= "Normalized Count") +
-  theme_bw() +
-  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) ->
-  all_library_scatterplot
+makeEnrichmentScatterplot <- function(norm_counts_long, fig_palette, enrich_levels) {
+  norm_counts_long %>%
+    ggplot(aes(x=gold_mean, y=norm_count, color=enrichment_method)) +
+    geom_point(alpha=0.3) +
+    labs(x = "Average Normalized Count in Unenriched", y= "Normalized Count") +
+    theme_bw() +
+    theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())  +
+    facet_grid(enrichment_method ~ RNA_sample_num) +
+    scale_colour_brewer(palette = fig_palette, guide = FALSE, drop=TRUE, limits = enrich_levels) +
+    geom_abline() %>%
+    return
+}
 ```
 
-### Sample x Enrichment Facetted Scatter Plot (Option #1)
 
-```{r fig.width=8, fig.height=10}  
-all_library_scatterplot +
-  facet_grid(enrichment_method ~ RNA_sample_num) +
-  scale_colour_brewer(palette = fig_palette, guide = FALSE) +
-  geom_abline()
+# Load GTF info
+```{r}
+import(gtf_with_mito_rrna.file, format="gtf") %>%
+  subset(type=="exon") %>% 
+  as.data.frame ->
+  h99_granges
+```
+
+# All Plots
+## All Genes
+```{r}
+unenriched_norm_counts %>%
+  select(-geneid) %>%
+  calculateCrossCorrelation(dds) ->
+  unenriched_cor
+
+enriched_cor = enrichedCorrelationToGoldStandard(norm_counts_wmeans, dds)
+
+correlationRanges(unenriched_cor, enriched_cor) %>%
+  kable
+```
+
+```{r}
+plotCorrelationValues(unenriched_cor, enriched_cor, dds, fig_palette, enrich_levels)
+ggsave(file.path(fig.dir, "all_genes_cor_values.tiff"))
+```
+
+```{r fig.width=8, fig.height=8}  
+makeEnrichmentScatterplot(norm_counts_long_noreps, fig_palette, enrich_levels)
+ggsave(file.path(fig.dir, "all_genes_scatter.tiff"))
 ```
 
 For each library per gene read counts were normalized by that library's total reads mapped to annotated genes (excluding rRNA genes and genes that recruit rRNA reads). A "gold standard" per gene read count was calculated as the average normalized count across the six unenriched libraries.  Libraries for each enrichment method applied to each biological replicate are ploted (technical replicates are not shown).  Each point represents a gene with the gold standard count as the x value, and the normalized count from a library as the y value.
 
-### Sample Facetted Scatter Plot (Option #2)
-```{r fig.width=8, fig.height=10}  
-all_library_scatterplot +
-  facet_grid(rows="RNA_sample_num") +
-  scale_colour_brewer(palette = fig_palette, guide = "legend", name="Enrichment Method") +
-  geom_abline()
+
+## Protein Coding Genes
+
+```{r}
+h99_granges %>% 
+  filter(gene_biotype == "protein_coding") %>%
+  pull(gene_id) %>%
+  unique ->
+  protein_coding_geneids
+
+unenriched_norm_counts %>%
+  filter(geneid %in% protein_coding_geneids) %>%
+  select(-geneid) %>%
+  calculateCrossCorrelation(dds) ->
+  protein_coding_unenriched_cor
+
+norm_counts_wmeans %>%
+  filter(geneid %in% protein_coding_geneids) %>%
+  enrichedCorrelationToGoldStandard(dds) ->
+  protein_coding_enriched_cor
+
+correlationRanges(protein_coding_unenriched_cor, protein_coding_enriched_cor) %>%
+  kable
+
 ```
+
+```{r}
+plotCorrelationValues(protein_coding_unenriched_cor, 
+                      protein_coding_enriched_cor, 
+                      dds, fig_palette, enrich_levels)
+ggsave(file.path(fig.dir, "protein_coding_cor_values.tiff"))
+```
+
+```{r fig.width=8, fig.height=8}  
+norm_counts_long_noreps %>%
+  filter(geneid %in% protein_coding_geneids) %>%
+  makeEnrichmentScatterplot(fig_palette, enrich_levels)
+ggsave(file.path(fig.dir, "protein_coding_scatter.tiff"))
+```
+
+## ncRNA Genes
+```{r}
+h99_granges %>% 
+  filter(gene_biotype == "ncRNA") %>%
+  pull(gene_id) %>%
+  unique ->
+  ncrna_geneids
+
+unenriched_norm_counts %>%
+  filter(geneid %in% ncrna_geneids) %>%
+  select(-geneid) %>%
+  calculateCrossCorrelation(dds) ->
+  ncrna_unenriched_cor
+
+norm_counts_wmeans %>%
+  filter(geneid %in% ncrna_geneids) %>%
+  enrichedCorrelationToGoldStandard(dds) ->
+  ncrna_enriched_cor
+
+correlationRanges(ncrna_unenriched_cor, ncrna_enriched_cor) %>%
+  kable
+
+```
+
+```{r}
+plotCorrelationValues(ncrna_unenriched_cor, 
+                      ncrna_enriched_cor, 
+                      dds, fig_palette, enrich_levels)
+ggsave(file.path(fig.dir, "ncrna_cor_values.tiff"))
+```
+
+```{r fig.width=8, fig.height=8}  
+norm_counts_long_noreps %>%
+  filter(geneid %in% ncrna_geneids) %>%
+  makeEnrichmentScatterplot(fig_palette, enrich_levels)
+ggsave(file.path(fig.dir, "ncrna_scatter.tiff"))
+```
+
 
 
 # SessionInfo
