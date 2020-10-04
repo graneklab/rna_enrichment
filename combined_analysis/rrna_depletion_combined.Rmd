@@ -1,0 +1,48 @@
+---
+title: "rRNA_depletion_combined"
+output: html_document
+---
+
+```{r global_options, include=FALSE, echo=FALSE}
+library(knitr)
+knitr::opts_chunk$set(echo=TRUE, include=TRUE)
+```
+
+### Load number of rRNA reads and total reads for all samples combined
+```{r include=FALSE}
+rrna_data_combined <- read.csv(file.choose("rrna_depletion_calculation_combined.csv"))
+levels(rrna_data_combined$Sample)
+rrna_data_combined$Sample <- ordered(rrna_data_combined$Sample, levels = c("Unenriched", "RNaseH", "RiboZero", "Poly(A)"))
+levels(rrna_data_combined$Sample)
+```
+
+### Perform statistical analysis - one way ANOVA
+```{r include=FALSE}
+library(rstatix)
+stat.test_combined <- aov(log_tranform_ratio ~ Sample, data = rrna_data_combined) %>%
+  tukey_hsd()
+stat.test_combined
+```
+### Load ggplot and plot percent rRNA reads
+```{r}
+library("ggpubr")
+library (ggplot2)
+fig_palette="Dark2"
+xlabels <- c("Unenriched", "RNase H", "Ribo-Zero", "Poly(A)")
+
+ggplot(data = rrna_data_combined) +
+  aes(x=Sample, y=percent_rrna, color=Sample) +
+  geom_boxplot(fill=NA, color="grey70",outlier.color = NA, width=0.5) +
+  geom_jitter(width=0.5, height=0, size = 4, stroke = 1, alpha=0.5) +
+  scale_colour_brewer(palette = fig_palette, guide = FALSE) +
+  labs(x=" ", y="rRNA reads (% total reads)") +
+  scale_x_discrete(labels= xlabels) +
+  theme_minimal() +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
+stat_pvalue_manual(
+    stat.test_combined, label = "p.adj.signif", 
+    tip.length = 0,
+    size = 4,
+    bracket.size = 0.5,
+    y.position = c(95, 100, 105, 87, 93, 89))
+```
