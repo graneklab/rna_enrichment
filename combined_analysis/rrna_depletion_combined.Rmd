@@ -10,7 +10,7 @@ knitr::opts_chunk$set(echo=TRUE, include=TRUE)
 
 ### Load number of rRNA reads and total reads for all samples combined
 ```{r include=FALSE}
-rrna_data_combined <- read.csv(file.choose("rrna_depletion_calculation_combined.csv"))
+rrna_data_combined <- read.csv("rrna_depletion_calculation_combined.csv")
 levels(rrna_data_combined$Sample)
 rrna_data_combined$Sample <- ordered(rrna_data_combined$Sample, levels = c("Unenriched", "RNaseH", "RiboZero", "Poly(A)"))
 levels(rrna_data_combined$Sample)
