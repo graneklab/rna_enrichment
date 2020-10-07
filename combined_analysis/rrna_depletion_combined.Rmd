@@ -8,6 +8,12 @@ library(knitr)
 knitr::opts_chunk$set(echo=TRUE, include=TRUE)
 ```
 
+### Load paths
+```{r include=FALSE}
+source("shared_functions.R")
+source("combined_config.R")
+```
+
 ### Load number of rRNA reads and total reads for all samples combined
 ```{r include=FALSE}
 rrna_data_combined <- read.csv("rrna_depletion_calculation_combined.csv")
@@ -45,4 +51,6 @@ stat_pvalue_manual(
     size = 4,
     bracket.size = 0.5,
     y.position = c(95, 100, 105, 87, 93, 89))
+
+ggsave(file.path(fig.dir, "rrna_depletion_quant.tiff"))
 ```
