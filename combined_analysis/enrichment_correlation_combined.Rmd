@@ -222,7 +222,7 @@ plotCorrelationValues <- function(unenriched_cor, enriched_cor, dds, fig_palette
     geom_jitter(width=0.2, height=0, size = 4, stroke = 1, alpha=0.5) +
     scale_colour_brewer(palette = fig_palette, guide = FALSE, drop=TRUE, limits = enrich_levels) +
     labs(x="Enrichment Method", y="Correlation") +
-    theme_minimal() +
+    theme_minimal(base_size = 10) +
     ylim(r_range) +
     theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) ->
     unenriched_plot
@@ -234,7 +234,7 @@ plotCorrelationValues <- function(unenriched_cor, enriched_cor, dds, fig_palette
     geom_jitter(width=0.2, height=0, size = 4, stroke = 1, alpha=0.5) +
     scale_colour_brewer(palette = fig_palette, guide = FALSE, drop=TRUE, limits = enrich_levels) +
     labs(x="Enrichment Method", y="Correlation") +
-    theme_minimal() +
+    theme_minimal(base_size = 10) +
     ylim(r_range) +
     theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) ->
     enriched_plot
@@ -307,7 +307,7 @@ makeEnrichmentScatterplot <- function(norm_counts_long, fig_palette, enrich_leve
     ggplot(aes(x=gold_mean, y=norm_count, color=enrichment_method)) +
     geom_point(alpha=0.3) +
     labs(x = "Average Normalized Count in Unenriched", y= "Normalized Count") +
-    theme_bw() +
+    theme_bw(base_size = 10) +
     theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())  +
     facet_grid(enrichment_method ~ RNA_sample_num) +
     scale_colour_brewer(palette = fig_palette, guide = FALSE, drop=TRUE, limits = enrich_levels) +
@@ -346,7 +346,7 @@ ggsave(file.path(fig.dir, "all_genes_cor_values.tiff"), compression = "lzw")
 
 ```{r fig.width=8, fig.height=8}  
 makeEnrichmentScatterplot(norm_counts_long_noreps, fig_palette, enrich_levels)
-ggsave(file.path(fig.dir, "all_genes_scatter.tiff"), compression = "lzw")
+ggsave(file.path(fig.dir, "all_genes_scatter.tiff"), compression = "lzw", width=20, height=25, units = "cm")
 ```
 
 For each library per gene read counts were normalized by that library's total reads mapped to annotated genes (excluding rRNA genes and genes that recruit rRNA reads). A "gold standard" per gene read count was calculated as the average normalized count across the six unenriched libraries.  Libraries for each enrichment method applied to each biological replicate are ploted (technical replicates are not shown).  Each point represents a gene with the gold standard count as the x value, and the normalized count from a library as the y value.
@@ -388,7 +388,7 @@ ggsave(file.path(fig.dir, "protein_coding_cor_values.tiff"), compression = "lzw"
 norm_counts_long_noreps %>%
   filter(geneid %in% protein_coding_geneids) %>%
   makeEnrichmentScatterplot(fig_palette, enrich_levels)
-ggsave(file.path(fig.dir, "protein_coding_scatter.tiff"), compression = "lzw")
+ggsave(file.path(fig.dir, "protein_coding_scatter.tiff"), compression = "lzw", width=20, height=25, units = "cm")
 ```
 
 ## ncRNA Genes
@@ -412,7 +412,6 @@ norm_counts_wmeans %>%
 
 correlationRanges(ncrna_unenriched_cor, ncrna_enriched_cor) %>%
   kable
-
 ```
 
 ```{r}
@@ -426,7 +425,7 @@ ggsave(file.path(fig.dir, "ncrna_cor_values.tiff"), compression = "lzw")
 norm_counts_long_noreps %>%
   filter(geneid %in% ncrna_geneids) %>%
   makeEnrichmentScatterplot(fig_palette, enrich_levels)
-ggsave(file.path(fig.dir, "ncrna_scatter.tiff"), compression = "lzw")
+ggsave(file.path(fig.dir, "ncrna_scatter.tiff"), compression = "lzw", width=20, height=25, units = "cm")
 ```
 
 
