@@ -52,5 +52,5 @@ stat_pvalue_manual(
     bracket.size = 0.5,
     y.position = c(95, 100, 105, 87, 93, 89))
 
-ggsave(file.path(fig.dir, "rrna_depletion_quant.tiff"))
+ggsave(file.path(fig.dir, "rrna_depletion_quant.tiff"), compression = "lzw")
 ```
