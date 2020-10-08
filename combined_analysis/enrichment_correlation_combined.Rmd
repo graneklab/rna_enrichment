@@ -74,6 +74,9 @@ bind_rows(sample_df_2018, sample_df_2019) %>%
                                        enrichment_method %in% c("T","TOT") ~ "Unenriched",
                                        enrichment_method %in% c("M","MA") ~ "Poly(A)",
                                        enrichment_method == "RZ" ~ "Ribo-Zero")) %>%
+  mutate(RNA_sample_num = case_when(RNA_sample_num == "2" ~ "A",
+                                    RNA_sample_num == "3" ~ "B",
+                                    RNA_sample_num == "4" ~ "C")) %>%
   mutate(enrichment_method=factor(enrichment_method, 
                                   levels = c("Unenriched", "RNase H", "Ribo-Zero", "Poly(A)"))) %>%
   column_to_rownames(var="expid") ->
