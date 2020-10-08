@@ -311,7 +311,7 @@ makeEnrichmentScatterplot <- function(norm_counts_long, fig_palette, enrich_leve
     theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())  +
     facet_grid(enrichment_method ~ RNA_sample_num) +
     scale_colour_brewer(palette = fig_palette, guide = FALSE, drop=TRUE, limits = enrich_levels) +
-    geom_abline() %>%
+    geom_abline(size=0.5) %>%
     return
 }
 ```
