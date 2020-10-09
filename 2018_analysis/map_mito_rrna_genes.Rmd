@@ -147,20 +147,22 @@ Right end looks like 9326
 
 ## Check Strand
 
-```{r}
+```{r eval=FALSE, include=FALSE}
+# not sure why this chunk isn't working now - it did previously! Maybe problem with BiocParallel?
 region_21s_plus = GRanges(seqnames = short_mito_name, 
                               IRanges(6500, 9500), strand = "+")
 region_21s_plus.overlaps = summarizeOverlaps(region_21s_plus, tot_L1_bams)
 assay(region_21s_plus.overlaps)
 ```
 
-```{r}
+```{r eval=FALSE, include=FALSE}
+# not sure why this chunk isn't working now - it did previously!
 region_21s_minus = GRanges(seqnames = short_mito_name, 
                               IRanges(6500, 9500), strand = "-")
 region_21s_minus.overlaps = summarizeOverlaps(region_21s_minus, tot_L1_bams)
 assay(region_21s_minus.overlaps)
 ```
-Vast majoring of reads are + strand, so 21s rRNA gene must be - strand
+Vast majoring of reads are + strand, so 21s rRNA gene must be - strand (since dUTP method was used)
 
 ## 21s rRNA annotation
 ```{r}
@@ -255,14 +257,16 @@ Right end looks like 18316
 left end looks like 16948?
 Right end looks like 18316
 
-```{r}
+```{r eval=FALSE, include=FALSE}
+# not sure why this chunk isn't working now - it did previously!
 region_15s_plus = GRanges(seqnames = short_mito_name, 
                               IRanges(16948, 18316), strand = "+")
 region_15s_plus.overlaps = summarizeOverlaps(region_15s_plus, tot_L1_bams)
 assay(region_15s_plus.overlaps)
 ```
 
-```{r}
+```{r eval=FALSE, include=FALSE}
+# not sure why this chunk isn't working now - it did previously!
 region_15s_minus = GRanges(seqnames = short_mito_name, 
                               IRanges(16948, 18316), strand = "-")
 region_15s_minus.overlaps = summarizeOverlaps(region_15s_minus, tot_L1_bams)
