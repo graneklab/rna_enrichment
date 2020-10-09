@@ -413,11 +413,11 @@ autoplot(tot_L1_bams[[1]], which = whole_mito_gr) +
   xlim(whole_mito_gr) +
   xlab("Position on Mitochondrial Chromosome") +
   ylab("Read Coverage") +
-  theme_classic() ->
+  theme_classic(base_size = 10) ->
   whole_mito_plot
 
-whole_mito_plot
-ggbio::ggsave(file.path(fig.dir, "whole_mito_rrna_coverage.png"), plot=whole_mito_plot)
+whole_mito_plot@ggplot
+ggsave(file.path(fig.dir, "whole_mito_rrna_coverage.tiff"), plot=whole_mito_plot@ggplot, compression = "lzw")
 ```
 
 
