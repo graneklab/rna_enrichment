@@ -44,6 +44,7 @@ ggplot(data = rrna_data_combined) +
   labs(x=" ", y="rRNA reads (% total reads)") +
   scale_x_discrete(labels= xlabels) +
   theme_minimal() +
+  theme(text=element_text(size=10)) +
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
 stat_pvalue_manual(
     stat.test_combined, label = "p.adj.signif", 
@@ -52,5 +53,5 @@ stat_pvalue_manual(
     bracket.size = 0.5,
     y.position = c(95, 100, 105, 87, 93, 89))
 
-ggsave(file.path(fig.dir, "rrna_depletion_quant.tiff"), compression = "lzw")
+ggsave(file.path(fig.dir, "rrna_depletion_quant_F1.tiff"), compression = "lzw", width=15, height=10.71, units = "cm")
 ```
