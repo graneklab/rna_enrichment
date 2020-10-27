@@ -102,7 +102,7 @@ list.files(pilot2018_fastq_dir) %>%
   str_subset(".fastq.gz", negate = FALSE) %>%
   as_tibble %>%
   mutate(stripped_filename=str_remove(value, "_R1_001.fastq.gz")) %>%
-  tidyr::separate(stripped_filename, into=c("library_name", "lane"), sep="(_S\\d+_)") %>%
+  tidyr::separate(stripped_filename, into=c("Label", "lane"), sep="(_S\\d+_)") %>%
   mutate(lane=paste(lane,"fastq", sep="_")) %>%
   pivot_wider(names_from=lane, values_from=value) ->
   pilot2018_fastq_df
@@ -121,29 +121,42 @@ pilot2018_count_dir %>%
   pilot2018_count_df
 pilot2018_count_df
 ```
-# SAMPLES
-```{r}
-fastq_manifest_path %>%
-  read_csv %>%
-  filter(group=="pilot") %>%
-  transmute(`Sample name`= paste("2017_pilot", seq_along(sample), sep="_"),
-         title=str_remove(sample, "_S\\d"),
-         `source name`="bacterial culture",
-         organism="Pseudomonas syringae",
-         `characteristics: strain`="pv. tomato DC3000",
-         `characteristics: genotype`="wild type",
-         `characteristics: treatment`= case_when(
-           media == "mm" ~ "minimal_media",
-           media == "kb" ~ "kings_B_media"),
-         molecule="total RNA",
-         description="",
-         `processed data file`= miseq_filename,
-         `raw file`= basename(fastq)
-  ) ->
-  geo_samples
 
-geo_samples
+## 2018 SAMPLES
+```{r}
+pilot2018_metadata %>%
+  transmute(
+    `Sample name`= paste("2018_pilot", seq_along(Label), sep="_"),
+    title=Label,
+    `source name`="yeast liquid culture",
+    organism="Cryptococcus neoformans",
+    `characteristics: strain`="var. grubii H99",
+    `characteristics: genotype`= case_when(
+           Strain == "H99" ~ "wild_type",
+           Strain == "mar1d" ~ "mar1d"),
+    `characteristics: media`= case_when(
+           Media == "TC" ~ "tissue_culture_media",
+           Media == "YPD" ~ "ypd_media"),
+    `characteristics: RNA sample number`=RNA_sample_num,
+    `characteristics: enrichment method`= case_when(
+      enrichment_method == "H" ~ "RNase H",
+      enrichment_method %in% c("T","TOT") ~ "Unenriched",
+      enrichment_method %in% c("M","MA") ~ "Poly(A)",
+      enrichment_method == "RZ" ~ "Ribo-Zero"),
+    `characteristics: experiment person`=experiment_person,
+    `characteristics: library prep person`=libprep_person,
+    molecule="total RNA",
+    description="",
+  ) %>%
+  left_join(pilot2018_count_df, by = c("title" = "Label")) %>%
+  left_join(pilot2018_fastq_df, by = c("title" = "Label")) ->
+  geo_samples_2018
+geo_samples_2018
 ```
+
+
+# SAMPLES
+
 
 # PROTOCOLS	
 
