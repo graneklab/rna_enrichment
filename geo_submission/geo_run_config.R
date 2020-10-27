@@ -49,13 +49,15 @@ max_jobs=4
 Sys.setenv(THREADS = threads)
 Sys.setenv(MAX_JOBS = max_jobs)
 
+adapters.file= file.path(info.dir, "neb_e7600_adapters_withrc.fasta")
+Sys.setenv(ADAPTERS = adapters.file)
+
 # 
 # # input
 # raw_fastq.dir="/data/hts_2018_data/hts2018_pilot_rawdata"
 # metadata.file=file.path(raw_fastq.dir, "2018_pilot_metadata.tsv")
 # 
 # # output
-# adapters.file= file.path(info.dir, "neb_e7600_adapters_withrc.fasta")
 # trimmed.dir=file.path(out.dir, "trimmed_fastqs")
 # total_samples_starout.dir=file.path(out.dir, "total_samples_starout")
 # mosdepth.dir=file.path(out.dir, "mosdepth")
@@ -88,7 +90,6 @@ Sys.setenv(MAX_JOBS = max_jobs)
 # 
 # # Output
 # Sys.setenv(CUROUT = out.dir)
-# Sys.setenv(ADAPTERS = adapters.file)
 # Sys.setenv(TRIMMED = trimmed.dir)
 
 # Sys.setenv(TOTAL_SAMPLES_STAROUT = total_samples_starout.dir)
