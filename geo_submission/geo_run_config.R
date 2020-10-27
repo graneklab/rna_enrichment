@@ -6,8 +6,10 @@ geo_upload_dir=file.path(geo_base_dir, "upload_to_geo")
 
 geo_fastq_dir=file.path(geo_upload_dir, "raw_fastqs")
 dir.create(geo_fastq_dir, recursive = TRUE)
-Sys.setenv(FASTQ_DIR = geo_fastq_dir)
 
+Sys.setenv(FASTQ_2018_DIR = file.path(geo_fastq_dir, "hts_2018_data/hts2018_pilot_rawdata"))
+Sys.setenv(FASTQ_2019_DIR = file.path(geo_fastq_dir, "hts_2019_data/hts2019_pilot_rawdata"))
+                      
 # output
 info.dir=file.path(geo_base_dir, "info")
 Sys.setenv(INFO = info.dir)
@@ -42,8 +44,11 @@ Sys.setenv(FA = fa.file)
 # library(dplyr)
 # 
 # # Setup R variables
-# threads=3
-# max_jobs=4
+threads=3
+max_jobs=4
+Sys.setenv(THREADS = threads)
+Sys.setenv(MAX_JOBS = max_jobs)
+
 # 
 # # input
 # raw_fastq.dir="/data/hts_2018_data/hts2018_pilot_rawdata"
@@ -77,8 +82,6 @@ Sys.setenv(FA = fa.file)
 # 
 # # Setup Bash variables
 # 
-# Sys.setenv(THREADS = threads)
-# Sys.setenv(MAX_JOBS = max_jobs)
 # 
 # # Input
 # Sys.setenv(RAW_FASTQS = raw_fastq.dir)
