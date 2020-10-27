@@ -1,0 +1,106 @@
+---
+title: "Download Data"
+output:
+  html_document:
+    toc: false
+---
+
+
+```{r}
+geo_base_dir="/workspace/geo_dir"
+geo_fastq_dir=file.path(geo_base_dir, "raw_fastqs")
+dir.create(geo_fastq_dir, recursive = TRUE)
+Sys.setenv(FASTQ_DIR = geo_fastq_dir)
+```
+
+```{bash}
+chmod -R u+w $FASTQ_DIR
+```
+
+## Download All data from 2018 run
+```{bash}
+ddsclient download -p HTS_course \
+  --include hts_2018_data/hts2018_pilot_rawdata \
+  $FASTQ_DIR
+```
+
+## Download 2018 data from 2019 run
+
+### Find 2018 FASTQs in 2019 data
+```{bash}
+ddsclient list -p HTS_course | grep "hts2019_pilot_rawdata" | grep 2018 
+```
+
+### Find metadata in 2019 data
+```{bash}
+ddsclient list -p HTS_course | grep "hts2019_pilot_rawdata" | grep -v "fastq.gz"
+```
+
+### Do download of 2019 data
+```{bash}
+ddsclient download -p HTS_course \
+  --include /hts_2019_data/hts2019_pilot_rawdata/2019_pilot_metadata.md \
+  --include /hts_2019_data/hts2019_pilot_rawdata/2019_pilot_metadata.tsv \
+  --include /hts_2019_data/hts2019_pilot_rawdata/sequencing_run_report_5630_190509A5.html \
+  --include /hts_2019_data/hts2019_pilot_rawdata/README.rtf \
+  --include /hts_2019_data/hts2019_pilot_rawdata/md5_checksum.txt \
+  --include /hts_2019_data/hts2019_pilot_rawdata/3_2018_P_H2_S29_L001_R1_001.fastq.gz \
+  --include /hts_2019_data/hts2019_pilot_rawdata/2_2018_P_H2_S28_L001_R1_001.fastq.gz \
+  --include /hts_2019_data/hts2019_pilot_rawdata/4_2018_P_H2_S30_L001_R1_001.fastq.gz \
+  --include /hts_2019_data/hts2019_pilot_rawdata/4_2018_P_H1_S27_L004_R1_001.fastq.gz \
+  --include /hts_2019_data/hts2019_pilot_rawdata/2_2018_P_M1_S34_L004_R1_001.fastq.gz \
+  --include /hts_2019_data/hts2019_pilot_rawdata/3_2018_P_M1_S35_L004_R1_001.fastq.gz \
+  --include /hts_2019_data/hts2019_pilot_rawdata/3_2018_P_H1_S26_L002_R1_001.fastq.gz \
+  --include /hts_2019_data/hts2019_pilot_rawdata/3_2018_P_T1_S32_L001_R1_001.fastq.gz \
+  --include /hts_2019_data/hts2019_pilot_rawdata/3_2018_P_H1_S26_L001_R1_001.fastq.gz \
+  --include /hts_2019_data/hts2019_pilot_rawdata/2_2018_P_H1_S25_L004_R1_001.fastq.gz \
+  --include /hts_2019_data/hts2019_pilot_rawdata/2_2018_P_T1_S31_L002_R1_001.fastq.gz \
+  --include /hts_2019_data/hts2019_pilot_rawdata/4_2018_P_T1_S33_L004_R1_001.fastq.gz \
+  --include /hts_2019_data/hts2019_pilot_rawdata/2_2018_P_H1_S25_L001_R1_001.fastq.gz \
+  --include /hts_2019_data/hts2019_pilot_rawdata/4_2018_P_M1_S36_L004_R1_001.fastq.gz \
+  --include /hts_2019_data/hts2019_pilot_rawdata/4_2018_P_H2_S30_L003_R1_001.fastq.gz \
+  --include /hts_2019_data/hts2019_pilot_rawdata/4_2018_P_M1_S36_L002_R1_001.fastq.gz \
+  --include /hts_2019_data/hts2019_pilot_rawdata/3_2018_P_H2_S29_L004_R1_001.fastq.gz \
+  --include /hts_2019_data/hts2019_pilot_rawdata/4_2018_P_H1_S27_L001_R1_001.fastq.gz \
+  --include /hts_2019_data/hts2019_pilot_rawdata/4_2018_P_H1_S27_L003_R1_001.fastq.gz \
+  --include /hts_2019_data/hts2019_pilot_rawdata/4_2018_P_H2_S30_L002_R1_001.fastq.gz \
+  --include /hts_2019_data/hts2019_pilot_rawdata/2_2018_P_M1_S34_L003_R1_001.fastq.gz \
+  --include /hts_2019_data/hts2019_pilot_rawdata/3_2018_P_H1_S26_L004_R1_001.fastq.gz \
+  --include /hts_2019_data/hts2019_pilot_rawdata/2_2018_P_H2_S28_L002_R1_001.fastq.gz \
+  --include /hts_2019_data/hts2019_pilot_rawdata/3_2018_P_T1_S32_L002_R1_001.fastq.gz \
+  --include /hts_2019_data/hts2019_pilot_rawdata/4_2018_P_H1_S27_L002_R1_001.fastq.gz \
+  --include /hts_2019_data/hts2019_pilot_rawdata/3_2018_P_T1_S32_L003_R1_001.fastq.gz \
+  --include /hts_2019_data/hts2019_pilot_rawdata/3_2018_P_H1_S26_L003_R1_001.fastq.gz \
+  --include /hts_2019_data/hts2019_pilot_rawdata/4_2018_P_H2_S30_L004_R1_001.fastq.gz \
+  --include /hts_2019_data/hts2019_pilot_rawdata/4_2018_P_M1_S36_L001_R1_001.fastq.gz \
+  --include /hts_2019_data/hts2019_pilot_rawdata/4_2018_P_M1_S36_L003_R1_001.fastq.gz \
+  --include /hts_2019_data/hts2019_pilot_rawdata/4_2018_P_T1_S33_L001_R1_001.fastq.gz \
+  --include /hts_2019_data/hts2019_pilot_rawdata/2_2018_P_T1_S31_L001_R1_001.fastq.gz \
+  --include /hts_2019_data/hts2019_pilot_rawdata/2_2018_P_M1_S34_L001_R1_001.fastq.gz \
+  --include /hts_2019_data/hts2019_pilot_rawdata/3_2018_P_H2_S29_L003_R1_001.fastq.gz \
+  --include /hts_2019_data/hts2019_pilot_rawdata/3_2018_P_M1_S35_L002_R1_001.fastq.gz \
+  --include /hts_2019_data/hts2019_pilot_rawdata/2_2018_P_H2_S28_L004_R1_001.fastq.gz \
+  --include /hts_2019_data/hts2019_pilot_rawdata/3_2018_P_M1_S35_L001_R1_001.fastq.gz \
+  --include /hts_2019_data/hts2019_pilot_rawdata/2_2018_P_T1_S31_L003_R1_001.fastq.gz \
+  --include /hts_2019_data/hts2019_pilot_rawdata/3_2018_P_H2_S29_L002_R1_001.fastq.gz \
+  --include /hts_2019_data/hts2019_pilot_rawdata/4_2018_P_T1_S33_L002_R1_001.fastq.gz \
+  --include /hts_2019_data/hts2019_pilot_rawdata/3_2018_P_M1_S35_L003_R1_001.fastq.gz \
+  --include /hts_2019_data/hts2019_pilot_rawdata/4_2018_P_T1_S33_L003_R1_001.fastq.gz \
+  --include /hts_2019_data/hts2019_pilot_rawdata/2_2018_P_H2_S28_L003_R1_001.fastq.gz \
+  --include /hts_2019_data/hts2019_pilot_rawdata/2_2018_P_H1_S25_L003_R1_001.fastq.gz \
+  --include /hts_2019_data/hts2019_pilot_rawdata/2_2018_P_M1_S34_L002_R1_001.fastq.gz \
+  --include /hts_2019_data/hts2019_pilot_rawdata/2_2018_P_T1_S31_L004_R1_001.fastq.gz \
+  --include /hts_2019_data/hts2019_pilot_rawdata/3_2018_P_T1_S32_L004_R1_001.fastq.gz \
+  --include /hts_2019_data/hts2019_pilot_rawdata/2_2018_P_H1_S25_L002_R1_001.fastq.gz \
+  $FASTQ_DIR
+```
+
+```{bash}
+chmod -R a-w $FASTQ_DIR
+```
+
+
+# SessionInfo
+```{r}
+sessionInfo()
+```
