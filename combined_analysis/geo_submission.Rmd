@@ -72,7 +72,8 @@ list.files(pilot2018_fastq_dir) %>%
   str_subset(".fastq.gz", negate = TRUE)
 ```
 
-## Check that all FASTQ names are unique (no duplicates between 2018 and 2019)
+## Sanity Check for Duplicated Names
+### Check that all FASTQ names are unique (no duplicates between 2018 and 2019)
 ```{r}
 list.files(pilot2018_fastq_dir) %>%
   str_subset(".fastq.gz", negate = FALSE) ->
@@ -83,6 +84,15 @@ list.files(pilot2019_fastq_dir) %>%
   pilot2019_fastqs
 
 duplicated(c(pilot2018_fastqs,pilot2019_fastqs)) %>%
+  any
+```
+
+### Check that all Count names are unique (no duplicates between 2018 and 2019)
+```{r}
+duplicated(c(
+  list.files(pilot2018_count_dir),
+  list.files(pilot2019_count_dir)
+)) %>%
   any
 ```
 
