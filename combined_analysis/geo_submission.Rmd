@@ -1,0 +1,134 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(readr)
+library(here)
+library(dplyr)
+library(stringr)
+library(tools)
+library(tibble)
+library(fs)
+```
+
+```{r}
+here("Data_Info_and_Results/2017_HTS/info/fastq_manifest.csv") ->
+  fastq_manifest_path
+```
+
+# SAMPLES
+```{r}
+fastq_manifest_path %>%
+  read_csv %>%
+  filter(group=="pilot") %>%
+  transmute(`Sample name`= paste("2017_pilot", seq_along(sample), sep="_"),
+         title=str_remove(sample, "_S\\d"),
+         `source name`="bacterial culture",
+         organism="Pseudomonas syringae",
+         `characteristics: strain`="pv. tomato DC3000",
+         `characteristics: genotype`="wild type",
+         `characteristics: treatment`= case_when(
+           media == "mm" ~ "minimal_media",
+           media == "kb" ~ "kings_B_media"),
+         molecule="total RNA",
+         description="",
+         `processed data file`= miseq_filename,
+         `raw file`= basename(fastq)
+  ) ->
+  geo_samples
+
+geo_samples
+```
+
+# PROTOCOLS	
+
+Protocols applicable to only a subset of Samples can be included as additional columns of the SAMPLES section above instead.	
+
+growth protocol	
+treatment protocol 	
+extract protocol	
+library construction protocol	rRNA was depleted from purified total RNA using the Ribo-Zero Gram-Negative Bacteria kit (Illumina). rRNA-depleted samples were then cleaned up with the RNA Clean & Concentrator-5 (Zymo Research) and eluted in 15ul.  
+library strategy	RNA-Seq.  RNA-Seq libraries were prepared using the NEBNext® Ultra™ Directional RNA Library Prep Kit for Illumina® (E7420; New England BioLabs).
+
+	
+# DATA PROCESSING PIPELINE	
+# Data processing steps include base-calling, alignment, filtering, peak-calling, generation of normalized abundance measurements etc…	
+# For each step provide a description, as well as software name, version, parameters, if applicable.	
+data processing step	General read quality was evaluated using FastQC v0.11.2
+data processing step	Genome and GTF files were downloaded from NCBI and indexed using bowtie2-build (Bowtie2 v2.3.1).
+data processing step	FASTQs were filtered and trimmed using fastq-mcf (ea-utils v1.1.2) using paramteres "-q 20 -x 0.5" and adapter sequences from the NEBNext manual.  
+data processing step	Filtered and trimmed reads were mapped using tophat2 (v2.1.1) using parameters "--library-type fr-firststrand --max-intron-length 5 --min-intron-length 4 --transcriptome-max-hits 1 --max-multihits 1 --no-coverage-search --no-novel-juncs --no-sort-bam
+data processing step	samtools v0.1.19 was used to merge and sort the accepted_hits.bam and unmapped.bam files output by tophat using commands "samtools merge -n" and "samtools sort -n"
+data processing step	htseq-count (htseq v0.6.1) was used to count reads per gene with the parameters "--order=name --format=bam --stranded=reverse --type=gene --idattr=locus_tag" $TH_DIR/${SAMPLE}/merged.name.bam
+data processing step	A Jupyter notebook containing the analysis pipeline is available at <https://gitlab.oit.duke.edu/Biostatistics_and_Bioinformatics/HTS_SummerCourse_2017/-/blob/master/Materials/Computation/Wk4_Day4_AM/analysis_nb/2017_generate_pilot_counts.ipynb>
+genome build	GCF_000007805.1_ASM780v1
+processed data files format and content	tab-delimited text files containing raw read counts per gene
+
+## PROCESSED DATA FILES
+```{r}
+"Data_Info_and_Results/2017_HTS/counts/HTS_2017_pilot" %>%
+  here %>%
+  list.files(full.names = TRUE) %>%
+  md5sum %>%
+  enframe(name="full_path", value="md5sum") %>%
+  mutate(`file name`=basename(full_path)) %>%
+  select(`file name`, `file checksum`=md5sum) ->
+  processed_md5
+
+processed_md5
+```
+
+```{r}
+fastq_manifest_path %>%
+  read_csv %>%
+  filter(group=="pilot") %>%
+  transmute(`file name`= miseq_filename,
+         `file type`="raw counts"
+         ) %>%
+  full_join(processed_md5, by="file name") ->
+  geo_processed_data_files
+
+geo_processed_data_files
+```
+
+# RAW FILES
+```{r}
+fastq_manifest_path %>%
+  read_csv %>%
+  filter(group=="pilot") %>%
+  transmute(`file name`= basename(fastq),
+         `file type`="fastq",
+         `file checksum` = md5,
+         `instrument model`="Illumina MiSeq",
+         `single or paired-end`="single"
+         ) ->
+  geo_raw_files
+
+geo_raw_files
+```
+
+# Copy Files
+```{r eval=FALSE, include=FALSE}
+geo_dir="/space/hts_for_geo/2017_files_for_geo"
+dir.create(geo_dir)
+
+list.files("/space/hts_for_geo/HTS_course/hts_2017_data/hts2017_pilot_rawdata/", pattern = "Pst-.*_L001_R1_001.fastq.gz", full.names = TRUE) %>%
+  file_copy(geo_dir)
+
+list.files(geo_dir, full.names = TRUE)
+```
+
+```{r eval=FALSE, include=FALSE}
+"Data_Info_and_Results/2017_HTS/counts/HTS_2017_pilot" %>%
+  here %>%
+  list.files(recursive = TRUE, full.names = TRUE) %>%
+  file_copy(geo_dir)
+
+list.files(geo_dir, full.names = TRUE)
+```
