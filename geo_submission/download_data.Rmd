@@ -7,10 +7,7 @@ output:
 
 
 ```{r}
-geo_base_dir="/workspace/geo_dir"
-geo_fastq_dir=file.path(geo_base_dir, "raw_fastqs")
-dir.create(geo_fastq_dir, recursive = TRUE)
-Sys.setenv(FASTQ_DIR = geo_fastq_dir)
+source("geo_run_config.R")
 ```
 
 ```{bash}
@@ -27,12 +24,12 @@ ddsclient download -p HTS_course \
 ## Download 2018 data from 2019 run
 
 ### Find 2018 FASTQs in 2019 data
-```{bash}
+```{bash eval=FALSE, include=FALSE}
 ddsclient list -p HTS_course | grep "hts2019_pilot_rawdata" | grep 2018 
 ```
 
 ### Find metadata in 2019 data
-```{bash}
+```{bash eval=FALSE, include=FALSE}
 ddsclient list -p HTS_course | grep "hts2019_pilot_rawdata" | grep -v "fastq.gz"
 ```
 
