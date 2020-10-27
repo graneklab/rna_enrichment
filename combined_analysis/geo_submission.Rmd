@@ -109,6 +109,18 @@ list.files(pilot2018_fastq_dir) %>%
 pilot2018_fastq_df
 ```
 
+## Consolidate all 4 lanes of Counts 
+```{r}
+pilot2018_count_dir %>%
+  list.files %>%
+  as_tibble %>%
+  mutate(stripped_filename=str_remove(value, "_ReadsPerGene.out.tab")) %>%
+  tidyr::separate(stripped_filename, into=c("Label", "lane"), sep="(_S\\d+_)") %>%
+  mutate(lane=paste(lane,"count", sep="_")) %>%
+  pivot_wider(names_from=lane, values_from=value) ->
+  pilot2018_count_df
+pilot2018_count_df
+```
 # SAMPLES
 ```{r}
 fastq_manifest_path %>%
