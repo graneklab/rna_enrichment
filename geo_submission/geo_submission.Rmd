@@ -52,6 +52,9 @@ list.files(pilot2019_fastq_dir) %>%
   str_subset(".fastq.gz", negate = TRUE)
 ```
 
+WORK ON 2019 SAMPLES Table
+
+
 # 2018 data
 ```{r}
 hts2018_data_base = file.path(data_base, "hts_2018_data")
@@ -152,6 +155,7 @@ pilot2018_metadata %>%
   left_join(pilot2018_fastq_df, by = c("title" = "Label")) ->
   geo_samples_2018
 geo_samples_2018
+complete.cases(geo_samples_2018)
 ```
 
 
