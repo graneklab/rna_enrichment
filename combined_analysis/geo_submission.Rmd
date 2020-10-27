@@ -72,6 +72,20 @@ list.files(pilot2018_fastq_dir) %>%
   str_subset(".fastq.gz", negate = TRUE)
 ```
 
+## Check that all FASTQ names are unique (no duplicates between 2018 and 2019)
+```{r}
+list.files(pilot2018_fastq_dir) %>%
+  str_subset(".fastq.gz", negate = FALSE) ->
+  pilot2018_fastqs
+
+list.files(pilot2019_fastq_dir) %>%
+  str_subset(".fastq.gz", negate = FALSE) ->
+  pilot2019_fastqs
+
+duplicated(c(pilot2018_fastqs,pilot2019_fastqs)) %>%
+  any
+```
+
 ## Consolidate all 4 lanes of FASTQs 
 ```{r}
 list.files(pilot2018_fastq_dir) %>%
