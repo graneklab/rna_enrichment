@@ -15,6 +15,7 @@ library(stringr)
 library(tools)
 library(tibble)
 library(fs)
+library(tidyr)
 ```
 
 ```{r}
@@ -71,6 +72,18 @@ list.files(pilot2018_fastq_dir) %>%
   str_subset(".fastq.gz", negate = TRUE)
 ```
 
+## Consolidate all 4 lanes of FASTQs 
+```{r}
+list.files(pilot2018_fastq_dir) %>%
+  str_subset(".fastq.gz", negate = FALSE) %>%
+  as_tibble %>%
+  mutate(stripped_filename=str_remove(value, "_R1_001.fastq.gz")) %>%
+  tidyr::separate(stripped_filename, into=c("library_name", "lane"), sep="(_S\\d+_)") %>%
+  mutate(lane=paste(lane,"fastq", sep="_")) %>%
+  pivot_wider(names_from=lane, values_from=value) ->
+  pilot2018_fastq_df
+pilot2018_fastq_df
+```
 
 # SAMPLES
 ```{r}
