@@ -103,12 +103,14 @@ trim_and_star_func() {
 }
 export -f trim_and_star_func
 
-# parallel --jobs $MAX_JOBS trim_and_star_func ::: $FASTQ_2018_DIR/*.fastq.gz
-# parallel --jobs $MAX_JOBS trim_and_star_func ::: $FASTQ_2019_DIR/*.fastq.gz
-parallel --jobs $MAX_JOBS trim_and_star_func ::: $FASTQ_2018_DIR/[2]_*_S*_L00[1]_R1_001.fastq.gz
+parallel --jobs $MAX_JOBS trim_and_star_func ::: $FASTQ_2018_DIR/*.fastq.gz
+#
+parallel --jobs $MAX_JOBS trim_and_star_func ::: $FASTQ_2019_DIR/*.fastq.gz
 # 
-parallel --jobs $MAX_JOBS trim_and_star_func ::: $FASTQ_2019_DIR/[2]_*_S*_L00[1]_R1_001.fastq.gz
+# parallel --jobs $MAX_JOBS trim_and_star_func ::: $FASTQ_2018_DIR/[2]_*_S*_L00[1]_R1_001.fastq.gz
 # 
+# parallel --jobs $MAX_JOBS trim_and_star_func ::: $FASTQ_2019_DIR/[2]_*_S*_L00[1]_R1_001.fastq.gz
+# Added this comment at the end because this MIGHT keep knitr from freaking out on this bash chunk
 ```
 
 
