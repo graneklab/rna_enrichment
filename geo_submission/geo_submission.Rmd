@@ -26,6 +26,7 @@ source("geo_run_config.R")
 # upload to GEO
 lftp geoftp@ftp-private.ncbi.nlm.nih.gov/uploads/jagranek_Ef8niGoI
 ```
+
 # SAMPLES
 
 ## 2019 pilot data
@@ -57,7 +58,7 @@ pilot2019_fastq_dir %>%
   mutate(lane=paste(lane,"fastq", sep="_")) %>%
   pivot_wider(names_from=lane, values_from=value) ->
   pilot2019_fastq_df
-pilot2019_fastq_df
+knitr::kable(pilot2019_fastq_df)
 ```
 
 ### Consolidate all 4 lanes of Counts 
@@ -70,13 +71,8 @@ pilot2019_count_dir %>%
   mutate(lane=paste(lane,"count", sep="_")) %>%
   pivot_wider(names_from=lane, values_from=value) ->
   pilot2019_count_df
-pilot2019_count_df
+knitr::kable(pilot2019_count_df)
 ```
-
-```{r}
-pilot2019_metadata
-```
-
 
 ## 2019 SAMPLES
 ```{r}
@@ -106,7 +102,7 @@ pilot2019_metadata %>%
   left_join(pilot2019_count_df, by = c("title" = "Label")) %>%
   left_join(pilot2019_fastq_df, by = c("title" = "Label")) ->
   geo_samples_2019
-geo_samples_2019
+knitr::kable(geo_samples_2019)
 complete.cases(geo_samples_2019)
 ```
 
@@ -160,7 +156,7 @@ list.files(pilot2018_fastq_dir) %>%
   mutate(lane=paste(lane,"fastq", sep="_")) %>%
   pivot_wider(names_from=lane, values_from=value) ->
   pilot2018_fastq_df
-pilot2018_fastq_df
+knitr::kable(pilot2018_fastq_df)
 ```
 
 ### Consolidate all 4 lanes of Counts 
@@ -173,7 +169,7 @@ pilot2018_count_dir %>%
   mutate(lane=paste(lane,"count", sep="_")) %>%
   pivot_wider(names_from=lane, values_from=value) ->
   pilot2018_count_df
-pilot2018_count_df
+knitr::kable(pilot2018_count_df)
 ```
 
 ## 2018 SAMPLES
@@ -204,7 +200,7 @@ pilot2018_metadata %>%
   left_join(pilot2018_count_df, by = c("title" = "Label")) %>%
   left_join(pilot2018_fastq_df, by = c("title" = "Label")) ->
   geo_samples_2018
-geo_samples_2018
+knitr::kable(geo_samples_2018)
 complete.cases(geo_samples_2018)
 ```
 
