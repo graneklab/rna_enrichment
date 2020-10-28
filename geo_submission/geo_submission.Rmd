@@ -22,24 +22,15 @@ library(tidyr)
 source("geo_run_config.R")
 ```
 
-```{r}
-data_base="/space/hts_for_geo/HTS_course/"
 ```
-
-```
-# pull from DDS
-ddsclient download -p HTS_course --include hts_2017_data --include hts_2019_data --include hts_2018_data
-
 # upload to GEO
 lftp geoftp@ftp-private.ncbi.nlm.nih.gov/uploads/jagranek_Ef8niGoI
 ```
+# SAMPLES
 
-# 2019 pilot data
+## 2019 pilot data
 Only dealing with the 2019 libraries that were generated from the 2018 YPD sample RNA. The rest of the 2019 pilot data has already been deposited.
 ```{r}
-pilot2019_data_base = file.path(data_base, "hts_2019_data")
-pilot2019_count_dir = file.path(pilot2019_data_base, "hts2019_pilot_counts")
-
 file.path(pilot2019_fastq_dir, "md5_checksum.txt") %>%
   read_delim(" ", trim_ws = TRUE, col_names = c("md5", "filename")) ->
   pilot2019_fastq_md5sums
@@ -55,7 +46,7 @@ list.files(pilot2019_fastq_dir) %>%
   str_subset(".fastq.gz", negate = TRUE)
 ```
 
-## Consolidate all 4 lanes of FASTQs 
+### Consolidate all 4 lanes of FASTQs 
 ```{r}
 pilot2019_fastq_dir %>%
   list.files %>%
@@ -69,10 +60,10 @@ pilot2019_fastq_dir %>%
 pilot2019_fastq_df
 ```
 
-## Consolidate all 4 lanes of Counts 
+### Consolidate all 4 lanes of Counts 
 ```{r}
 pilot2019_count_dir %>%
-  list.files %>%
+  list.files(pattern="ReadsPerGene.out.tab") %>%
   as_tibble %>%
   mutate(stripped_filename=str_remove(value, "_ReadsPerGene.out.tab")) %>%
   tidyr::separate(stripped_filename, into=c("Label", "lane"), sep="(_S\\d+_)") %>%
@@ -114,17 +105,13 @@ pilot2019_metadata %>%
   ) %>%
   left_join(pilot2019_count_df, by = c("title" = "Label")) %>%
   left_join(pilot2019_fastq_df, by = c("title" = "Label")) ->
-  geo_samples_2018
-geo_samples_2018
-complete.cases(geo_samples_2018)
+  geo_samples_2019
+geo_samples_2019
+complete.cases(geo_samples_2019)
 ```
 
-# 2018 data
+## 2018 data
 ```{r}
-hts2018_data_base = file.path(data_base, "hts_2018_data")
-pilot2018_fastq_dir = file.path(hts2018_data_base, "hts2018_pilot_rawdata")
-pilot2018_count_dir = file.path(hts2018_data_base, "hts2018_pilot_counts")
-
 file.path(pilot2018_fastq_dir, "md5_checksum.txt") %>%
   read_delim(" ", trim_ws = TRUE, col_names = c("md5", "filename")) ->
   pilot2018_fastq_md5sums
@@ -139,8 +126,8 @@ list.files(pilot2018_fastq_dir) %>%
   str_subset(".fastq.gz", negate = TRUE)
 ```
 
-## Sanity Check for Duplicated Names
-### Check that all FASTQ names are unique (no duplicates between 2018 and 2019)
+### Sanity Check for Duplicated Names
+#### Check that all FASTQ names are unique (no duplicates between 2018 and 2019)
 ```{r}
 list.files(pilot2018_fastq_dir) %>%
   str_subset(".fastq.gz", negate = FALSE) ->
@@ -154,7 +141,7 @@ duplicated(c(pilot2018_fastqs,pilot2019_fastqs)) %>%
   any
 ```
 
-### Check that all Count names are unique (no duplicates between 2018 and 2019)
+#### Check that all Count names are unique (no duplicates between 2018 and 2019)
 ```{r}
 duplicated(c(
   list.files(pilot2018_count_dir),
@@ -163,7 +150,7 @@ duplicated(c(
   any
 ```
 
-## Consolidate all 4 lanes of FASTQs 
+### Consolidate all 4 lanes of FASTQs 
 ```{r}
 list.files(pilot2018_fastq_dir) %>%
   str_subset(".fastq.gz", negate = FALSE) %>%
@@ -176,10 +163,10 @@ list.files(pilot2018_fastq_dir) %>%
 pilot2018_fastq_df
 ```
 
-## Consolidate all 4 lanes of Counts 
+### Consolidate all 4 lanes of Counts 
 ```{r}
 pilot2018_count_dir %>%
-  list.files %>%
+  list.files(pattern="ReadsPerGene.out.tab") %>%
   as_tibble %>%
   mutate(stripped_filename=str_remove(value, "_ReadsPerGene.out.tab")) %>%
   tidyr::separate(stripped_filename, into=c("Label", "lane"), sep="(_S\\d+_)") %>%
@@ -221,9 +208,10 @@ geo_samples_2018
 complete.cases(geo_samples_2018)
 ```
 
-
-# SAMPLES
-
+```{r}
+bind_rows(geo_samples_2018, geo_samples_2019)%>%
+  write_tsv(sample_table_tsv)
+```
 
 # PROTOCOLS	
 

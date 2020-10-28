@@ -5,6 +5,8 @@ output:
     toc: false
 ---
 
+Rscript -e "rmarkdown::render('run_star_for_geo.Rmd')"
+
 ```{r}
 source("geo_run_config.R")
 ```
