@@ -19,6 +19,10 @@ library(tidyr)
 ```
 
 ```{r}
+source("geo_run_config.R")
+```
+
+```{r}
 data_base="/space/hts_for_geo/HTS_course/"
 ```
 
@@ -34,7 +38,6 @@ lftp geoftp@ftp-private.ncbi.nlm.nih.gov/uploads/jagranek_Ef8niGoI
 Only dealing with the 2019 libraries that were generated from the 2018 YPD sample RNA. The rest of the 2019 pilot data has already been deposited.
 ```{r}
 pilot2019_data_base = file.path(data_base, "hts_2019_data")
-pilot2019_fastq_dir = file.path(pilot2019_data_base, "hts2019_pilot_rawdata")
 pilot2019_count_dir = file.path(pilot2019_data_base, "hts2019_pilot_counts")
 
 file.path(pilot2019_fastq_dir, "md5_checksum.txt") %>%
@@ -52,8 +55,69 @@ list.files(pilot2019_fastq_dir) %>%
   str_subset(".fastq.gz", negate = TRUE)
 ```
 
-WORK ON 2019 SAMPLES Table
+## Consolidate all 4 lanes of FASTQs 
+```{r}
+pilot2019_fastq_dir %>%
+  list.files %>%
+  str_subset(".fastq.gz", negate = FALSE) %>%
+  as_tibble %>%
+  mutate(stripped_filename=str_remove(value, "_R1_001.fastq.gz")) %>%
+  tidyr::separate(stripped_filename, into=c("Label", "lane"), sep="(_S\\d+_)") %>%
+  mutate(lane=paste(lane,"fastq", sep="_")) %>%
+  pivot_wider(names_from=lane, values_from=value) ->
+  pilot2019_fastq_df
+pilot2019_fastq_df
+```
 
+## Consolidate all 4 lanes of Counts 
+```{r}
+pilot2019_count_dir %>%
+  list.files %>%
+  as_tibble %>%
+  mutate(stripped_filename=str_remove(value, "_ReadsPerGene.out.tab")) %>%
+  tidyr::separate(stripped_filename, into=c("Label", "lane"), sep="(_S\\d+_)") %>%
+  mutate(lane=paste(lane,"count", sep="_")) %>%
+  pivot_wider(names_from=lane, values_from=value) ->
+  pilot2019_count_df
+pilot2019_count_df
+```
+
+```{r}
+pilot2019_metadata
+```
+
+
+## 2019 SAMPLES
+```{r}
+pilot2019_metadata %>%
+  transmute(
+    `Sample name`= paste("2019_pilot", seq_along(Label), sep="_"),
+    title=Label,
+    `source name`="yeast liquid culture",
+    organism="Cryptococcus neoformans",
+    `characteristics: strain`="var. grubii H99",
+    `characteristics: genotype`= case_when(
+           genotype == "WT" ~ "wild_type",
+           genotype == "mar1d" ~ "mar1d"),
+    `characteristics: media`= case_when(
+           condition == "TC" ~ "tissue_culture_media",
+           condition == "YPD" ~ "ypd_media"),
+    `characteristics: RNA sample number`=RNA_sample_num,
+    `characteristics: enrichment method`= case_when(
+      enrichment_method == "RNaseH" ~ "RNase H",
+      enrichment_method %in% c("T","TOT", "Total") ~ "Unenriched",
+      enrichment_method %in% c("M","MA","mRNA") ~ "Poly(A)",
+      enrichment_method == "RZ" ~ "Ribo-Zero"),
+    `characteristics: library prep person`=libprep_person,
+    molecule="total RNA",
+    description="",
+  ) %>%
+  left_join(pilot2019_count_df, by = c("title" = "Label")) %>%
+  left_join(pilot2019_fastq_df, by = c("title" = "Label")) ->
+  geo_samples_2018
+geo_samples_2018
+complete.cases(geo_samples_2018)
+```
 
 # 2018 data
 ```{r}
@@ -146,7 +210,6 @@ pilot2018_metadata %>%
       enrichment_method %in% c("T","TOT") ~ "Unenriched",
       enrichment_method %in% c("M","MA") ~ "Poly(A)",
       enrichment_method == "RZ" ~ "Ribo-Zero"),
-    `characteristics: experiment person`=experiment_person,
     `characteristics: library prep person`=libprep_person,
     molecule="total RNA",
     description="",
