@@ -32,7 +32,8 @@ pilot2018_count_dir = geo_starout_dir
 table_dir=file.path(geo_base_dir, "table_dir")
 dir.create(table_dir)
 sample_table_tsv=file.path(table_dir, "sample_table.tsv")
-
+processed_files_table_tsv=file.path(table_dir, "processed_files_table.tsv")
+raw_files_table_tsv=file.path(table_dir, "raw_files_table.tsv")
 
 # genome
 gtf_url %>%

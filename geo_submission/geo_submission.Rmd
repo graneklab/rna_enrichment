@@ -31,16 +31,7 @@ lftp geoftp@ftp-private.ncbi.nlm.nih.gov/uploads/jagranek_Ef8niGoI
 
 ## 2019 pilot data
 Only dealing with the 2019 libraries that were generated from the 2018 YPD sample RNA. The rest of the 2019 pilot data has already been deposited.
-```{r}
-file.path(pilot2019_fastq_dir, "md5_checksum.txt") %>%
-  read_delim(" ", trim_ws = TRUE, col_names = c("md5", "filename")) ->
-  pilot2019_fastq_md5sums
 
-file.path(pilot2019_fastq_dir, "2019_pilot_metadata.tsv") %>%
-  read_tsv %>%
-  filter(sample_year!=2019) ->
-  pilot2019_metadata
-```
 
 ```{r}
 list.files(pilot2019_fastq_dir) %>%
@@ -76,7 +67,9 @@ knitr::kable(pilot2019_count_df)
 
 ## 2019 SAMPLES
 ```{r}
-pilot2019_metadata %>%
+file.path(pilot2019_fastq_dir, "2019_pilot_metadata.tsv") %>%
+  read_tsv %>%
+  filter(sample_year!=2019)  %>%
   transmute(
     `Sample name`= paste("2019_pilot", seq_along(Label), sep="_"),
     title=Label,
@@ -107,15 +100,7 @@ complete.cases(geo_samples_2019)
 ```
 
 ## 2018 data
-```{r}
-file.path(pilot2018_fastq_dir, "md5_checksum.txt") %>%
-  read_delim(" ", trim_ws = TRUE, col_names = c("md5", "filename")) ->
-  pilot2018_fastq_md5sums
 
-file.path(pilot2018_fastq_dir, "2018_pilot_metadata.tsv") %>%
-  read_tsv ->
-  pilot2018_metadata
-```
 
 ```{r}
 list.files(pilot2018_fastq_dir) %>%
@@ -174,7 +159,8 @@ knitr::kable(pilot2018_count_df)
 
 ## 2018 SAMPLES
 ```{r}
-pilot2018_metadata %>%
+file.path(pilot2018_fastq_dir, "2018_pilot_metadata.tsv") %>%
+  read_tsv %>%
   transmute(
     `Sample name`= paste("2018_pilot", seq_along(Label), sep="_"),
     title=Label,
@@ -249,8 +235,9 @@ extract protocol	Cells were then pelleted, flash frozen on dry ice, and lyophili
 library construction protocol	purified total RNA was processed unenriched or was rRNA was depleted using either Ribo-Zero Yeast kit (Illumina), the NEBNext poly(A) mRNA Magnetic Isolation Module (New England Biolabs, Ipswich, MA), or the RNase H method with custom oligos. Ribo-Zero and RNase H treated RNA were then cleaned up with the RNA Clean & Concentrator-5 (Zymo Research) before library preparation.  RNA-Seq libraries were prepared from these enriched samples and from unenriched control samples (i.e. “Unenriched”) using the NEBNext® Ultra™ II Directional RNA Library Prep with Sample Purification Beads (NEB #E7765) (New England Biolabs, Ipswich, MA). 
 	
 # DATA PROCESSING PIPELINE	
-# Data processing steps include base-calling, alignment, filtering, peak-calling, generation of normalized abundance measurements etc…	
-# For each step provide a description, as well as software name, version, parameters, if applicable.	
+Data processing steps include base-calling, alignment, filtering, peak-calling, generation of normalized abundance measurements etc…	
+For each step provide a description, as well as software name, version, parameters, if applicable.	
+
 data processing step	General read quality was evaluated using `r system2("fastqc", "--version", stdout=TRUE)` and `r system2("multiqc", "--version", stdout=TRUE)` 
 
 data processing step	Genome and GTF files were downloaded from Ensembl Fungi (release 39) and indexed using `r system2("STAR", "--version", stdout=TRUE)`
@@ -271,58 +258,40 @@ geo_starout_dir %>%
   list.files(pattern="ReadsPerGene.out.tab",full.names = TRUE) %>%
   md5sum %>%
   enframe(name="full_path", value="md5sum") %>%
-  mutate(`file name`=basename(full_path)) %>%
-  select(`file name`, `file checksum`=md5sum) ->
+  transmute(`file name` = basename(full_path),
+            `file type` = "raw counts", 
+            `file checksum` = md5sum) ->
   processed_md5
 
-processed_md5
-```
-
-```{r}
-fastq_manifest_path %>%
-  read_csv %>%
-  filter(group=="pilot") %>%
-  transmute(`file name`= miseq_filename,
-         `file type`="raw counts"
-         ) %>%
-  full_join(processed_md5, by="file name") ->
-  geo_processed_data_files
-
-geo_processed_data_files
+knitr::kable(processed_md5)
+write_tsv(processed_md5, processed_files_table_tsv)
 ```
 
 # RAW FILES
 ```{r}
-fastq_manifest_path %>%
-  read_csv %>%
-  filter(group=="pilot") %>%
-  transmute(`file name`= basename(fastq),
+file.path(pilot2018_fastq_dir, "md5_checksum.txt") %>%
+  read_delim(" ", trim_ws = TRUE, col_names = c("md5", "filename")) ->
+  pilot2018_fastq_md5sums
+```
+
+```{r}
+file.path(pilot2019_fastq_dir, "md5_checksum.txt") %>%
+  read_delim(" ", trim_ws = TRUE, col_names = c("md5", "filename")) %>%
+  filter(str_detect(filename, "\\d+_2018_")) ->
+  pilot2019_fastq_md5sums
+```
+
+```{r}
+bind_rows(pilot2018_fastq_md5sums, pilot2019_fastq_md5sums) %>%
+  transmute(`file name`= filename,
          `file type`="fastq",
          `file checksum` = md5,
-         `instrument model`="Illumina MiSeq",
-         `single or paired-end`="single"
-         ) ->
+         `instrument model`="NextSeq 500",
+         `single or paired-end`="single") ->
   geo_raw_files
 
-geo_raw_files
+knitr::kable(geo_raw_files)
+
+write_tsv(geo_raw_files, raw_files_table_tsv)
 ```
 
-# Copy Files
-```{r eval=FALSE, include=FALSE}
-geo_dir="/space/hts_for_geo/2017_files_for_geo"
-dir.create(geo_dir)
-
-list.files("/space/hts_for_geo/HTS_course/hts_2017_data/hts2017_pilot_rawdata/", pattern = "Pst-.*_L001_R1_001.fastq.gz", full.names = TRUE) %>%
-  file_copy(geo_dir)
-
-list.files(geo_dir, full.names = TRUE)
-```
-
-```{r eval=FALSE, include=FALSE}
-"Data_Info_and_Results/2017_HTS/counts/HTS_2017_pilot" %>%
-  here %>%
-  list.files(recursive = TRUE, full.names = TRUE) %>%
-  file_copy(geo_dir)
-
-list.files(geo_dir, full.names = TRUE)
-```
