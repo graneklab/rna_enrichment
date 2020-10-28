@@ -267,9 +267,8 @@ processed data files format and content	Tab-delimited text files containing raw 
 
 ## PROCESSED DATA FILES
 ```{r}
-"Data_Info_and_Results/2017_HTS/counts/HTS_2017_pilot" %>%
-  here %>%
-  list.files(full.names = TRUE) %>%
+geo_starout_dir %>%
+  list.files(pattern="ReadsPerGene.out.tab",full.names = TRUE) %>%
   md5sum %>%
   enframe(name="full_path", value="md5sum") %>%
   mutate(`file name`=basename(full_path)) %>%
