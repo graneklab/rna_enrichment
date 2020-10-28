@@ -205,33 +205,65 @@ complete.cases(geo_samples_2018)
 ```
 
 ```{r}
-bind_rows(geo_samples_2018, geo_samples_2019)%>%
-  write_tsv(sample_table_tsv)
+bind_rows(geo_samples_2018, geo_samples_2019) ->
+  geo_samples_all
+
+write_tsv(geo_samples_all, sample_table_tsv)
 ```
+
+```{r}
+geo_samples_all%>% nrow
+geo_samples_all%>% pull(`characteristics: RNA sample number`) %>% unique %>% length
+```
+
+
+SERIES 	
+# This section describes the overall study. Complete all fields.	
+title	Comparative analysis of RNA enrichment methods for preparation of Cryptococcus neoformans RNA-sequencing libraries
+
+summary	This project had two major goals: to compare different methods of rRNA depletion for RNA-Seq in Cryptococcus neoformans and to identify genes differentially expressed in a mar1 deletion mutant.
+
+overall design	This project generated `r nrow(geo_samples_all)` libraries from `r geo_samples_all%>% pull("characteristics: RNA sample number") %>% unique %>% length` different samples. Samples from 6 biological replicates were generated for each treatment x genotype. The two treatments conditions were growth in YPD and tissue culture media.  The two genotypes were H99 wildtype and mar1 deletion mutant.  Two libraries were made from each RNA sample using different methods for rRNA depletion: poly(A) isolation and Ribo-Zero.  For 3 of the samples libraries were also made from unenriched RNA and RNA enriched using the RNase H method.  For these 3 samples unenriched, RNase H, and poly(A) enriched libraries were prepared and sequenced in 2019 and unenriched, poly(A), and Ribo-Zero libraries were prepared and sequenced in 2018.  All other libraries were prepared and sequenced in 2018.  
+
+contributor	Calla,L,Telzrow
+contributor	Paul,J,Zwack
+contributor	Shannon,E,Righi
+contributor	Fred,S,Dietrich
+contributor	Cliburn,Chan
+contributor	Kouros,Owzar
+contributor	J,Andrew,Alspaugh
+contributor	Joshua,A,Granek
+supplementary file	
+
 
 # PROTOCOLS	
 
 Protocols applicable to only a subset of Samples can be included as additional columns of the SAMPLES section above instead.	
 
-growth protocol	
-treatment protocol 	
-extract protocol	
-library construction protocol	rRNA was depleted from purified total RNA using the Ribo-Zero Gram-Negative Bacteria kit (Illumina). rRNA-depleted samples were then cleaned up with the RNA Clean & Concentrator-5 (Zymo Research) and eluted in 15ul.  
-library strategy	RNA-Seq.  RNA-Seq libraries were prepared using the NEBNext® Ultra™ Directional RNA Library Prep Kit for Illumina® (E7420; New England BioLabs).
+growth protocol	Samples were prepared by growing each biological replicate of the WT and mar1d strain to mid-logarithmic growth phase in separate flasks of liquid YPD medium, with 150 rpm shaking. 
 
+treatment protocol 	Approximately 1 × 109 cells from each sample were pelleted, resuspended in fresh YPD medium or tissue culture media, and incubated at 30°C for 90 min with 150 rpm shaking. 
+
+extract protocol	Cells were then pelleted, flash frozen on dry ice, and lyophilized for ~18 hours. Total RNA was isolated using the Qiagen RNeasy Plant Mini Kit (Qiagen, Valencia, CA); on-column DNase digestion was performed to eliminate contaminating genomic DNA. Total RNA quantity and quality were assessed using the Agilent 2100 Bioanalyzer. Purified RNA was subsequently stored at -80°C.
+
+library construction protocol	purified total RNA was processed unenriched or was rRNA was depleted using either Ribo-Zero Yeast kit (Illumina), the NEBNext poly(A) mRNA Magnetic Isolation Module (New England Biolabs, Ipswich, MA), or the RNase H method with custom oligos. Ribo-Zero and RNase H treated RNA were then cleaned up with the RNA Clean & Concentrator-5 (Zymo Research) before library preparation.  RNA-Seq libraries were prepared from these enriched samples and from unenriched control samples (i.e. “Unenriched”) using the NEBNext® Ultra™ II Directional RNA Library Prep with Sample Purification Beads (NEB #E7765) (New England Biolabs, Ipswich, MA). 
 	
 # DATA PROCESSING PIPELINE	
 # Data processing steps include base-calling, alignment, filtering, peak-calling, generation of normalized abundance measurements etc…	
 # For each step provide a description, as well as software name, version, parameters, if applicable.	
-data processing step	General read quality was evaluated using FastQC v0.11.2
-data processing step	Genome and GTF files were downloaded from NCBI and indexed using bowtie2-build (Bowtie2 v2.3.1).
-data processing step	FASTQs were filtered and trimmed using fastq-mcf (ea-utils v1.1.2) using paramteres "-q 20 -x 0.5" and adapter sequences from the NEBNext manual.  
-data processing step	Filtered and trimmed reads were mapped using tophat2 (v2.1.1) using parameters "--library-type fr-firststrand --max-intron-length 5 --min-intron-length 4 --transcriptome-max-hits 1 --max-multihits 1 --no-coverage-search --no-novel-juncs --no-sort-bam
-data processing step	samtools v0.1.19 was used to merge and sort the accepted_hits.bam and unmapped.bam files output by tophat using commands "samtools merge -n" and "samtools sort -n"
-data processing step	htseq-count (htseq v0.6.1) was used to count reads per gene with the parameters "--order=name --format=bam --stranded=reverse --type=gene --idattr=locus_tag" $TH_DIR/${SAMPLE}/merged.name.bam
-data processing step	A Jupyter notebook containing the analysis pipeline is available at <https://gitlab.oit.duke.edu/Biostatistics_and_Bioinformatics/HTS_SummerCourse_2017/-/blob/master/Materials/Computation/Wk4_Day4_AM/analysis_nb/2017_generate_pilot_counts.ipynb>
-genome build	GCF_000007805.1_ASM780v1
-processed data files format and content	tab-delimited text files containing raw read counts per gene
+data processing step	General read quality was evaluated using `r system2("fastqc", "--version", stdout=TRUE)` and `r system2("multiqc", "--version", stdout=TRUE)` 
+
+data processing step	Genome and GTF files were downloaded from Ensembl Fungi (release 39) and indexed using `r system2("STAR", "--version", stdout=TRUE)`
+
+data processing step	FASTQs were filtered and trimmed using fastq-mcf v1.04.807  using paramteres "-q 20 -x 0.5" and the following adapter sequences, which were supplied by NEB, and their reverse complements: AGATCGGAAGAGCACACGTCTGAACTCCAGTCA and AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT
+
+data processing step	Filtered and trimmed reads were mapped and counted using `r system2("STAR", "--version", stdout=TRUE)` with these parameters: --runMode alignReads --outSAMtype None --quantMode GeneCounts --genomeLoad NoSharedMemory  --twopassMode None --outFilterScoreMinOverLread 0 --outFilterMatchNminOverLread 0 --outFilterMatchNmin 0 --outFilterMismatchNmax 2 
+
+data processing step	An Rmarkdown notebook containing the counting pipeline is available at <https://github.com/granek-pubs/rna_enrichment/tree/master/geo_submission>
+
+genome build	GCA_000149245.3
+
+processed data files format and content	Tab-delimited text files containing raw read counts per gene in STAR format. The appropriate counts are in column 4 (counts for the 2nd read strand aligned with RNA), because the directional reads were generated using the dUTP method
 
 ## PROCESSED DATA FILES
 ```{r}
