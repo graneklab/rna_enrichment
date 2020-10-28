@@ -227,16 +227,15 @@ supplementary file
 Protocols applicable to only a subset of Samples can be included as additional columns of the SAMPLES section above instead.	
 
 growth protocol	Samples were prepared by growing each biological replicate of the WT and mar1d strain to mid-logarithmic growth phase in separate flasks of liquid YPD medium, with 150 rpm shaking. 
-
 treatment protocol 	Approximately 1 × 109 cells from each sample were pelleted, resuspended in fresh YPD medium or tissue culture media, and incubated at 30°C for 90 min with 150 rpm shaking. 
-
 extract protocol	Cells were then pelleted, flash frozen on dry ice, and lyophilized for ~18 hours. Total RNA was isolated using the Qiagen RNeasy Plant Mini Kit (Qiagen, Valencia, CA); on-column DNase digestion was performed to eliminate contaminating genomic DNA. Total RNA quantity and quality were assessed using the Agilent 2100 Bioanalyzer. Purified RNA was subsequently stored at -80°C.
+library construction protocol	Purified total RNA was processed unenriched or was rRNA was depleted using either Ribo-Zero Yeast kit (Illumina), the NEBNext poly(A) mRNA Magnetic Isolation Module (New England Biolabs, Ipswich, MA), or the RNase H method with custom oligos. Ribo-Zero and RNase H treated RNA were then cleaned up with the RNA Clean & Concentrator-5 (Zymo Research) before library preparation.  RNA-Seq libraries were prepared from these enriched samples and from unenriched control samples (i.e. “Unenriched”) using the NEBNext® Ultra™ II Directional RNA Library Prep with Sample Purification Beads (NEB #E7765) (New England Biolabs, Ipswich, MA). 
+library strategy	RNA-Seq
 
-library construction protocol	purified total RNA was processed unenriched or was rRNA was depleted using either Ribo-Zero Yeast kit (Illumina), the NEBNext poly(A) mRNA Magnetic Isolation Module (New England Biolabs, Ipswich, MA), or the RNase H method with custom oligos. Ribo-Zero and RNase H treated RNA were then cleaned up with the RNA Clean & Concentrator-5 (Zymo Research) before library preparation.  RNA-Seq libraries were prepared from these enriched samples and from unenriched control samples (i.e. “Unenriched”) using the NEBNext® Ultra™ II Directional RNA Library Prep with Sample Purification Beads (NEB #E7765) (New England Biolabs, Ipswich, MA). 
-	
 # DATA PROCESSING PIPELINE	
 Data processing steps include base-calling, alignment, filtering, peak-calling, generation of normalized abundance measurements etc…	
 For each step provide a description, as well as software name, version, parameters, if applicable.	
+
 
 data processing step	General read quality was evaluated using `r system2("fastqc", "--version", stdout=TRUE)` and `r system2("multiqc", "--version", stdout=TRUE)` 
 
@@ -294,4 +293,29 @@ knitr::kable(geo_raw_files)
 
 write_tsv(geo_raw_files, raw_files_table_tsv)
 ```
+
+# Clean up Count directory
+```{r}
+geo_starout_dir %>%
+  list.files(full.names = TRUE, pattern="final.out$") %>%
+  file_delete
+
+geo_starout_dir %>%
+  list.files(full.names = TRUE, pattern="_Log.out$") %>%
+  file_delete
+
+geo_starout_dir %>%
+  list.files(full.names = TRUE, pattern="_Log.progress.out$") %>%
+  file_delete
+
+geo_starout_dir %>%
+  list.files(full.names = TRUE, pattern="_SJ.out.tab$") %>%
+  file_delete
+
+geo_starout_dir %>%
+  list.files %>%
+  str_subset("_ReadsPerGene.out.tab", negate = TRUE)
+
+```
+
 
