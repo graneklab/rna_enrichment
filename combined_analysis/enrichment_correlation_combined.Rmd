@@ -434,7 +434,20 @@ norm_counts_long_noreps %>%
 ggsave(file.path(fig.dir, "ncrna_scatter_S3.tiff"), compression = "lzw", width=20, height=20, units = "cm")
 ```
 
+# Pre-filtering to drop genes <50 reads in gold standard
+```{r}
+keep <- rowSums(counts(dds[enrichment_method = 'Unenriched'])) >= 50
+dds50 <- dds[keep,]
+dds50
+```
+#Identifying genes with decreased expression in Poly(A) compared to Unenriched
+```{r}
+res50 <- results(dds50, contrast = c("enrichment_method", "Poly(A)", "Unenriched"), lfcThreshold=log2(8), altHypothesis = "less")
+res50
 
+summary(res50)
+
+```
 
 # SessionInfo
 ```{r}
