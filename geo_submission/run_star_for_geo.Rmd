@@ -1,0 +1,122 @@
+---
+title: "Run STAR for GEO"
+output:
+  html_document:
+    toc: false
+---
+
+Rscript -e "rmarkdown::render('run_star_for_geo.Rmd')"
+
+```{r}
+source("geo_run_config.R")
+```
+
+```{r}
+# dir_delete()
+for (cur_dir in c(info.dir, genome.dir, geo_starout_dir)) {
+  if (dir_exists(cur_dir)){
+    dir_delete(cur_dir)
+  }
+}
+```
+
+# Make adapter file
+```{bash}
+set -u
+mkdir -p $INFO
+echo ">Adapter
+AGATCGGAAGAGCACACGTCTGAACTCCAGTCA
+>AdapterRead2
+AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT
+>Adapter_rc
+TGACTGGAGTTCAGACGTGTGCTCTTCCGATCT
+>AdapterRead2_rc
+ACACTCTTTCCCTACACGACGCTCTTCCGATCT" >  $ADAPTERS
+head $ADAPTERS
+```
+
+# Genome
+## Download Genome
+```{bash}
+set -u
+mkdir -p $GENOME_DIR
+wget --no-verbose --directory-prefix ${GENOME_DIR} ${FA_URL} 
+wget --no-verbose --directory-prefix ${GENOME_DIR} ${GTF_URL}
+gunzip -f ${FA}.gz
+gunzip -f ${GTF}.gz
+
+ls ${GENOME_DIR}
+```
+
+## Index Genome
+```{bash}
+set -u
+mkdir -p ${GEO_STAROUT_DIR}
+STAR \
+    --runMode genomeGenerate \
+    --genomeDir $GENOME_DIR \
+    --genomeFastaFiles ${FA} \
+    --sjdbGTFfile ${GTF} \
+    --outFileNamePrefix ${GEO_STAROUT_DIR}/genome_ \
+    --genomeSAindexNbases 11
+# --genomeSAindexNbases 6
+```
+
+## Trim and Map Reads
+```{bash engine.path="/bin/bash"}
+set -u
+mkdir -p ${GEO_STAROUT_DIR}
+trim_and_star_func() {
+    FASTQ=$1
+    FASTQ_BASE=${FASTQ##*/} # strip directory from file path
+    SAMPLE="${FASTQ_BASE%_R1_001.fastq.gz}" # strip .fq.gz file extension
+    echo $SAMPLE
+    echo $FASTQ
+    echo $FASTQ_BASE
+    # exit 1
+
+
+    # make a pipe for trimmed fastq
+    CUR_PIPE=`mktemp --dry-run`_${SAMPLE}_pipe.fq
+    mkfifo $CUR_PIPE
+
+    # Run fastq-mcf
+    fastq-mcf \
+        $ADAPTERS \
+        $FASTQ \
+        -o $CUR_PIPE \
+        -q 20 -x 0.5 &
+        
+    STAR \
+    --runMode alignReads \
+    --runThreadN $THREADS \
+    --genomeDir $GENOME_DIR \
+    --outSAMtype None \
+    --quantMode GeneCounts \
+    --genomeLoad NoSharedMemory \
+    --twopassMode None \
+    --outFileNamePrefix ${GEO_STAROUT_DIR}/${SAMPLE}_ \
+    --outFilterScoreMinOverLread 0 --outFilterMatchNminOverLread 0 \
+    --outFilterMatchNmin 0 --outFilterMismatchNmax 2 \
+    --readFilesIn $CUR_PIPE        
+        
+    rm -f $CUR_PIPE
+    # samtools index ${TOTAL_SAMPLES_STAROUT}/${SAMPLE}_Aligned.sortedByCoord.out.bam
+}
+export -f trim_and_star_func
+
+parallel --jobs $MAX_JOBS trim_and_star_func ::: $FASTQ_2018_DIR/*.fastq.gz
+#
+parallel --jobs $MAX_JOBS trim_and_star_func ::: $FASTQ_2019_DIR/*.fastq.gz
+# 
+# parallel --jobs $MAX_JOBS trim_and_star_func ::: $FASTQ_2018_DIR/[2]_*_S*_L00[1]_R1_001.fastq.gz
+# 
+# parallel --jobs $MAX_JOBS trim_and_star_func ::: $FASTQ_2019_DIR/[2]_*_S*_L00[1]_R1_001.fastq.gz
+# Added this comment at the end because this MIGHT keep knitr from freaking out on this bash chunk
+```
+
+
+# SessionInfo
+```{r}
+sessionInfo()
+```

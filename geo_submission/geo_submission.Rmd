@@ -1,0 +1,321 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(readr)
+library(here)
+library(dplyr)
+library(stringr)
+library(tools)
+library(tibble)
+library(fs)
+library(tidyr)
+```
+
+```{r}
+source("geo_run_config.R")
+```
+
+```
+# upload to GEO
+lftp geoftp@ftp-private.ncbi.nlm.nih.gov/uploads/jagranek_Ef8niGoI
+```
+
+# SAMPLES
+
+## 2019 pilot data
+Only dealing with the 2019 libraries that were generated from the 2018 YPD sample RNA. The rest of the 2019 pilot data has already been deposited.
+
+
+```{r}
+list.files(pilot2019_fastq_dir) %>%
+  str_subset(".fastq.gz", negate = TRUE)
+```
+
+### Consolidate all 4 lanes of FASTQs 
+```{r}
+pilot2019_fastq_dir %>%
+  list.files %>%
+  str_subset(".fastq.gz", negate = FALSE) %>%
+  as_tibble %>%
+  mutate(stripped_filename=str_remove(value, "_R1_001.fastq.gz")) %>%
+  tidyr::separate(stripped_filename, into=c("Label", "lane"), sep="(_S\\d+_)") %>%
+  mutate(lane=paste(lane,"fastq", sep="_")) %>%
+  pivot_wider(names_from=lane, values_from=value) ->
+  pilot2019_fastq_df
+knitr::kable(pilot2019_fastq_df)
+```
+
+### Consolidate all 4 lanes of Counts 
+```{r}
+pilot2019_count_dir %>%
+  list.files(pattern="ReadsPerGene.out.tab") %>%
+  as_tibble %>%
+  mutate(stripped_filename=str_remove(value, "_ReadsPerGene.out.tab")) %>%
+  tidyr::separate(stripped_filename, into=c("Label", "lane"), sep="(_S\\d+_)") %>%
+  mutate(lane=paste(lane,"count", sep="_")) %>%
+  pivot_wider(names_from=lane, values_from=value) ->
+  pilot2019_count_df
+knitr::kable(pilot2019_count_df)
+```
+
+## 2019 SAMPLES
+```{r}
+file.path(pilot2019_fastq_dir, "2019_pilot_metadata.tsv") %>%
+  read_tsv %>%
+  filter(sample_year!=2019)  %>%
+  transmute(
+    `Sample name`= paste("2019_pilot", seq_along(Label), sep="_"),
+    title=Label,
+    `source name`="yeast liquid culture",
+    organism="Cryptococcus neoformans",
+    `characteristics: strain`="var. grubii H99",
+    `characteristics: genotype`= case_when(
+           genotype == "WT" ~ "wild_type",
+           genotype == "mar1d" ~ "mar1d"),
+    `characteristics: media`= case_when(
+           condition == "TC" ~ "tissue_culture_media",
+           condition == "YPD" ~ "ypd_media"),
+    `characteristics: RNA sample number`=RNA_sample_num,
+    `characteristics: enrichment method`= case_when(
+      enrichment_method == "RNaseH" ~ "RNase H",
+      enrichment_method %in% c("T","TOT", "Total") ~ "Unenriched",
+      enrichment_method %in% c("M","MA","mRNA") ~ "Poly(A)",
+      enrichment_method == "RZ" ~ "Ribo-Zero"),
+    `characteristics: library prep person`=libprep_person,
+    molecule="total RNA",
+    description="",
+  ) %>%
+  left_join(pilot2019_count_df, by = c("title" = "Label")) %>%
+  left_join(pilot2019_fastq_df, by = c("title" = "Label")) ->
+  geo_samples_2019
+knitr::kable(geo_samples_2019)
+complete.cases(geo_samples_2019)
+```
+
+## 2018 data
+
+
+```{r}
+list.files(pilot2018_fastq_dir) %>%
+  str_subset(".fastq.gz", negate = TRUE)
+```
+
+### Sanity Check for Duplicated Names
+#### Check that all FASTQ names are unique (no duplicates between 2018 and 2019)
+```{r}
+list.files(pilot2018_fastq_dir) %>%
+  str_subset(".fastq.gz", negate = FALSE) ->
+  pilot2018_fastqs
+
+list.files(pilot2019_fastq_dir) %>%
+  str_subset(".fastq.gz", negate = FALSE) ->
+  pilot2019_fastqs
+
+duplicated(c(pilot2018_fastqs,pilot2019_fastqs)) %>%
+  any
+```
+
+#### Check that all Count names are unique (no duplicates between 2018 and 2019)
+```{r}
+duplicated(c(
+  list.files(pilot2018_count_dir),
+  list.files(pilot2019_count_dir)
+)) %>%
+  any
+```
+
+### Consolidate all 4 lanes of FASTQs 
+```{r}
+list.files(pilot2018_fastq_dir) %>%
+  str_subset(".fastq.gz", negate = FALSE) %>%
+  as_tibble %>%
+  mutate(stripped_filename=str_remove(value, "_R1_001.fastq.gz")) %>%
+  tidyr::separate(stripped_filename, into=c("Label", "lane"), sep="(_S\\d+_)") %>%
+  mutate(lane=paste(lane,"fastq", sep="_")) %>%
+  pivot_wider(names_from=lane, values_from=value) ->
+  pilot2018_fastq_df
+knitr::kable(pilot2018_fastq_df)
+```
+
+### Consolidate all 4 lanes of Counts 
+```{r}
+pilot2018_count_dir %>%
+  list.files(pattern="ReadsPerGene.out.tab") %>%
+  as_tibble %>%
+  mutate(stripped_filename=str_remove(value, "_ReadsPerGene.out.tab")) %>%
+  tidyr::separate(stripped_filename, into=c("Label", "lane"), sep="(_S\\d+_)") %>%
+  mutate(lane=paste(lane,"count", sep="_")) %>%
+  pivot_wider(names_from=lane, values_from=value) ->
+  pilot2018_count_df
+knitr::kable(pilot2018_count_df)
+```
+
+## 2018 SAMPLES
+```{r}
+file.path(pilot2018_fastq_dir, "2018_pilot_metadata.tsv") %>%
+  read_tsv %>%
+  transmute(
+    `Sample name`= paste("2018_pilot", seq_along(Label), sep="_"),
+    title=Label,
+    `source name`="yeast liquid culture",
+    organism="Cryptococcus neoformans",
+    `characteristics: strain`="var. grubii H99",
+    `characteristics: genotype`= case_when(
+           Strain == "H99" ~ "wild_type",
+           Strain == "mar1d" ~ "mar1d"),
+    `characteristics: media`= case_when(
+           Media == "TC" ~ "tissue_culture_media",
+           Media == "YPD" ~ "ypd_media"),
+    `characteristics: RNA sample number`=RNA_sample_num,
+    `characteristics: enrichment method`= case_when(
+      enrichment_method == "H" ~ "RNase H",
+      enrichment_method %in% c("T","TOT") ~ "Unenriched",
+      enrichment_method %in% c("M","MA") ~ "Poly(A)",
+      enrichment_method == "RZ" ~ "Ribo-Zero"),
+    `characteristics: library prep person`=libprep_person,
+    molecule="total RNA",
+    description="",
+  ) %>%
+  left_join(pilot2018_count_df, by = c("title" = "Label")) %>%
+  left_join(pilot2018_fastq_df, by = c("title" = "Label")) ->
+  geo_samples_2018
+knitr::kable(geo_samples_2018)
+complete.cases(geo_samples_2018)
+```
+
+```{r}
+bind_rows(geo_samples_2018, geo_samples_2019) ->
+  geo_samples_all
+
+write_tsv(geo_samples_all, sample_table_tsv)
+```
+
+```{r}
+geo_samples_all%>% nrow
+geo_samples_all%>% pull(`characteristics: RNA sample number`) %>% unique %>% length
+```
+
+
+SERIES 	
+# This section describes the overall study. Complete all fields.	
+title	Comparative analysis of RNA enrichment methods for preparation of Cryptococcus neoformans RNA-sequencing libraries
+
+summary	This project had two major goals: to compare different methods of rRNA depletion for RNA-Seq in Cryptococcus neoformans and to identify genes differentially expressed in a mar1 deletion mutant.
+
+overall design	This project generated `r nrow(geo_samples_all)` libraries from `r geo_samples_all%>% pull("characteristics: RNA sample number") %>% unique %>% length` different samples. Samples from 6 biological replicates were generated for each treatment x genotype. The two treatments conditions were growth in YPD and tissue culture media.  The two genotypes were H99 wildtype and mar1 deletion mutant.  Two libraries were made from each RNA sample using different methods for rRNA depletion: poly(A) isolation and Ribo-Zero.  For 3 of the samples libraries were also made from unenriched RNA and RNA enriched using the RNase H method.  For these 3 samples unenriched, RNase H, and poly(A) enriched libraries were prepared and sequenced in 2019 and unenriched, poly(A), and Ribo-Zero libraries were prepared and sequenced in 2018.  All other libraries were prepared and sequenced in 2018.  
+
+contributor	Calla,L,Telzrow
+contributor	Paul,J,Zwack
+contributor	Shannon,E,Righi
+contributor	Fred,S,Dietrich
+contributor	Cliburn,Chan
+contributor	Kouros,Owzar
+contributor	J,Andrew,Alspaugh
+contributor	Joshua,A,Granek
+supplementary file	
+
+
+# PROTOCOLS	
+
+Protocols applicable to only a subset of Samples can be included as additional columns of the SAMPLES section above instead.	
+
+growth protocol	Samples were prepared by growing each biological replicate of the WT and mar1d strain to mid-logarithmic growth phase in separate flasks of liquid YPD medium, with 150 rpm shaking. 
+treatment protocol 	Approximately 1 × 109 cells from each sample were pelleted, resuspended in fresh YPD medium or tissue culture media, and incubated at 30°C for 90 min with 150 rpm shaking. 
+extract protocol	Cells were then pelleted, flash frozen on dry ice, and lyophilized for ~18 hours. Total RNA was isolated using the Qiagen RNeasy Plant Mini Kit (Qiagen, Valencia, CA); on-column DNase digestion was performed to eliminate contaminating genomic DNA. Total RNA quantity and quality were assessed using the Agilent 2100 Bioanalyzer. Purified RNA was subsequently stored at -80°C.
+library construction protocol	Purified total RNA was processed unenriched or was rRNA was depleted using either Ribo-Zero Yeast kit (Illumina), the NEBNext poly(A) mRNA Magnetic Isolation Module (New England Biolabs, Ipswich, MA), or the RNase H method with custom oligos. Ribo-Zero and RNase H treated RNA were then cleaned up with the RNA Clean & Concentrator-5 (Zymo Research) before library preparation.  RNA-Seq libraries were prepared from these enriched samples and from unenriched control samples (i.e. “Unenriched”) using the NEBNext® Ultra™ II Directional RNA Library Prep with Sample Purification Beads (NEB #E7765) (New England Biolabs, Ipswich, MA). 
+library strategy	RNA-Seq
+
+# DATA PROCESSING PIPELINE	
+Data processing steps include base-calling, alignment, filtering, peak-calling, generation of normalized abundance measurements etc…	
+For each step provide a description, as well as software name, version, parameters, if applicable.	
+
+
+data processing step	General read quality was evaluated using `r system2("fastqc", "--version", stdout=TRUE)` and `r system2("multiqc", "--version", stdout=TRUE)` 
+
+data processing step	Genome and GTF files were downloaded from Ensembl Fungi (release 39) and indexed using `r system2("STAR", "--version", stdout=TRUE)`
+
+data processing step	FASTQs were filtered and trimmed using fastq-mcf v1.04.807  using paramteres "-q 20 -x 0.5" and the following adapter sequences, which were supplied by NEB, and their reverse complements: AGATCGGAAGAGCACACGTCTGAACTCCAGTCA and AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT
+
+data processing step	Filtered and trimmed reads were mapped and counted using `r system2("STAR", "--version", stdout=TRUE)` with these parameters: --runMode alignReads --outSAMtype None --quantMode GeneCounts --genomeLoad NoSharedMemory  --twopassMode None --outFilterScoreMinOverLread 0 --outFilterMatchNminOverLread 0 --outFilterMatchNmin 0 --outFilterMismatchNmax 2 
+
+data processing step	An Rmarkdown notebook containing the counting pipeline is available at <https://github.com/granek-pubs/rna_enrichment/tree/master/geo_submission>
+
+genome build	GCA_000149245.3
+
+processed data files format and content	Tab-delimited text files containing raw read counts per gene in STAR format. The appropriate counts are in column 4 (counts for the 2nd read strand aligned with RNA), because the directional reads were generated using the dUTP method
+
+## PROCESSED DATA FILES
+```{r}
+geo_starout_dir %>%
+  list.files(pattern="ReadsPerGene.out.tab",full.names = TRUE) %>%
+  md5sum %>%
+  enframe(name="full_path", value="md5sum") %>%
+  transmute(`file name` = basename(full_path),
+            `file type` = "raw counts", 
+            `file checksum` = md5sum) ->
+  processed_md5
+
+knitr::kable(processed_md5)
+write_tsv(processed_md5, processed_files_table_tsv)
+```
+
+# RAW FILES
+```{r}
+file.path(pilot2018_fastq_dir, "md5_checksum.txt") %>%
+  read_delim(" ", trim_ws = TRUE, col_names = c("md5", "filename")) ->
+  pilot2018_fastq_md5sums
+```
+
+```{r}
+file.path(pilot2019_fastq_dir, "md5_checksum.txt") %>%
+  read_delim(" ", trim_ws = TRUE, col_names = c("md5", "filename")) %>%
+  filter(str_detect(filename, "\\d+_2018_")) ->
+  pilot2019_fastq_md5sums
+```
+
+```{r}
+bind_rows(pilot2018_fastq_md5sums, pilot2019_fastq_md5sums) %>%
+  transmute(`file name`= filename,
+         `file type`="fastq",
+         `file checksum` = md5,
+         `instrument model`="NextSeq 500",
+         `single or paired-end`="single") ->
+  geo_raw_files
+
+knitr::kable(geo_raw_files)
+
+write_tsv(geo_raw_files, raw_files_table_tsv)
+```
+
+# Clean up Count directory
+```{r}
+geo_starout_dir %>%
+  list.files(full.names = TRUE, pattern="final.out$") %>%
+  file_delete
+
+geo_starout_dir %>%
+  list.files(full.names = TRUE, pattern="_Log.out$") %>%
+  file_delete
+
+geo_starout_dir %>%
+  list.files(full.names = TRUE, pattern="_Log.progress.out$") %>%
+  file_delete
+
+geo_starout_dir %>%
+  list.files(full.names = TRUE, pattern="_SJ.out.tab$") %>%
+  file_delete
+
+geo_starout_dir %>%
+  list.files %>%
+  str_subset("_ReadsPerGene.out.tab", negate = TRUE)
+
+```
+
+

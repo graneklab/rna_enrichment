@@ -1,5 +1,7 @@
 # Genome URLs
 library(here)
+library(dplyr)
+library(fs)
 
 url_part1="ftp://ftp.ensemblgenomes.org/pub/release-39/fungi/"
 url_part2="/fungi_basidiomycota1_collection/cryptococcus_neoformans_var_grubii_h99/"
