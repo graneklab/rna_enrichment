@@ -447,6 +447,22 @@ res50
 
 summary(res50)
 
+h99_granges %>% 
+  filter(gene_id == "CNAG_09000") ->
+ missed_geneids
+
+norm_counts_long_noreps %>%
+    ggplot(aes(x=gold_mean, y=norm_count, color=enrichment_method)) +
+    geom_point(alpha=0.3) +
+    labs(x = "Average Normalized Count in Unenriched", y= "Normalized Count") +
+    theme_bw() +
+    theme(text=element_text(size=10)) +
+    theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())  +
+    facet_grid(enrichment_method ~ RNA_sample_num) +
+    scale_colour_brewer(palette = fig_palette, guide = FALSE, drop=TRUE, limits = enrich_levels) +
+    geom_abline(size=0.5) %>%
+    return
+
 ```
 
 # SessionInfo
