@@ -440,20 +440,64 @@ keep <- rowSums(counts(dds[enrichment_method = 'Unenriched'])) >= 50
 dds50 <- dds[keep,]
 dds50
 ```
-#Identifying genes with decreased expression in Poly(A) compared to Unenriched
+#DE analysis to ID genes with decreased expression in Poly(A) compared to Unenriched
 ```{r}
 res50 <- results(dds50, contrast = c("enrichment_method", "Poly(A)", "Unenriched"), lfcThreshold=log2(8), altHypothesis = "less")
 res50
 
 summary(res50)
 
-h99_granges %>% 
-  filter(gene_id == "CNAG_09000") ->
- missed_geneids
+write.csv(res50, file = 'polya_dep_genes.csv')
 
+norm_counts_long_noreps$genecolour <- rep('grey', nrow(norm_counts_long_noreps))
+norm_counts_long_noreps$genecolour[norm_counts_long_noreps$geneid == 'CNAG_01093'] <- 'royalblue'
+norm_counts_long_noreps$genecolour[norm_counts_long_noreps$geneid == 'CNAG_12486'] <- 'royalblue'
+norm_counts_long_noreps$genecolour[norm_counts_long_noreps$geneid == 'CNAG_12895'] <- 'royalblue'
+norm_counts_long_noreps$genecolour[norm_counts_long_noreps$geneid == 'CNAG_12640'] <- 'royalblue'
+norm_counts_long_noreps$genecolour[norm_counts_long_noreps$geneid == 'CNAG_12216'] <- 'royalblue'
+norm_counts_long_noreps$genecolour[norm_counts_long_noreps$geneid == 'CNAG_12677'] <- 'royalblue'
+norm_counts_long_noreps$genecolour[norm_counts_long_noreps$geneid == 'CNAG_12056'] <- 'royalblue'
+norm_counts_long_noreps$genecolour[norm_counts_long_noreps$geneid == 'CNAG_12223'] <- 'royalblue'
+norm_counts_long_noreps$genecolour[norm_counts_long_noreps$geneid == 'CNAG_09001'] <- 'royalblue'
+norm_counts_long_noreps$genecolour[norm_counts_long_noreps$geneid == 'CNAG_12667'] <- 'royalblue'
+norm_counts_long_noreps$genecolour[norm_counts_long_noreps$geneid == 'CNAG_12987'] <- 'royalblue'
+norm_counts_long_noreps$genecolour[norm_counts_long_noreps$geneid == 'CNAG_12692'] <- 'royalblue'
+norm_counts_long_noreps$genecolour[norm_counts_long_noreps$geneid == 'CNAG_12894'] <- 'royalblue'
+norm_counts_long_noreps$genecolour[norm_counts_long_noreps$geneid == 'CNAG_09003'] <- 'royalblue'
+norm_counts_long_noreps$genecolour[norm_counts_long_noreps$geneid == 'CNAG_12256'] <- 'royalblue'
+norm_counts_long_noreps$genecolour[norm_counts_long_noreps$geneid == 'CNAG_12434'] <- 'royalblue'
+norm_counts_long_noreps$genecolour[norm_counts_long_noreps$geneid == 'CNAG_12573'] <- 'royalblue'
+norm_counts_long_noreps$genecolour[norm_counts_long_noreps$geneid == 'CNAG_07813'] <- 'royalblue'
+norm_counts_long_noreps$genecolour[norm_counts_long_noreps$geneid == 'CNAG_09011'] <- 'royalblue'
+norm_counts_long_noreps$genecolour[norm_counts_long_noreps$geneid == 'CNAG_13174'] <- 'royalblue'
+norm_counts_long_noreps$genecolour[norm_counts_long_noreps$geneid == 'CNAG_12714'] <- 'royalblue'
+norm_counts_long_noreps$genecolour[norm_counts_long_noreps$geneid == 'CNAG_13128'] <- 'royalblue'
+norm_counts_long_noreps$genecolour[norm_counts_long_noreps$geneid == 'CNAG_03835'] <- 'royalblue'
+norm_counts_long_noreps$genecolour[norm_counts_long_noreps$geneid == 'CNAG_13196'] <- 'royalblue'
+norm_counts_long_noreps$genecolour[norm_counts_long_noreps$geneid == 'CNAG_12094'] <- 'royalblue'
+norm_counts_long_noreps$genecolour[norm_counts_long_noreps$geneid == 'CNAG_05651'] <- 'royalblue'
+norm_counts_long_noreps$genecolour[norm_counts_long_noreps$geneid == 'CNAG_00311'] <- 'royalblue'
+norm_counts_long_noreps$genecolour[norm_counts_long_noreps$geneid == 'CNAG_12993'] <- 'royalblue'
+norm_counts_long_noreps$genecolour[norm_counts_long_noreps$geneid == 'CNAG_12266'] <- 'royalblue'
+norm_counts_long_noreps$genecolour[norm_counts_long_noreps$geneid == 'CNAG_09010'] <- 'royalblue'
+norm_counts_long_noreps$genecolour[norm_counts_long_noreps$geneid == 'CNAG_09005'] <- 'royalblue'
+norm_counts_long_noreps$genecolour[norm_counts_long_noreps$geneid == 'CNAG_09008'] <- 'royalblue'
+norm_counts_long_noreps$genecolour[norm_counts_long_noreps$geneid == 'CNAG_09002'] <- 'royalblue'
+norm_counts_long_noreps$genecolour[norm_counts_long_noreps$geneid == 'CNAG_09009'] <- 'royalblue'
+norm_counts_long_noreps$genecolour[norm_counts_long_noreps$geneid == 'CNAG_12087'] <- 'royalblue'
+norm_counts_long_noreps$genecolour[norm_counts_long_noreps$geneid == 'CNAG_12260'] <- 'royalblue'
+norm_counts_long_noreps$genecolour[norm_counts_long_noreps$geneid == 'CNAG_12265'] <- 'royalblue'
+norm_counts_long_noreps$genecolour[norm_counts_long_noreps$geneid == 'CNAG_09006'] <- 'royalblue'
+norm_counts_long_noreps$genecolour[norm_counts_long_noreps$geneid == 'CNAG_09004'] <- 'royalblue'
+norm_counts_long_noreps$genecolour[norm_counts_long_noreps$geneid == 'CNAG_09012'] <- 'royalblue'
+norm_counts_long_noreps$genecolour[norm_counts_long_noreps$geneid == 'CNAG_09000'] <- 'royalblue'
+```
+
+#Scatterplot of genes with decreased expression in Poly(A) compared to Unenriched
+```{r fig.width=8, fig.height=8}
 norm_counts_long_noreps %>%
-    ggplot(aes(x=gold_mean, y=norm_count, color=enrichment_method)) +
-    geom_point(alpha=0.3) +
+    ggplot(aes(x=gold_mean, y=norm_count, colour=genecolour)) +
+    geom_point(alpha=0.3, colour = norm_counts_long_noreps$genecolour) +
     labs(x = "Average Normalized Count in Unenriched", y= "Normalized Count") +
     theme_bw() +
     theme(text=element_text(size=10)) +
@@ -463,6 +507,23 @@ norm_counts_long_noreps %>%
     geom_abline(size=0.5) %>%
     return
 
+ggsave(file.path(fig.dir, "polya_dep.tiff"), compression = "lzw", width=20, height=20, units = "cm")
+```
+
+#Volcano plot of genes with decreased expression in Poly(A) compared to Unenriched
+```{r}
+library(EnhancedVolcano)
+  
+EnhancedVolcano(res50,
+    lab = rownames(res50),
+    x = 'log2FoldChange',
+    y = 'padj',
+    title = 'Poly(A) v. Unenriched',
+    subtitle = " ",
+    col=c('black', 'black', 'black', 'royalblue'),
+    labSize = 2.5,
+    pCutoff = 0.05,
+    FCcutoff = 3)
 ```
 
 # SessionInfo
