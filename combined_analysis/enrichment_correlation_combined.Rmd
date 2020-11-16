@@ -434,7 +434,67 @@ norm_counts_long_noreps %>%
 ggsave(file.path(fig.dir, "ncrna_scatter_S3.tiff"), compression = "lzw", width=20, height=20, units = "cm")
 ```
 
+### Exploring RNaseH ncRNA outlier (CNAG_12993)
+```{r}
+norm_counts_long_noreps %>%
+  filter(geneid %in% ncrna_geneids) %>%
+  filter(enrichment_method=="RNase H") %>%
+  arrange(desc(gold_mean))
+```
 
+```{r}
+norm_counts_wmeans %>%
+  filter(geneid %in% ncrna_geneids) %>%
+  filter(geneid != "CNAG_12993") %>%
+  enrichedCorrelationToGoldStandard(dds) ->
+  ncrna_enriched_drop_CNAG_12993_cor
+
+plotCorrelationValues(ncrna_unenriched_cor, 
+                      ncrna_enriched_drop_CNAG_12993_cor, 
+                      dds, fig_palette, enrich_levels)
+```
+```{r}
+correlationRanges(ncrna_unenriched_cor, ncrna_enriched_drop_CNAG_12993_cor) %>%
+  kable
+```
+
+#### Does size explain CNAG_12993?
+
+```{r}
+import(gtf_with_mito_rrna.file, format="gtf") %>%
+  as.data.frame %>%
+  filter(gene_id %in% ncrna_geneids) %>%
+  filter(type == "gene") %>%
+  arrange(width) 
+```
+
+```{r}
+import(gtf_with_mito_rrna.file, format="gtf") %>%
+  as.data.frame %>%
+  filter(gene_id %in% ncrna_geneids) %>%
+  filter(type == "gene") %>%
+  arrange(width) %>%
+  ggplot(aes(x=width)) +   
+   geom_histogram(aes(y=..density..)) + 
+   geom_density(aes(y=..density..))
+
+```
+
+```{r}
+import(gtf_with_mito_rrna.file, format="gtf") %>%
+  as.data.frame %>%
+  filter(gene_id %in% ncrna_geneids) %>%
+  filter(type == "gene") ->
+  gene_annotations
+
+results(dds, contrast=c("enrichment_method","Unenriched","RNase H")) %>%
+  as.data.frame %>%
+  rownames_to_column("gene_id") %>%
+  filter(gene_id %in% ncrna_geneids) %>%
+  left_join(gene_annotations, by="gene_id") %>%
+  ggplot(aes(width, log2FoldChange)) +
+  geom_point()
+```
 
 # SessionInfo
 ```{r}
