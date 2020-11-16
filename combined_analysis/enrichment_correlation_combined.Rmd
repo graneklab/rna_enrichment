@@ -445,6 +445,13 @@ dds50
 res50 <- results(dds50, contrast = c("enrichment_method", "Poly(A)", "Unenriched"), lfcThreshold=log2(8), altHypothesis = "less")
 res50
 
+res50 %>% 
+  as.data.frame() %>%
+  arrange(padj, log2FoldChange)
+```
+
+```{r}
+
 summary(res50)
 
 write.csv(res50, file = 'polya_dep_genes.csv')
