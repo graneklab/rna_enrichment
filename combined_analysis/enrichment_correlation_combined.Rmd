@@ -252,11 +252,11 @@ plotCorrelationValues <- function(unenriched_cor, enriched_cor, dds, fig_palette
 ```
 
 ```{r}
-correlationRanges <- function(unenriched_cor, enriched_cor){
+correlationRanges <- function(unenriched_cor, enriched_cor, rounding=3){
   bind_rows(unenriched_cor, enriched_cor) %>%
   group_by(enrichment_method) %>%
-  summarise(min_r = min(cor_with_unenriched),
-            max_r = max(cor_with_unenriched)) %>%
+  summarise(min_r = round(min(cor_with_unenriched), rounding),
+            max_r = round(max(cor_with_unenriched), rounding)) %>%
     return
 }
 ```
