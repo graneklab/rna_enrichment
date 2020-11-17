@@ -450,10 +450,19 @@ norm_counts_wmeans %>%
   enrichedCorrelationToGoldStandard(dds) ->
   ncrna_enriched_drop_CNAG_12993_cor
 
-plotCorrelationValues(ncrna_unenriched_cor, 
+unenriched_norm_counts %>%
+  filter(geneid %in% ncrna_geneids) %>%
+  filter(geneid != "CNAG_12993") %>%
+  select(-geneid) %>%
+  calculateCrossCorrelation(dds) ->
+  ncrna_unenriched_drop_CNAG_12993_cor
+
+plotCorrelationValues(ncrna_unenriched_drop_CNAG_12993_cor, 
                       ncrna_enriched_drop_CNAG_12993_cor, 
                       dds, fig_palette, enrich_levels)
+ggsave(file.path(fig.dir, "Figure_S5.tiff"), compression = "lzw", width=15, height=10.71, units = "cm")
 ```
+
 ```{r}
 correlationRanges(ncrna_unenriched_cor, ncrna_enriched_drop_CNAG_12993_cor) %>%
   kable
