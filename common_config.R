@@ -32,7 +32,7 @@ gtf_url %>%
   path_ext_remove %>%
   path_ext_remove %>%
   paste0("__with_mito_rrna.gtf") %>%
-  file.path(here("info"), .) ->
+  file.path(here::here("info"), .) ->
   gtf_with_mito_rrna.file
 
 fig.dir = file.path(out.dir, "figures")

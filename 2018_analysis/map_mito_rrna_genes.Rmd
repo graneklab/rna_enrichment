@@ -69,7 +69,7 @@ tot_L1_bam_files
 ```
 # Whole Genome
 ```{r}
-autoplot(tot_L1_bams, which = whole_mito_gr) +
+autoplot(tot_L1_bams, which = whole_mito_gr, geom = "area") +
   xlim(whole_mito_gr) +
   xlab("Position on Mitochondrial Chromosome") +
   theme_classic() ->
@@ -412,16 +412,16 @@ grep CNAG_10500 $TOTAL_SAMPLES_STAROUT/*_L001_ReadsPerGene.out.tab
 
 # Figures for Manuscript
 ## Whole Genome
-```{r}
-autoplot(tot_L1_bams[[1]], which = whole_mito_gr) +
+```{r fig.width=8, fig.height=4}
+autoplot(tot_L1_bams[[1]], which = whole_mito_gr, geom="area") +
   xlim(whole_mito_gr) +
   xlab("Position on Mitochondrial Chromosome") +
-  ylab("Read Coverage") +
+  ylab("Depth of Coverage") +
   theme_classic(base_size = 10) ->
   whole_mito_plot
 
 whole_mito_plot@ggplot
-ggsave(file.path(fig.dir, "whole_mito_rrna_coverage.tiff"), plot=whole_mito_plot@ggplot, compression = "lzw")
+ggsave(file.path(fig.dir, "Figure_S4.tiff"), plot=whole_mito_plot@ggplot, compression = "lzw")
 ```
 
 
