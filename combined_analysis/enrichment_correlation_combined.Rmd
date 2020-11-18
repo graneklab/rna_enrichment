@@ -565,7 +565,7 @@ norm_counts_long_noreps_lost_polya %>%
     geom_abline(size=0.5) %>%
     return
 
-ggsave(file.path(fig.dir, "polya_dep.tiff"), compression = "lzw", width=20, height=20, units = "cm")
+ggsave(file.path(fig.dir, "polya_dep_S6.tiff"), compression = "lzw", width=20, height=20, units = "cm")
 ```
 ```{r}
 import(gtf_with_mito_rrna.file, format = "gtf") %>%
