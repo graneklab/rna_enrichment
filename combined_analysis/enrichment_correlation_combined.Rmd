@@ -512,50 +512,66 @@ unenriched_low_counts = c(50)
 unenriched_low_counts
 
 keep <- rowSums(counts(dds[enrichment_method = 'Unenriched'])) >= unenriched_low_counts
-dds50 <- dds[keep,]
-dds50
+dds_no_low_counts <- dds[keep,]
+dds_no_low_counts
 ```
 #DE analysis to ID genes with decreased expression in Poly(A) compared to Unenriched
 ```{r}
 lfc_cutoff = c(log2(8))
 sig_cutoff = c(0.05)
 
-res50 <- results(dds50, contrast = c("enrichment_method", "Poly(A)", "Unenriched"), lfcThreshold=lfc_cutoff, altHypothesis = "less")
-res50
+dea_polya_unenriched <- results(dds_no_low_counts, contrast = c("enrichment_method", "Poly(A)", "Unenriched"), lfcThreshold=lfc_cutoff, altHypothesis = "less")
+dea_polya_unenriched
 
-res50 %>% 
+dea_polya_unenriched %>% 
   as.data.frame() %>%
-  arrange(padj, log2FoldChange) -> res50_df
+  arrange(padj, log2FoldChange) -> dea_polya_unenriched_df
 
-rownames_to_column(res50_df, "gene_id") -> res50_df_geneids
+rownames_to_column(dea_polya_unenriched_df, "gene_id") -> dea_polya_unenriched_df_geneids
 
-res50_df_geneids %>% 
+dea_polya_unenriched_df_geneids %>% 
   filter(padj < sig_cutoff) %>%
   pull(gene_id) ->
-  sig_less_polya_genes
+  lost_polya_genes
 
-norm_counts_long_noreps_missed_polya <- norm_counts_long_noreps %>%
-  mutate(polya_missed = ifelse(geneid %in% sig_less_polya_genes, T, F))
+norm_counts_long_noreps_lost_polya <- norm_counts_long_noreps %>%
+  mutate(polya_lost = ifelse(geneid %in% lost_polya_genes, T, F))
 
-norm_counts_long_noreps_missed_polya
+norm_counts_long_noreps_lost_polya
+
 ```
 
 #Scatterplot of genes with decreased expression in Poly(A) compared to Unenriched
 ```{r fig.width=8, fig.height=8}
 
-norm_counts_long_noreps_missed_polya %>%
-    ggplot(aes(x=gold_mean, y=norm_count, colour=polya_missed)) +
-    geom_point(alpha=0.3, colour = norm_counts_long_noreps_missed_polya$polya_missed) +
+norm_counts_long_noreps_lost_polya$polya_lost <-  as.factor(norm_counts_long_noreps_lost_polya$polya_lost)
+
+norm_counts_long_noreps_lost_polya %>%
+  pull(polya_lost) %>%
+  levels ->
+  sig_levels
+
+fig_palette2 = "Set1"
+
+norm_counts_long_noreps_lost_polya %>%
+    ggplot(aes(x=gold_mean, y=norm_count, color=polya_lost)) +
+    geom_point(alpha=0.3) +
     labs(x = "Average Normalized Count in Unenriched", y= "Normalized Count") +
     theme_bw() +
     theme(text=element_text(size=10)) +
     theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())  +
     facet_grid(enrichment_method ~ RNA_sample_num) +
-    scale_colour_brewer(palette = fig_palette, guide = FALSE, drop=TRUE, limits = enrich_levels) +
+    scale_colour_brewer(palette = fig_palette2, direction = -1, guide = FALSE, drop=TRUE, limits = sig_levels) +
     geom_abline(size=0.5) %>%
     return
 
 ggsave(file.path(fig.dir, "polya_dep.tiff"), compression = "lzw", width=20, height=20, units = "cm")
+```
+```{r}
+import(gtf_with_mito_rrna.file, format = "gtf") %>%
+  as.data.frame %>%
+  filter(gene_id %in% lost_polya_genes) %>%
+  select(gene_id, seqnames, gene_biotype) -> genes_lost_in_polya
 ```
 
 # SessionInfo
