@@ -125,10 +125,15 @@ all_oligos.df
 # write_tsv(all_oligos.df, rrna_oligos.file)
 
 # Reformat oligos for eurofins form
+#all_oligos.df %>%
+  #mutate(five_prime_mods="", three_prime_mods="") %>%
+  #dplyr::select(oligo_name, five_prime_mods, oligo_sequence, three_prime_mods) %>%
+  #write_tsv(rrna_oligos.file)
+
 all_oligos.df %>%
   mutate(five_prime_mods="", three_prime_mods="") %>%
   dplyr::select(oligo_name, five_prime_mods, oligo_sequence, three_prime_mods) %>%
-  write_tsv(rrna_oligos.file)
+  write_tsv(file.path(fig.dir, "File_S3.tsv"))
 ```
 ### Make FASTQ from oligos for checking
 ```{r}
