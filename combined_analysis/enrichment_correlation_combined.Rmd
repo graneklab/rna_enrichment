@@ -440,6 +440,7 @@ norm_counts_long_noreps %>%
   filter(geneid %in% ncrna_geneids) %>%
   filter(enrichment_method=="RNase H") %>%
   arrange(desc(gold_mean)) %>%
+  head(20) %>%
   kable
 ```
 
@@ -475,7 +476,8 @@ import(gtf_with_mito_rrna.file, format="gtf") %>%
   as.data.frame %>%
   filter(gene_id %in% ncrna_geneids) %>%
   filter(type == "gene") %>%
-  arrange(width) 
+  arrange(width) %>%
+  head(20)
 ```
 
 ```{r}
@@ -535,6 +537,7 @@ norm_counts_long_noreps_lost_polya <- norm_counts_long_noreps %>%
   mutate(polya_lost = ifelse(geneid %in% lost_polya_genes, T, F))
 
 norm_counts_long_noreps_lost_polya %>%
+  head %>%
   kable
 ```
 
