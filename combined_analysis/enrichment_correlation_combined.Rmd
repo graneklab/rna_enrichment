@@ -347,12 +347,12 @@ correlationRanges(unenriched_cor, enriched_cor) %>%
 
 ```{r}
 plotCorrelationValues(unenriched_cor, enriched_cor, dds, fig_palette, enrich_levels)
-ggsave(file.path(fig.dir, "all_genes_cor_values_F2.tiff"), compression = "lzw", width=15, height=10.71, units = "cm")
+ggsave(file.path(fig.dir, "Figure_2.tiff"), compression = "lzw", width=15, height=10.71, units = "cm")
 ```
 
 ```{r fig.width=8, fig.height=8}  
 makeEnrichmentScatterplot(norm_counts_long_noreps, fig_palette, enrich_levels)
-ggsave(file.path(fig.dir, "all_genes_scatter_S1.tiff"), compression = "lzw", width=20, height=20, units = "cm")
+ggsave(file.path(fig.dir, "Figure_S1.tiff"), compression = "lzw", width=20, height=20, units = "cm")
 ```
 
 For each library per gene read counts were normalized by that library's total reads mapped to annotated genes (excluding rRNA genes and genes that recruit rRNA reads). A "gold standard" per gene read count was calculated as the average normalized count across the six unenriched libraries.  Libraries for each enrichment method applied to each biological replicate are ploted (technical replicates are not shown).  Each point represents a gene with the gold standard count as the x value, and the normalized count from a library as the y value.
@@ -387,14 +387,14 @@ correlationRanges(protein_coding_unenriched_cor, protein_coding_enriched_cor) %>
 plotCorrelationValues(protein_coding_unenriched_cor, 
                       protein_coding_enriched_cor, 
                       dds, fig_palette, enrich_levels)
-ggsave(file.path(fig.dir, "protein_coding_cor_values_F3.tiff"), compression = "lzw", width=15, height=10.71, units = "cm")
+ggsave(file.path(fig.dir, "Figure_3.tiff"), compression = "lzw", width=15, height=10.71, units = "cm")
 ```
 
 ```{r fig.width=8, fig.height=8}  
 norm_counts_long_noreps %>%
   filter(geneid %in% protein_coding_geneids) %>%
   makeEnrichmentScatterplot(fig_palette, enrich_levels)
-ggsave(file.path(fig.dir, "protein_coding_scatter_S2.tiff"), compression = "lzw", width=20, height=20, units = "cm")
+ggsave(file.path(fig.dir, "Figure_S2.tiff"), compression = "lzw", width=20, height=20, units = "cm")
 ```
 
 ## ncRNA Genes
