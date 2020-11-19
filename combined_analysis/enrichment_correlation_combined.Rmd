@@ -534,8 +534,8 @@ dea_polya_unenriched %>%
 norm_counts_long_noreps_lost_polya <- norm_counts_long_noreps %>%
   mutate(polya_lost = ifelse(geneid %in% lost_polya_genes, T, F))
 
-norm_counts_long_noreps_lost_polya
-
+norm_counts_long_noreps_lost_polya %>%
+  kable
 ```
 
 #Scatterplot of genes with decreased expression in Poly(A) compared to Unenriched
