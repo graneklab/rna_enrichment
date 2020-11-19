@@ -527,14 +527,15 @@ dea_polya_unenriched
 
 dea_polya_unenriched %>% 
   as.data.frame() %>%
+  rownames_to_column("gene_id") %>%
   arrange(padj, log2FoldChange) %>%
-  rownames_to_column("gene_id") %>% 
   filter(padj < sig_cutoff) %>%
   pull(gene_id) ->
   lost_polya_genes
 
-norm_counts_long_noreps_lost_polya <- norm_counts_long_noreps %>%
-  mutate(polya_lost = ifelse(geneid %in% lost_polya_genes, T, F))
+norm_counts_long_noreps %>%
+  mutate(polya_lost = geneid %in% lost_polya_genes) ->
+  norm_counts_long_noreps_lost_polya
 
 norm_counts_long_noreps_lost_polya %>%
   head %>%
@@ -543,15 +544,6 @@ norm_counts_long_noreps_lost_polya %>%
 
 #Scatterplot of genes with decreased expression in Poly(A) compared to Unenriched
 ```{r fig.width=8, fig.height=8}
-
-norm_counts_long_noreps_lost_polya$polya_lost <-  as.factor(norm_counts_long_noreps_lost_polya$polya_lost)
-
-norm_counts_long_noreps_lost_polya %>%
-  pull(polya_lost) %>%
-  levels ->
-  sig_levels
-
-
 norm_counts_long_noreps_lost_polya %>%
     ggplot(aes(x=gold_mean, y=norm_count, color=polya_lost)) +
     geom_point(alpha=0.3) +
@@ -560,7 +552,7 @@ norm_counts_long_noreps_lost_polya %>%
     theme(text=element_text(size=10)) +
     theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())  +
     facet_grid(enrichment_method ~ RNA_sample_num) +
-    scale_colour_manual(values = c("FALSE"="grey60", "TRUE"="red"), guide = FALSE, drop=TRUE) +
+    scale_colour_manual(values = c("FALSE"="grey60","TRUE"="red"), guide = FALSE) +
     geom_abline(size=0.5)
 
 ggsave(file.path(fig.dir, "polya_dep_S6.tiff"), compression = "lzw", width=20, height=20, units = "cm")
