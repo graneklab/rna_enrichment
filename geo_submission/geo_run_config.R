@@ -81,9 +81,6 @@ Sys.setenv(ADAPTERS = adapters.file)
 # 
 
 # 
-# rrna_oligos.file = file.path(seq.dir, "rrna_oligos.tsv")
-# rrna_oligos.fastq = file.path(seq.dir, "rrna_oligos.fastq")
-# rrna_oligos.fastq = file.path(seq.dir, "rrna_oligos.fastq")
 # 
 # # Genome with mito rRNA
 # genome_with_mito_rrna.dir=file.path(out.dir, "genome_with_mito_rrna")

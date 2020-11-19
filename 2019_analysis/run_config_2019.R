@@ -56,9 +56,6 @@ fa_url %>%
 
 # gtf_with_mito_rrna.file="../info/Cryptococcus_neoformans_var_grubii_h99.CNA3.39__with_mito_rrna.gtf"
 # 
-# rrna_oligos.file = file.path(seq.dir, "rrna_oligos.tsv")
-# rrna_oligos.fastq = file.path(seq.dir, "rrna_oligos.fastq")
-# rrna_oligos.fastq = file.path(seq.dir, "rrna_oligos.fastq")
 # 
 # # Genome with mito rRNA
 genome_with_mito_rrna.dir=file.path(out.dir, "genome_with_mito_rrna")

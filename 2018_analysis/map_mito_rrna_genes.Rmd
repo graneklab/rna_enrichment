@@ -75,7 +75,7 @@ autoplot(tot_L1_bams, which = whole_mito_gr, geom = "area") +
   theme_classic() ->
   whole_mito_plot
 
-ggsave(file.path(fig.dir, "whole_mito_rrna_coverage.png"), whole_mito_plot)
+# ggsave(file.path(fig.dir, "whole_mito_rrna_coverage.png"), whole_mito_plot)
 whole_mito_plot
 ```
 
@@ -86,7 +86,7 @@ autoplot(tot_L1_bams, which = range_21s_region) +
   xlim(range_21s_region) ->
   mito_21S_plot
 
-ggsave(file.path(fig.dir, "mito_21S_rrna_coverage.png"), mito_21S_plot)
+# ggsave(file.path(fig.dir, "mito_21S_rrna_coverage.png"), mito_21S_plot)
 mito_21S_plot
 ```
 
@@ -184,7 +184,7 @@ autoplot(tot_L1_bams, which = range_15s_region) +
   xlim(range_15s_region) ->
   mito_15S_plot
 
-ggsave(file.path(fig.dir, "mito_15S_rrna_coverage.png"), mito_15S_plot)
+# ggsave(file.path(fig.dir, "mito_15S_rrna_coverage.png"), mito_15S_plot)
 mito_15S_plot
 ```
 
