@@ -47,5 +47,5 @@ ggplot(data = rrna_data_combined) +
   theme(text=element_text(size=10)) +
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
 
-ggsave(file.path(fig.dir, "rrna_depletion_quant_F1.tiff"), compression = "lzw", width=15, height=10.71, units = "cm")
+ggsave(file.path(fig.dir, "Figure_1.tiff"), compression = "lzw", width=15, height=10.71, units = "cm")
 ```

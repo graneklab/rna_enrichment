@@ -424,14 +424,14 @@ correlationRanges(ncrna_unenriched_cor, ncrna_enriched_cor) %>%
 plotCorrelationValues(ncrna_unenriched_cor, 
                       ncrna_enriched_cor, 
                       dds, fig_palette, enrich_levels)
-ggsave(file.path(fig.dir, "ncrna_cor_values_F4.tiff"), compression = "lzw", width=15, height=10.71, units = "cm")
+ggsave(file.path(fig.dir, "Figure_4.tiff"), compression = "lzw", width=15, height=10.71, units = "cm")
 ```
 
 ```{r fig.width=8, fig.height=8}  
 norm_counts_long_noreps %>%
   filter(geneid %in% ncrna_geneids) %>%
   makeEnrichmentScatterplot(fig_palette, enrich_levels)
-ggsave(file.path(fig.dir, "ncrna_scatter_S3.tiff"), compression = "lzw", width=20, height=20, units = "cm")
+ggsave(file.path(fig.dir, "Figure_S3.tiff"), compression = "lzw", width=20, height=20, units = "cm")
 ```
 
 ### Exploring RNaseH ncRNA outlier (CNAG_12993)
@@ -560,7 +560,7 @@ norm_counts_long_noreps_lost_polya %>%
     scale_colour_manual(values = c("FALSE"="grey60", "TRUE"="red"), guide = FALSE, drop=TRUE) +
     geom_abline(size=0.5)
 
-ggsave(file.path(fig.dir, "polya_dep_S6.tiff"), compression = "lzw", width=20, height=20, units = "cm")
+ggsave(file.path(fig.dir, "Figure_S6.tiff"), compression = "lzw", width=20, height=20, units = "cm")
 ```
 ```{r}
 import(gtf_with_mito_rrna.file, format = "gtf") %>%
@@ -569,6 +569,8 @@ import(gtf_with_mito_rrna.file, format = "gtf") %>%
   filter(type=="gene") %>%
   select(Gene=gene_id, Chromosome=seqnames, `Gene type`=gene_biotype) %>%
   arrange(`Gene type`, Chromosome) -> genes_lost_in_polya
+  
+  write.csv(file.path(fig.dir, "Table_S1.csv"), row.names = FALSE)
 
 ```
 
