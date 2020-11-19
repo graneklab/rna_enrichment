@@ -3,6 +3,9 @@ title: "Untitled"
 output: html_document
 ---
 
+singularity exec --bind /space:/space library://granek/published/rna_enrichment:latest Rscript -e "rmarkdown::render('lnc_rna/run_lncpipe_reproducible.Rmd')"
+
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
