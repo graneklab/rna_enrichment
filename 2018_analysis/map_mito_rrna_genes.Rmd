@@ -395,6 +395,7 @@ write.table(mito_rrdna_gtf.gf,
             quote = FALSE, sep = "\t",
             row.names = FALSE,
             col.names = FALSE)
+file_copy(gtf_with_mito_rrna.file, file_S2_path)
 ```
 
 
