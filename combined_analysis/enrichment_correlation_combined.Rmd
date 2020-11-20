@@ -352,7 +352,7 @@ ggsave(file.path(fig.dir, "Figure_2.tiff"), compression = "lzw", width=15, heigh
 
 ```{r fig.width=8, fig.height=8}  
 makeEnrichmentScatterplot(norm_counts_long_noreps, fig_palette, enrich_levels)
-ggsave(file.path(fig.dir, "Figure_S1.tiff"), compression = "lzw", width=20, height=20, units = "cm")
+ggsave(file.path(fig.dir, "Figure_S2.tiff"), compression = "lzw", width=20, height=20, units = "cm")
 ```
 
 For each library per gene read counts were normalized by that library's total reads mapped to annotated genes (excluding rRNA genes and genes that recruit rRNA reads). A "gold standard" per gene read count was calculated as the average normalized count across the six unenriched libraries.  Libraries for each enrichment method applied to each biological replicate are ploted (technical replicates are not shown).  Each point represents a gene with the gold standard count as the x value, and the normalized count from a library as the y value.
@@ -394,7 +394,7 @@ ggsave(file.path(fig.dir, "Figure_3.tiff"), compression = "lzw", width=15, heigh
 norm_counts_long_noreps %>%
   filter(geneid %in% protein_coding_geneids) %>%
   makeEnrichmentScatterplot(fig_palette, enrich_levels)
-ggsave(file.path(fig.dir, "Figure_S2.tiff"), compression = "lzw", width=20, height=20, units = "cm")
+ggsave(file.path(fig.dir, "Figure_S3.tiff"), compression = "lzw", width=20, height=20, units = "cm")
 ```
 
 ## ncRNA Genes
@@ -431,7 +431,7 @@ ggsave(file.path(fig.dir, "Figure_4.tiff"), compression = "lzw", width=15, heigh
 norm_counts_long_noreps %>%
   filter(geneid %in% ncrna_geneids) %>%
   makeEnrichmentScatterplot(fig_palette, enrich_levels)
-ggsave(file.path(fig.dir, "Figure_S3.tiff"), compression = "lzw", width=20, height=20, units = "cm")
+ggsave(file.path(fig.dir, "Figure_S4.tiff"), compression = "lzw", width=20, height=20, units = "cm")
 ```
 
 ### Exploring RNaseH ncRNA outlier (CNAG_12993)
@@ -564,7 +564,8 @@ import(gtf_with_mito_rrna.file, format = "gtf") %>%
   filter(type=="gene") %>%
   select(Gene=gene_id, Chromosome=seqnames, `Gene type`=gene_biotype) %>%
   arrange(`Gene type`, Chromosome) -> genes_lost_in_polya
-  
+
+genes_lost_in_polya %>%
   write.csv(file.path(fig.dir, "Table_S1.csv"), row.names = FALSE)
 
 ```

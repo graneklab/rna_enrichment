@@ -422,7 +422,7 @@ autoplot(tot_L1_bams[[1]], which = whole_mito_gr, geom="area") +
   whole_mito_plot
 
 whole_mito_plot@ggplot
-ggsave(file.path(fig.dir, "Figure_S4.tiff"), plot=whole_mito_plot@ggplot, compression = "lzw")
+ggsave(file.path(fig.dir, "Figure_S11.tiff"), plot=whole_mito_plot@ggplot, compression = "lzw")
 ```
 
 

@@ -39,6 +39,7 @@ xlabels <- c("Unenriched", "RNase H", "Ribo-Zero", "Poly(A)")
 ggplot(data = rrna_data_combined) +
   aes(x=Sample, y=percent_rrna, color=Sample) +
   geom_boxplot(fill=NA, color="grey70",outlier.color = NA, width=0.5) +
+  ylim(0, 100) +
   geom_jitter(width=0.5, height=0, size = 4, stroke = 1, alpha=0.5) +
   scale_colour_brewer(palette = fig_palette, guide = FALSE) +
   labs(x="Enrichment Method ", y="rRNA reads (% total reads)") +
