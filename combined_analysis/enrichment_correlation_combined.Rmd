@@ -224,7 +224,7 @@ plotCorrelationValues <- function(unenriched_cor, enriched_cor, dds, fig_palette
     geom_boxplot(fill=NA, color="grey70",outlier.color = NA, width=0.5) +
     geom_jitter(width=0.2, height=0, size = 4, stroke = 1, alpha=0.5) +
     scale_colour_brewer(palette = fig_palette, guide = FALSE, drop=TRUE, limits = enrich_levels) +
-    labs(x="Enrichment Method", y="Correlation") +
+    labs(x="Enrichment Method", y="Leave-One-Out Cross Correlation") +
     theme_minimal() +
     theme(text=element_text(size=10)) +
     ylim(r_range) +
@@ -237,7 +237,7 @@ plotCorrelationValues <- function(unenriched_cor, enriched_cor, dds, fig_palette
     geom_boxplot(fill=NA, color="grey70",outlier.color = NA, width=0.5) +
     geom_jitter(width=0.2, height=0, size = 4, stroke = 1, alpha=0.5) +
     scale_colour_brewer(palette = fig_palette, guide = FALSE, drop=TRUE, limits = enrich_levels) +
-    labs(x="Enrichment Method", y="Correlation") +
+    labs(x="Enrichment Method", y="Correlation with Unenriched") +
     theme_minimal() +
     theme(text=element_text(size=10)) +
     ylim(r_range) +
