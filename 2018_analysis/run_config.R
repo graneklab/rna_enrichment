@@ -44,6 +44,8 @@ gtf.file %>%
   file.path(seq.dir, .) ->
   gtf_with_mito_rrna.file
 
+file_S2_path = file.path(fig.dir, "File_S2.gtf")
+
 rrna_oligos.file = file.path(fig.dir, "rrna_oligos.tsv")
 rrna_oligos.fastq = file.path(seq.dir, "rrna_oligos.fastq")
 rrna_oligos.fastq = file.path(seq.dir, "rrna_oligos.fastq")
