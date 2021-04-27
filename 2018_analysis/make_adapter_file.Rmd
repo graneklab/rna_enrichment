@@ -1,0 +1,39 @@
+---
+title: "Run STAR on TOTAL samples"
+output:
+  html_document:
+    toc: false
+---
+
+```{r}
+source("run_config.R")
+```
+
+
+# Make adapter file
+```{bash}
+set -u
+mkdir -p $INFO
+echo ">Adapter
+AGATCGGAAGAGCACACGTCTGAACTCCAGTCA
+>AdapterRead2
+AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT
+>Adapter_rc
+TGACTGGAGTTCAGACGTGTGCTCTTCCGATCT
+>AdapterRead2_rc
+ACACTCTTTCCCTACACGACGCTCTTCCGATCT" >  $ADAPTERS
+head $ADAPTERS
+```
+
+```{bash}
+echo $ADAPTERS
+cat $ADAPTERS
+sed -e 'N;s/\n/\t/' $ADAPTERS | sed s/\>// > $FASTQC_ADAPTERS
+```
+
+
+
+# SessionInfo
+```{r}
+sessionInfo()
+```

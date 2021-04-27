@@ -36,6 +36,7 @@ list.files(pattern = ".Rmd") ->
 
 ordered_rmds_to_run = c(
   "download_data.Rmd",
+  "make_adapter_file.Rmd",
   "qc_total_reads_raw.Rmd",
   "run_star_on_total_samples.Rmd",
   "run_qc.Rmd",

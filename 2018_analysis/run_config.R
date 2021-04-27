@@ -16,6 +16,8 @@ metadata.file=file.path(raw_fastq.dir, "2018_pilot_metadata.tsv")
 # output
 info.dir=file.path(out.dir, "info")
 adapters.file= file.path(info.dir, "neb_e7600_adapters_withrc.fasta")
+adapters.fastqc= file.path(info.dir, "neb_e7600_adapters_fastqc.txt")
+
 trimmed.dir=file.path(out.dir, "trimmed_fastqs")
 genome.dir=file.path(out.dir, "genome")
 total_samples_starout.dir=file.path(out.dir, "total_samples_starout")
@@ -69,6 +71,7 @@ oligo_bam.file = file.path(rrna_oligo_starout.dir, "rrna_oligos_Aligned.sortedBy
 # Setup Bash variables
 
 Sys.setenv(THREADS = threads)
+Sys.setenv(TOTAL_THREADS = total_threads)
 Sys.setenv(MAX_JOBS = max_jobs)
 
 # Input
@@ -78,6 +81,7 @@ Sys.setenv(RAW_FASTQS = raw_fastq.dir)
 Sys.setenv(CUROUT = out.dir)
 Sys.setenv(INFO = info.dir)
 Sys.setenv(ADAPTERS = adapters.file)
+Sys.setenv(FASTQC_ADAPTERS = adapters.fastqc)
 Sys.setenv(TRIMMED = trimmed.dir)
 Sys.setenv(GENOME_DIR = genome.dir)
 Sys.setenv(TOTAL_SAMPLES_STAROUT = total_samples_starout.dir)
