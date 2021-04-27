@@ -44,7 +44,7 @@ trim_and_star_func() {
     FASTQ=$1
     FASTQ_BASE=${FASTQ##*/} # strip directory from file path
     SAMPLE="${FASTQ_BASE%_R1_001.fastq.gz}" # strip .fq.gz file extension
-    FASTQ_TRIMMED="$TRIMMED/${SAMPLE}.fq.gz"
+    FASTQ_TRIMMED="$TRIMMED/${SAMPLE}_trimmed.fq.gz"
     echo $SAMPLE
     echo $FASTQ
     echo $FASTQ_BASE

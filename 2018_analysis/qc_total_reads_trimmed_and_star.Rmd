@@ -1,0 +1,30 @@
+---
+title: "Run QC"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+source("run_config.R")
+```
+
+```{bash engine.path="/bin/bash"}
+ls $TRIMMED/[234]_TOT*L00[1234]*.fq.gz
+```
+
+# FASTQC on Trimmed reads
+```{bash engine.path="/bin/bash"}
+fastqc --quiet --threads $TOTAL_THREADS $TRIMMED/[234]_TOT*L00[1234]*.fq.gz --adapters $FASTQC_ADAPTERS --outdir $QC_TRIM_DIR
+```
+
+```{bash engine.path="/bin/bash"}
+multiqc --force $QC_TRIM_DIR --outdir ${QC_DIR} --filename multiqc_total_reads_trimmed.html
+```
+
+# MultiQC STAR Output
+```{bash engine.path="/bin/bash"}
+multiqc --force $TOTAL_SAMPLES_STAROUT --outdir ${QC_DIR} --filename multiqc_total_reads_star.html
+```

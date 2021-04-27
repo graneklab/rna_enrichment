@@ -39,7 +39,7 @@ ordered_rmds_to_run = c(
   "make_adapter_file.Rmd",
   "qc_total_reads_raw.Rmd",
   "run_star_on_total_samples.Rmd",
-  "run_qc.Rmd",
+  "qc_total_reads_trimmed_and_star.Rmd",
   "map_mito_rrna_genes.Rmd", 
   "generate_rnaseh_oligos.Rmd",
   "check_rnaseh_oligos.Rmd",
