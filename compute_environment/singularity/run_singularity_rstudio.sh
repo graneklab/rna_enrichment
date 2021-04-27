@@ -11,12 +11,10 @@ SINGULARITY_IMAGE="${1:-library://granek/published/rna_enrichment:latest}"
 
 DATA_BASE_DIR="${DATA_BASE_DIR:-$HOME}"
 WORKSPACE_BASE_DIR="${WORKSPACE_BASE_DIR:-$HOME}"
+SPACE_DIR="${SPACE_BASE_DIR:-$HOME}"
 
 DATA="$DATA_BASE_DIR/rnaseq_enrichment/rawdata"
 WORKSPACE="$WORKSPACE_BASE_DIR/rnaseq_enrichment/workspace"
-
-SPACE="/space"
-
 
  
 if [ -d "${DATA}" ]; then
@@ -32,8 +30,8 @@ else
     echo "Make sure WORKSPACE exists: $WORKSPACE"
 fi
 
-if [ -d "${SPACE}" ]; then
-    BIND_ARGS="$BIND_ARGS --bind ${SPACE}:/space"
+if [ -d "${SPACE_DIR}" ]; then
+    BIND_ARGS="$BIND_ARGS --bind ${SPACE_DIR}:/space"
 else
     echo "Make sure SPACE exists: $SPACE"
 fi
