@@ -55,11 +55,12 @@ STAR \
 ## Trim and Map Reads
 ```{bash engine.path="/bin/bash"}
 set -u
-mkdir -p ${TOTAL_SAMPLES_STAROUT}
+mkdir -p ${TOTAL_SAMPLES_STAROUT} ${TRIMMED}
 trim_and_star_func() {
     FASTQ=$1
     FASTQ_BASE=${FASTQ##*/} # strip directory from file path
     SAMPLE="${FASTQ_BASE%_R1_001.fastq.gz}" # strip .fq.gz file extension
+    FASTQ_TRIMMED="$TRIMMED/${SAMPLE}.fq.gz"
     echo $SAMPLE
     echo $FASTQ
     echo $FASTQ_BASE
@@ -67,15 +68,15 @@ trim_and_star_func() {
 
 
     # make a pipe for trimmed fastq
-    CUR_PIPE=`mktemp --dry-run`_${SAMPLE}_pipe.fq
-    mkfifo $CUR_PIPE
+    # CUR_PIPE=`mktemp --dry-run`_${SAMPLE}_pipe.fq
+    # mkfifo $CUR_PIPE
 
     # Run fastq-mcf
     fastq-mcf \
         $ADAPTERS \
         $FASTQ \
-        -o $CUR_PIPE \
-        -q 20 -x 0.5 &
+        -o $FASTQ_TRIMMED \
+        -q 20 -x 0.5
         
     STAR \
     --runMode alignReads \
@@ -89,9 +90,10 @@ trim_and_star_func() {
     --outFileNamePrefix ${TOTAL_SAMPLES_STAROUT}/${SAMPLE}_ \
     --outFilterScoreMinOverLread 0 --outFilterMatchNminOverLread 0 \
     --outFilterMatchNmin 0 --outFilterMismatchNmax 2 \
-    --readFilesIn $CUR_PIPE        
+    --readFilesCommand zcat \
+    --readFilesIn $FASTQ_TRIMMED        
         
-    rm -f $CUR_PIPE
+    # rm -f $CUR_PIPE
     samtools index ${TOTAL_SAMPLES_STAROUT}/${SAMPLE}_Aligned.sortedByCoord.out.bam
 }
 export -f trim_and_star_func
