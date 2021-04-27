@@ -23,6 +23,7 @@ library(stringr)
 library(Rsamtools)
 library(DESeq2)
 library(tibble)
+library(knitr)
 ```
 
 ## Load STAR Count Data
@@ -62,7 +63,8 @@ out <- foreach(count_path = countfiles, .combine = mycombine) %do% {
             dplyr::rename_(.dots=setNames(names(.), c("gene",readset_label)))
 }
 
-out[1:6,1:6]
+out[1:6,1:6] %>%
+  kable
 
 # Drop STAR count statistics and rotate dataframe
 out %>%
@@ -70,7 +72,8 @@ out %>%
     gather(expid, value, -gene) %>% 
     spread(gene, value) -> genecounts
 
-genecounts[1:6,1:6]
+genecounts[1:6,1:6] %>%
+  kable
 ```
 
 ### Extract library specific label
@@ -80,7 +83,8 @@ genecounts %>%
   dplyr::select(Label, everything()) %>%
   dplyr::select(-expid) ->
   genecounts_with_label
-genecounts_with_label[1:8,1:6]
+genecounts_with_label[1:8,1:6] %>%
+  kable
 ```
 
 ### Combine per library counts across lanes
@@ -98,7 +102,8 @@ read_tsv(metadata.file) %>%
 genecounts_lanes_combined %<>%
   left_join(metadata.df, by="Label") %>%
   dplyr::select(library=Label, enrichment_method, RNA_sample_num, everything())
-genecounts_lanes_combined[,1:6]
+genecounts_lanes_combined[,1:6] %>%
+  kable
 ```
 
 ## Compare library preps
@@ -188,19 +193,22 @@ genecounts_lanes_combined %>%
   dplyr::select(strand_specific_rrna_homologs) ->
   check_select
 
-check_select[,1:6]
+check_select[,1:6] %>%
+  kable
 
 genecounts_lanes_combined %>%
   dplyr::select(-strand_specific_rrna_homologs) ->
   genecounts_lanes_combined_no_rrna
 
-genecounts_lanes_combined_no_rrna[,1:6]
+genecounts_lanes_combined_no_rrna[,1:6] %>%
+  kable
 
 dim(check_select)
 dim(genecounts_lanes_combined)
 dim(genecounts_lanes_combined_no_rrna)
 
-dplyr::select(genecounts_lanes_combined,small_MTrRNA)
+dplyr::select(genecounts_lanes_combined,small_MTrRNA) %>%
+  kable
 # dplyr::select(genecounts_lanes_combined_no_rrna,small_MTrRNA)
 
 ```
@@ -208,8 +216,8 @@ dplyr::select(genecounts_lanes_combined,small_MTrRNA)
 
 ### Generate scatterplots for MA vs TOT and RZ vs TOT
 ```{r}
-genecounts_lanes_combined_no_rrna[,1:6]
-
+genecounts_lanes_combined_no_rrna[,1:6] %>%
+  kable
 ```
 
 ```{r}
@@ -324,19 +332,6 @@ for (cur_sample in 2:4) {
 ```
 
 
-```{r}
-# Trying to generalize plotting 
-require(dplyr)
-set.seed(123)
-xx = data.frame(group = rep(1:4, 100), a = rnorm(400) , b = rnorm(400))
-
-xx
-gp = group_by(xx, group)
-dplyr::summarize(gp, cor(a, b))
-
-# https://www.sixhat.net/how-to-plot-multpile-data-series-with-ggplot.html
-```
-
 # Analysis with Normalized Counts
 
 
@@ -395,9 +390,10 @@ dds
 
 ```{r}
 dds <- DESeq(dds)
-counts(dds,normalized=TRUE)
-results(dds, contrast = c("enrichment_method", "MA", "MA"))
+# counts(dds,normalized=TRUE)
+# results(dds, contrast = c("enrichment_method", "MA", "MA")) 
 ```
+
 ```{r}
 dds %>%
   counts(normalized=TRUE) ->
@@ -481,9 +477,9 @@ Heatmap of the count matrix
 
 
 ```{r}
-rlog(dds, blind=TRUE) %>%
-  counts
-  
+# rlog(dds, blind=TRUE) %>%
+#   counts 
+#   
 ```
 
 
