@@ -44,8 +44,9 @@ ordered_rmds_to_run = c(
   "generate_rnaseh_oligos.Rmd",
   "check_rnaseh_oligos.Rmd",
   "run_star_on_enrich_compare_samples.Rmd",
+  "qc_enriched_trimmed_and_star.Rmd",
   "tally_rrna_reads.Rmd",
-  "enrichment_correlation.Rmd",
+  "enrichment_correlation.Rmd"
   )
 
 cat(paste("Rmds not run by this meta script:", paste(setdiff(all_rmd_vector, ordered_rmds_to_run), collapse="\n"), sep="\n"))
