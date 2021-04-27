@@ -15,6 +15,7 @@ library(GenomicFeatures)
 library(Rsamtools)
 library(rtracklayer)
 library(tibble)
+library(knitr)
 ```
 
 
@@ -31,6 +32,7 @@ gunzip -f ${FA_WITH_MITO_RRNA}.gz
 set -u
 mkdir -p ${RRNA_OLIGO_STAROUT}
 STAR \
+    --runThreadN $TOTAL_THREADS \
     --runMode genomeGenerate \
     --genomeDir $GENOME_WITH_MITO_RRNA_DIR \
     --genomeFastaFiles ${FA_WITH_MITO_RRNA} \
@@ -47,7 +49,7 @@ SAMPLE="rrna_oligos"
 mkdir -p ${RRNA_OLIGO_STAROUT}
     STAR \
     --runMode alignReads \
-    --runThreadN $THREADS \
+    --runThreadN $TOTAL_THREADS \
     --genomeDir $GENOME_WITH_MITO_RRNA_DIR \
     --outSAMtype BAM SortedByCoordinate \
     --quantMode GeneCounts \
@@ -75,10 +77,12 @@ read_tsv(star_oligo_readspergene.path,
   filter_at(vars(-gene_id), any_vars(. != 0)) ->
   oligo_read_counts
 
-oligo_read_counts
+oligo_read_counts %>%
+  kable
 
 oligo_read_counts %>%
-  summarise_at(vars(-gene_id), sum)
+  summarise_at(vars(-gene_id), sum) %>%
+  kable
 ```
 
 ### Count number of oligos generated for each rRNA gene
@@ -91,17 +95,20 @@ read_tsv(rrna_oligos.file) %>%
   dplyr::rename(gene_id="V1", gene_oligo_num="V2") %>%
   group_by(gene_id) %>%
   dplyr::summarise(total_counts = n()) ->
-  generated_oligo_counts
+  generated_oligo_counts 
   
-generated_oligo_counts
+generated_oligo_counts %>%
+  kable
 
 generated_oligo_counts %>%
-  summarise(total = sum(total_counts))
+  summarise(total = sum(total_counts)) %>%
+  kable
 ```
 
 ```{r}
 full_join(generated_oligo_counts, oligo_read_counts) %>%
-  mutate(missing=total_counts-second_strand)
+  mutate(missing=total_counts-second_strand) %>%
+  kable
 ```
 
 ### Look for multimappers

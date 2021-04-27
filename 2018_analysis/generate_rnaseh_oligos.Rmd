@@ -122,7 +122,7 @@ for (i in seq_along(rrna.gr)[-CNAG_10503_index]){
 }
 
 all_oligos.df
-# write_tsv(all_oligos.df, rrna_oligos.file)
+write_tsv(all_oligos.df, rrna_oligos.file)
 
 # Reformat oligos for eurofins form
 #all_oligos.df %>%
