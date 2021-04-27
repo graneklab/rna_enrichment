@@ -1,0 +1,20 @@
+https://stackoverflow.com/questions/743812/calculating-moving-average
+
+
+
+/Users/josh/Box\ Sync/Home\ Folder\ josh/Sync/Work/BioinfCollabs/scripts/chromosomal_sv_search.py
+/Users/josh/Box\ Sync/Home\ Folder\ josh/Sync/Work/BioinfCollabs/scripts/sv_search.py
+/Users/josh/Box\ Sync/Home\ Folder\ josh/Sync/Work/BioinfCollabs/scripts/find_contigs_in_region.py
+/Users/josh/Box\ Sync/Home\ Folder\ josh/Sync/Work/BioinfCollabs/scripts/synteny_map.py
+/Users/josh/Box\ Sync/Home\ Folder\ josh/Sync/Work/BioinfCollabs/scripts/synteny_map.py.OLD.py
+/Users/josh/Box\ Sync/Home\ Folder\ josh/Sync/Work/BioinfCollabs/scripts/sv_search_flymake.py
+/Users/josh/Box\ Sync/Home\ Folder\ josh/Sync/Work/BioinfCollabs/scripts/blast_xml_to_table.py
+/Users/josh/Box\ Sync/Home\ Folder\ josh/Sync/Work/BioinfCollabs/scripts/mummer_coords_to_gff.py 
+
+
+
+
+
+Search in /Users/josh/Box\ Sync/Home\ Folder\ josh/Sync/Work/BioinfCollabs/scripts/
+Contents: percent
+Contents: identity
