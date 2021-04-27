@@ -22,18 +22,24 @@ if [ -d "${DATA}" ]; then
     BIND_ARGS="--bind ${DATA}:/data"
 else
     echo "Make sure DATA exists: $DATA"
+    echo "The location of DATA can be controlled by setting DATA_BASE_DIR before running this or in your .bashrc file"
+    exit 1
 fi
 
 if [ -d "${WORKSPACE}" ]; then
     BIND_ARGS="$BIND_ARGS --bind ${WORKSPACE}:/workspace"
 else
     echo "Make sure WORKSPACE exists: $WORKSPACE"
+    echo "The location of WORKSPACE can be controlled by setting WORKSPACE_BASE_DIR before running this or in your .bashrc file"
+    exit 1
 fi
 
 if [ -d "${SPACE_DIR}" ]; then
     BIND_ARGS="$BIND_ARGS --bind ${SPACE_DIR}:/space"
 else
-    echo "Make sure SPACE exists: $SPACE"
+    echo "Make sure SPACE exists: $SPACE_DIR"
+    echo "The location of SPACE can be controlled by setting SPACE_DIR before running this or in your .bashrc file"
+    exit 1
 fi
 
 
