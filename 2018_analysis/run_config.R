@@ -21,6 +21,9 @@ mosdepth.dir=file.path(out.dir, "mosdepth")
 seq.dir = file.path(out.dir, "seq_out"); dir.create(seq.dir, recursive = TRUE)
 # export final_counts=$data_base/star_counts
 igv_tarball = file.path(out.dir, "visualize_oligos.tgz")
+qc.dir = file.path(out.dir, "qc"); dir.create(qc.dir, recursive = TRUE)
+qc.raw.dir = file.path(qc.dir, "raw_read_qc"); dir.create(qc.raw.dir, recursive = TRUE)
+qc.trim.dir = file.path(qc.dir, "trimmed_read_qc"); dir.create(qc.trim.dir, recursive = TRUE)
 
 # genome
 
@@ -77,6 +80,9 @@ Sys.setenv(TRIMMED = trimmed.dir)
 Sys.setenv(GENOME_DIR = genome.dir)
 Sys.setenv(TOTAL_SAMPLES_STAROUT = total_samples_starout.dir)
 Sys.setenv(MOSDEPTH_OUT = mosdepth.dir)
+Sys.setenv(QC_DIR = qc.dir)
+Sys.setenv(QC_RAW_DIR = qc.raw.dir)
+Sys.setenv(QC_TRIM_DIR = qc.trim.dir)
 
 Sys.setenv(FA_URL = fa_url)
 Sys.setenv(GTF_URL = gtf_url)

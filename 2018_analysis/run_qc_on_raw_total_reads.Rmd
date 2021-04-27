@@ -1,0 +1,24 @@
+---
+title: "Run QC"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+source("run_config.R")
+```
+
+```{bash engine.path="/bin/bash"}
+ls $RAW_FASTQS/[234]_TOT*L00[1234]*.fastq.gz
+```
+
+```{bash engine.path="/bin/bash"}
+fastqc --quiet --threads $THREADS $RAW_FASTQS/[234]_TOT*L00[1234]*.fastq.gz --outdir $QC_RAW_DIR 
+```
+
+```{bash engine.path="/bin/bash"}
+multiqc --force $QC_RAW_DIR --outdir ${QC_DIR} --filename multiqc_report_rawfastq.html
+```
