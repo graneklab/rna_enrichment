@@ -20,5 +20,5 @@ fastqc --quiet --threads $THREADS $RAW_FASTQS/[234]_TOT*L00[1234]*.fastq.gz --ou
 ```
 
 ```{bash engine.path="/bin/bash"}
-multiqc --force $QC_RAW_DIR --outdir ${QC_DIR} --filename multiqc_report_rawfastq.html
+multiqc --force $QC_RAW_DIR --outdir ${QC_DIR} --filename multiqc_total_reads_raw.html
 ```
