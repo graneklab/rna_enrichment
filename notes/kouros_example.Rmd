@@ -1,0 +1,49 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+foo<-function(lam1,lam2){cor(rpois(10, lam1), rpois(10, lam2))}
+set.seed(1234)
+summary(replicate(10000,foo(10,15)))
+```
+
+```{r}
+summary(replicate(10000,foo(10,30)))
+```
+
+```{r}
+summary(replicate(10000,foo(10,50)))
+```
+
+```{r}
+summary(replicate(10000,foo(10,100)))
+```
+
+
+Concordance (same ranking) = kendells Tau
+
+Pearson is correlation 
+Normalize by the depth, FPKM, Rlog
+
+Spearman is non-parametric version 
+
+
+Take all libraries VST for all samples. Calculate first PC for all libraries we have - one value per library
+
+Heatmap using 1-correlation for distance (don't let heatmap it sort)
+Row 1 is Gold Standard
+Row 2 is Method 1
+Row 3 is Method 2
+Row 4 is Method 3
+
+Present as descriptive analysis (not statistical measure)
+
+
+
