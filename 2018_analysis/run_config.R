@@ -4,8 +4,10 @@ library(fs)
 library(dplyr)
 
 # Setup R variables
-threads=3
-max_jobs=4
+total_threads=60
+# threads=3
+max_jobs=10
+threads=floor(total_threads/max_jobs)
 
 # input
 raw_fastq.dir="/data/hts_2018_data/hts2018_pilot_rawdata"
