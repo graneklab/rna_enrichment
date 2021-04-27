@@ -12,11 +12,11 @@ source("run_config.R")
 ```
 
 ```{bash engine.path="/bin/bash"}
-ls $RAW_FASTQS/[234]_TOT*L00[1234]*.fastq.gz
+ls $RAW_FASTQS/*.fastq.gz
 ```
 
 ```{bash engine.path="/bin/bash"}
-fastqc --quiet --threads $TOTAL_THREADS $RAW_FASTQS/[234]_TOT*L00[1234]*.fastq.gz --adapters $FASTQC_ADAPTERS --outdir $QC_RAW_DIR
+fastqc --quiet --threads $TOTAL_THREADS $RAW_FASTQS/*.fastq.gz --adapters $FASTQC_ADAPTERS --outdir $QC_RAW_DIR
 ```
 
 ```{bash engine.path="/bin/bash"}
