@@ -47,7 +47,8 @@ STAR \
     --genomeFastaFiles ${FA} \
     --sjdbGTFfile ${GTF} \
     --outFileNamePrefix ${TOTAL_SAMPLES_STAROUT}/genome_ \
-    --genomeSAindexNbases 11
+    --genomeSAindexNbases 11 \
+    --runThreadN $THREADS
 # --genomeSAindexNbases 6
 ```
 
@@ -95,12 +96,17 @@ trim_and_star_func() {
 }
 export -f trim_and_star_func
 
-# parallel --jobs $MAX_JOBS trim_and_star_func ::: $RAW_FASTQS/*.fastq.gz
+parallel --jobs $MAX_JOBS trim_and_star_func ::: $RAW_FASTQS/*.fastq.gz
 # parallel --jobs $MAX_JOBS trim_and_star_func ::: $RAW_FASTQS/?_TOT*L00[12]*.fastq.gz
-parallel --jobs $MAX_JOBS trim_and_star_func ::: $RAW_FASTQS/[234]_TOT*L00[1234]*.fastq.gz
+# parallel --jobs $MAX_JOBS trim_and_star_func ::: $RAW_FASTQS/[234]_TOT*L00[1234]*.fastq.gz
 # parallel --jobs $MAX_JOBS trim_and_star_func ::: $RAW_FASTQS/[234]_*_S*_L00*_R1_001.fastq.gz
 
 ```
+
+```{bash}
+ls $RAW_FASTQS/*.fastq.gz
+```
+
 
 
 # SessionInfo
