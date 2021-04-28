@@ -13,6 +13,7 @@ source("run_config_2019.R")
 
 library(knitr)
 library(rmarkdown)
+library(callr)
 # library(here)
 # library(dplyr)
 # library(fs)
@@ -34,26 +35,37 @@ list.files(pattern = ".Rmd") ->
 
 ordered_rmds_to_run = c(
   "download_data_2019.Rmd",
-  "run_star_on_enrich_samples.Rmd"
-  )
+  "run_star_on_enrich_samples.Rmd",
+  "enrichment_correlation_2019.Rmd")
 
-cat(paste("Rmds not run by this meta script:", paste(setdiff(all_rmd_vector, ordered_rmds_to_run), collapse="\n"), sep="\n"))
+cat(paste("Rmds not run by this meta script:", paste(setdiff(all_rmd_vector, ordered_rmds_to_run), collapse="\n"), sep="\n"), fill=TRUE)
+
 warning("several Rmds in this directory are not being run!!!")
 ```
 
-```{r run_render}
-#R -e "rmarkdown::render('run_full_lemur_data.Rmd',output_file='run_full_lemur_data.html')"
-
-for (cur_rmd in ordered_rmds_to_run){
+```{r}
+for (cur_rmd in ordered_rmds_to_run) {
   print(cur_rmd)
   path_file(cur_rmd) %>%
     path_ext_set("html") %>%
     file.path(regression_output_dir, .) ->
     cur_out
-  render(cur_rmd, output_file=cur_out, output_format="html_document")
+  # Run render in callr::r to avoid library leakage between Rmds. This fixes a problem knitting enrichment_correlation.Rmd
+  callr::r(
+    function(input, output_file, output_format) {
+      rmarkdown::render(input = input,
+                        output_file = output_file,
+                        output_format = output_format)
+    },
+    args = list(
+      input = cur_rmd,
+      output_file = cur_out,
+      output_format = "html_document"
+    )
+  )
+  cat("RENDERED:", cur_out, fill = TRUE)
 }
 ```
-
 
 # SessionInfo
 ```{r session_info}
