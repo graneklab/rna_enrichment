@@ -1,6 +1,6 @@
 # Run Analysis on 2018 data
   This step does ???? preliminary analysis on 2018 data, including generating mitochondrial rRNA annotation and RNase H oligos.
-  `singularity run ?????????? Rscript KNITCOMMAND 2018_analysis/meta_run_rrna_analysis.Rmd`
+  `srun -A chsi -p chsi --cpus-per-task=60 --mem=300G ~/project_repos/rna_enrichment/run_full_analysis.sh`
 
 # lncRNA Analysis
 To run the lncRNA discovery analysis:
