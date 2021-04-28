@@ -3,11 +3,6 @@ source("../common_config.R")
 library(fs)
 library(dplyr)
 
-# Setup R variables
-total_threads=60
-# threads=3
-max_jobs=10
-threads=floor(total_threads/max_jobs)
 
 # input
 raw_fastq.dir="/data/hts_2018_data/hts2018_pilot_rawdata"

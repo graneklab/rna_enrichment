@@ -3,6 +3,13 @@ library(here)
 library(dplyr)
 library(fs)
 
+#--------------------------------------
+total_threads=60
+# threads=3
+max_jobs=10
+threads=floor(total_threads/max_jobs)
+#--------------------------------------
+
 url_part1="ftp://ftp.ensemblgenomes.org/pub/release-39/fungi/"
 url_part2="/fungi_basidiomycota1_collection/cryptococcus_neoformans_var_grubii_h99/"
 url_part3="Cryptococcus_neoformans_var_grubii_h99.CNA3."

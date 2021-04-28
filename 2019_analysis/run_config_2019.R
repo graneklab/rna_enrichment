@@ -4,10 +4,6 @@ library(dplyr)
 
 source("../common_config.R")
 
-# Setup R variables
-threads=3
-max_jobs=4
-
 # # input
 raw_fastq.dir="/data/hts_2019_data/hts2019_pilot_rawdata"
 metadata.file=file.path(raw_fastq.dir, "2019_pilot_metadata.tsv")
