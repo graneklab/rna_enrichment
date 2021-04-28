@@ -1,15 +1,11 @@
 ---
 title: "Enrichment Correlation"
 output:
-  
+  html_document:
+    toc: false
 editor_options: 
-  chunk_output_type: console
+  chunk_output_type: inline
 ---
-
-```{r global_options, include=FALSE}
-library(knitr)
-knitr::opts_chunk$set(echo=FALSE, include=FALSE)
-```
 
 # Load paths and libraries
 ```{r include=FALSE}
@@ -24,6 +20,7 @@ library(gridExtra)
 library(readr)
 library(stringr)
 library(Rsamtools)
+library(knitr)
 ```
 
 ## Load STAR Count Data
@@ -67,7 +64,8 @@ out <- foreach(count_path = countfiles, .combine = mycombine) %do% {
             dplyr::rename_(.dots=setNames(names(.), c("gene",readset_label)))
 }
 
-out[1:6,1:6]
+out[1:6,1:6] %>%
+  kable
 
 # Drop STAR count statistics and rotate dataframe
 out %>%
@@ -75,7 +73,8 @@ out %>%
     gather(expid, value, -gene) %>% 
     spread(gene, value) -> genecounts
 
-genecounts[1:6,1:6]
+genecounts[1:6,1:6] %>%
+  kable
 ```
 
 ### Extract library specific label
@@ -86,17 +85,11 @@ genecounts %>%
   dplyr::select(Label, everything()) %>%
   dplyr::select(-expid) ->
   genecounts_with_label
-genecounts_with_label
-
 ```
 
 
 
 ### Combine per library counts across lanes
-```{r}
-read_tsv(metadata.file)
-```
-
 ```{r}
 genecounts_with_label %>%
   group_by(Label) %>%
@@ -111,7 +104,7 @@ read_tsv(metadata.file) %>%
 genecounts_lanes_combined %<>%
   left_join(metadata.df, by="Label") %>%
   dplyr::select(library=Label, enrichment_method, RNA_sample_num, enrich_rep, everything())
-genecounts_lanes_combined
+# genecounts_lanes_combined
 ```
 
 ## Compare library preps
@@ -137,29 +130,28 @@ genecounts_lanes_combined %>%
   dplyr::select(strand_specific_rrna_homologs) ->
   check_select
 
-check_select[,1:6]
+check_select[,1:6] %>%
+  kable
 
 genecounts_lanes_combined %>%
   dplyr::select(-strand_specific_rrna_homologs) ->
   genecounts_lanes_combined_no_rrna
 
-genecounts_lanes_combined_no_rrna[,1:6]
+genecounts_lanes_combined_no_rrna[,1:6] %>%
+  kable
+
 
 dim(check_select)
 dim(genecounts_lanes_combined)
 dim(genecounts_lanes_combined_no_rrna)
 
-dplyr::select(genecounts_lanes_combined,small_MTrRNA)
+# dplyr::select(genecounts_lanes_combined,small_MTrRNA)
 # dplyr::select(genecounts_lanes_combined_no_rrna,small_MTrRNA)
 
 ```
 
 
 ### Generate scatterplots for mRNA vs Total and RNaseH vs Total
-```{r}
-genecounts_lanes_combined_no_rrna[,1:6]
-
-```
 
 ```{r}
 
@@ -230,7 +222,8 @@ ggplot(cur_sample.tidy, alpha = 1/2) +
 
 
 ```
-```{r correlation_scatter_plot, include=TRUE, fig.path='figures/', dev=c('png','pdf')}
+
+```{r correlation_scatter_plot_1, include=TRUE, fig.path='figures/', dev=c('png','pdf')}
 
 makeScatterPlot = function(genecounts_lanes_combined_no_rrna, cur_sample_num, cur_enrich_rep = 1) {
   
@@ -276,27 +269,11 @@ for (cur_sample in 2:4) {
 }
 ```
 
-
-
-
-
-
-```{r}
-# Trying to generalize plotting 
-require(dplyr)
-set.seed(123)
-xx = data.frame(group = rep(1:4, 100), a = rnorm(400) , b = rnorm(400))
-
-xx
-gp = group_by(xx, group)
-dplyr::summarize(gp, cor(a, b))
-
-# https://www.sixhat.net/how-to-plot-multpile-data-series-with-ggplot.html
-```
 # testing for protein-coding
 ```{r}
 head(h99_granges)
 ```
+
 ```{r}
 h99_granges %>% 
   as.data.frame %>% 
@@ -305,6 +282,7 @@ h99_granges %>%
   unique ->
   all_non_protein_coding_gene_IDs
 ```
+
 ```{r}
 
 all_non_protein_coding_and_rrna_homologs_gene_IDs = 
@@ -312,21 +290,23 @@ all_non_protein_coding_and_rrna_homologs_gene_IDs =
 
 genecounts_lanes_combined %>%
   dplyr::select(all_non_protein_coding_and_rrna_homologs_gene_IDs) ->
-  check_select
+  check_select 
 
-check_select[,1:6]
+check_select[,1:6] %>%
+  kable
 
 genecounts_lanes_combined %>%
   dplyr::select(-all_non_protein_coding_and_rrna_homologs_gene_IDs) ->
   genecounts_lanes_combined_protein_coding_only
 
-genecounts_lanes_combined_protein_coding_only[,1:6]
+genecounts_lanes_combined_protein_coding_only[,1:6] %>%
+  kable
 
 dim(check_select)
 dim(genecounts_lanes_combined)
 dim(genecounts_lanes_combined_protein_coding_only)
 
-dplyr::select(genecounts_lanes_combined,small_MTrRNA)
+# dplyr::select(genecounts_lanes_combined,small_MTrRNA)
 
 ```
 # plotting for protein-coding
@@ -461,19 +441,9 @@ for (cur_sample in 2:4) {
   print(makeScatterPlot(genecounts_lanes_combined_protein_coding_only, cur_sample, cur_enrich_rep = 1))
 }
 ```
-```{r}
-# Trying to generalize plotting 
-require(dplyr)
-set.seed(123)
-xx = data.frame(group = rep(1:4, 100), a = rnorm(400) , b = rnorm(400))
 
-xx
-gp = group_by(xx, group)
-dplyr::summarize(gp, cor(a, b))
 
-# https://www.sixhat.net/how-to-plot-multpile-data-series-with-ggplot.html
-```
-
+# Technical Variation: Correlation Among Unenriched Replicates
 # T2 vs T3 & T4 plotting
 ```{r}
 cur_enrich_method = "Total"
@@ -547,8 +517,8 @@ ggplot(cur_sample.tidy, alpha = 1/2) +
 
 
 ```
-
-```{r correlation_scatter_plot, include=TRUE, fig.path='figures/', dev=c('png','pdf')}
+### 
+```{r correlation_scatter_plot_2, include=TRUE, fig.path='figures/', dev=c('png','pdf')}
 
 makeScatterPlot = function(genecounts_lanes_combined, cur_enrich_method, cur_enrich_rep) {
   
@@ -593,7 +563,7 @@ ggplot(cur_sample.tidy, aes(Total_2, y=value, color=variable)) +
 
   print(makeScatterPlot(genecounts_lanes_combined, cur_enrich_method, cur_enrich_rep = 1))
 ```
-```{r correlation_scatter_plot, include=TRUE, fig.path='figures/', dev=c('png','pdf')}
+```{r correlation_scatter_plot_3, include=TRUE, fig.path='figures/', dev=c('png','pdf')}
 
 makeScatterPlot = function(genecounts_lanes_combined, cur_enrich_method, cur_enrich_rep) {
   
@@ -626,13 +596,13 @@ ggplot(cur_sample.tidy) +
   annotate("text", x=5000000, y = 0, 
            label = paste(T3_cor),
            hjust="inward",
-           just="inward", 
+           vjust="inward", 
            color="black")
 }
 
   print(makeScatterPlot(genecounts_lanes_combined, cur_enrich_method, cur_enrich_rep = 1))
 ```
-```{r correlation_scatter_plot, include=TRUE, fig.path='figures/', dev=c('png','pdf')}
+```{r correlation_scatter_plot_4, include=TRUE, fig.path='figures/', dev=c('png','pdf')}
 
 makeScatterPlot = function(genecounts_lanes_combined, cur_enrich_method, cur_enrich_rep) {
   
@@ -664,14 +634,14 @@ ggplot(cur_sample.tidy) +
   annotate("text", x=5000000, y = 0, 
            label = paste(T4_cor),
            hjust="inward",
-           just="inward", 
+           vjust="inward", 
            color="black")
 }
 
   print(makeScatterPlot(genecounts_lanes_combined, cur_enrich_method, cur_enrich_rep = 1))
 ```
 # T3 vs T4 plotting
-```{r correlation_scatter_plot, include=TRUE, fig.path='figures/', dev=c('png','pdf')}
+```{r correlation_scatter_plot_5, include=TRUE, fig.path='figures/', dev=c('png','pdf')}
 
 makeScatterPlot = function(genecounts_lanes_combined, cur_enrich_method, cur_enrich_rep) {
   
@@ -703,7 +673,7 @@ ggplot(cur_sample.tidy) +
   annotate("text", x=5000000, y = 0, 
            label = paste(T4_cor),
            hjust="inward",
-           just="inward", 
+           vjust="inward", 
            color="black")
 }
 
@@ -718,25 +688,28 @@ h99_granges %>%
   unique ->
   all_non_tRNA_gene_IDs
 ```
+
 ```{r}
 
 genecounts_lanes_combined %>%
   dplyr::select(all_non_tRNA_gene_IDs) ->
   check_select
 
-check_select[,1:6]
+check_select[,1:6] %>%
+  kable
 
 genecounts_lanes_combined %>%
   dplyr::select(-all_non_tRNA_gene_IDs) ->
   genecounts_lanes_combined_tRNA_only
 
-genecounts_lanes_combined_tRNA_only[,1:6]
+genecounts_lanes_combined_tRNA_only[,1:6] %>%
+  kable
 
 dim(check_select)
 dim(genecounts_lanes_combined)
 dim(genecounts_lanes_combined_tRNA_only)
 
-dplyr::select(genecounts_lanes_combined,small_MTrRNA)
+# dplyr::select(genecounts_lanes_combined,small_MTrRNA)
 
 ```
 # plotting for tRNA correlations
@@ -830,27 +803,30 @@ h99_granges %>%
   unique ->
   all_non_ncRNA_gene_IDs
 ```
+
 ```{r}
 
 genecounts_lanes_combined %>%
   dplyr::select(all_non_ncRNA_gene_IDs) ->
   check_select
 
-check_select[,1:6]
+check_select[,1:6] %>%
+  kable
 
 genecounts_lanes_combined %>%
   dplyr::select(-all_non_ncRNA_gene_IDs) ->
   genecounts_lanes_combined_ncRNA_only
 
-genecounts_lanes_combined_ncRNA_only[,1:6]
+genecounts_lanes_combined_ncRNA_only[,1:6] %>%
+  kable
 
 dim(check_select)
 dim(genecounts_lanes_combined)
 dim(genecounts_lanes_combined_ncRNA_only)
 
-dplyr::select(genecounts_lanes_combined,small_MTrRNA)
-
+# dplyr::select(genecounts_lanes_combined,small_MTrRNA)
 ```
+
 # plotting for ncRNA correlations
 ```{r ncRNA_correlation_scatter_plot, include=TRUE, fig.path='figures/', dev=c('png','pdf')}
 
@@ -1006,7 +982,8 @@ outRZ <- foreach(count_path = countfilesRZ, .combine = mycombineRZ) %do% {
             dplyr::rename_(.dots=setNames(names(.), c("gene",readset_labelRZ)))
 }
 
-outRZ[1:6,1:6]
+outRZ[1:6,1:6] %>%
+  kable
 
 # Drop STAR count statistics and rotate dataframe
 outRZ %>%
@@ -1014,7 +991,8 @@ outRZ %>%
     gather(expid, value, -gene) %>% 
     spread(gene, value) -> genecountsRZ
 
-genecountsRZ
+genecountsRZ[1:6,1:6] %>%
+  kable
 ```
 ### Extract library specific label
 
@@ -1024,11 +1002,13 @@ genecountsRZ %>%
   dplyr::select(Label, everything()) %>%
   dplyr::select(-expid) ->
   genecountsRZ_with_label
-genecountsRZ_with_label
 
+genecountsRZ_with_label[1:6,1:6] %>%
+  kable
 ```
+
 ### Combine per library counts across lanes
-```{r}
+```{r eval=FALSE, include=FALSE}
 read_tsv(metadata.file)
 ```
 
@@ -1055,7 +1035,9 @@ bind_rows(metadata_2018.df, metadataRZ.df) ->
 genecountsRZ_lanes_combined %<>%
   left_join(metadata_combined.df, by="Label") %>%
   dplyr::select(library=Label, enrichment_method, RNA_sample_num, enrich_rep, everything())
-genecountsRZ_lanes_combined
+
+genecountsRZ_lanes_combined %>%
+  kable
 ```
 ## Compare library preps
 
@@ -1077,19 +1059,21 @@ genecountsRZ_lanes_combined %>%
   dplyr::select(strand_specific_rrna_homologs) ->
   check_selectRZ
 
-check_selectRZ[,1:6]
+check_selectRZ[,1:6] %>%
+  kable
 
 genecountsRZ_lanes_combined %>%
   dplyr::select(-strand_specific_rrna_homologs) ->
   genecountsRZ_lanes_combined_no_rrna
 
-genecountsRZ_lanes_combined_no_rrna[,1:6]
+genecountsRZ_lanes_combined_no_rrna[,1:6] %>%
+  kable
 
 dim(check_selectRZ)
 dim(genecountsRZ_lanes_combined)
 dim(genecountsRZ_lanes_combined_no_rrna)
 
-dplyr::select(genecountsRZ_lanes_combined,small_MTrRNA)
+# dplyr::select(genecountsRZ_lanes_combined,small_MTrRNA)
 # dplyr::select(genecountsRZ_lanes_combined_no_rrna,small_MTrRNA)
 
 ```
@@ -1102,6 +1086,7 @@ h99_grangesRZ %>%
   unique ->
   all_non_protein_coding_gene_IDs_RZ
 ```
+
 ```{r}
 all_non_protein_coding_and_rrna_homologs_gene_IDs_RZ = 
   union(all_non_protein_coding_gene_IDs_RZ, strand_specific_rrna_homologs)
@@ -1110,21 +1095,22 @@ genecountsRZ_lanes_combined %>%
   dplyr::select(all_non_protein_coding_and_rrna_homologs_gene_IDs_RZ) ->
   check_selectRZ
 
-check_selectRZ[,1:6]
+check_selectRZ[,1:6] %>%
+  kable
 
 genecountsRZ_lanes_combined %>%
   dplyr::select(-all_non_protein_coding_and_rrna_homologs_gene_IDs_RZ) ->
   genecounts_lanes_combined_protein_coding_only_RZ
 
-genecounts_lanes_combined_protein_coding_only_RZ[,1:6]
+genecounts_lanes_combined_protein_coding_only_RZ[,1:6] %>%
+  kable
 
 
 dim(check_selectRZ)
 dim(genecountsRZ_lanes_combined)
 dim(genecounts_lanes_combined_protein_coding_only_RZ)
 
-dplyr::select(genecountsRZ_lanes_combined,small_MTrRNA)
-
+# dplyr::select(genecountsRZ_lanes_combined,small_MTrRNA)
 ```
 # plotting for RZ protein-coding correlations - 2018 RZ to 2018 TOT
 ```{r RZ2018_protein_coding_correlation_scatter_plot, include=TRUE, fig.path='figures/', dev=c('png','pdf')}
@@ -1240,25 +1226,27 @@ h99_grangesRZ %>%
   unique ->
   all_non_ncRNA_gene_IDs_RZ
 ```
-```{r}
 
+```{r}
 genecountsRZ_lanes_combined %>%
   dplyr::select(all_non_ncRNA_gene_IDs_RZ) ->
   check_selectRZ
 
-check_selectRZ[,1:6]
+check_selectRZ[,1:6] %>%
+  kable
 
 genecountsRZ_lanes_combined %>%
   dplyr::select(-all_non_ncRNA_gene_IDs_RZ) ->
   genecountsRZ_lanes_combined_ncRNA_only
 
-genecountsRZ_lanes_combined_ncRNA_only[,1:6]
+genecountsRZ_lanes_combined_ncRNA_only[,1:6] %>%
+  kable
 
 dim(check_selectRZ)
 dim(genecountsRZ_lanes_combined)
 dim(genecountsRZ_lanes_combined_ncRNA_only)
 
-dplyr::select(genecountsRZ_lanes_combined,small_MTrRNA)
+# dplyr::select(genecountsRZ_lanes_combined,small_MTrRNA)
 
 ```
 # plotting for RZ ncRNA correlations - 2018 RZ to 2018 TOT
@@ -1460,21 +1448,20 @@ for (cur_sample in 2:4) {
 ```
 # setting up 2018 total to 2019 total comparison
 
-```{r 2018_2019_total_scatter_plot, include=TRUE, fig.path='figures/', dev=c('png','pdf')}
-head (h99_granges)
-
-head (genecountsRZ_lanes_combined_no_rrna)
-
-genecountsRZ_lanes_combined
+```{r 2018_2019_total_scatter_plot_1, include=TRUE, fig.path='figures/', dev=c('png','pdf')}
+# head (h99_granges)
+# head (genecountsRZ_lanes_combined_no_rrna)
+# genecountsRZ_lanes_combined
 
 genecountsRZ_lanes_combined %>%
   dplyr::select(-all_non_protein_coding_and_rrna_homologs_gene_IDs) ->
   genecountsRZ_lanes_combined_protein_coding_only
 
-genecountsRZ_lanes_combined_protein_coding_only
+genecountsRZ_lanes_combined_protein_coding_only %>%
+  kable
 ```
 # Plotting Total 2 comparison
-```{r 2018_2019_total_scatter_plot, include=TRUE, fig.path='figures/', dev=c('png','pdf')}
+```{r 2018_2019_total_scatter_plot_2, include=TRUE, fig.path='figures/', dev=c('png','pdf')}
 cur_sample_num = "2"
 cur_enrich_rep = 1
 
@@ -1526,13 +1513,13 @@ ggplot(cur_sample_total2.tidy) +
   annotate("text", x=5000000, y = 0, 
            label = paste(T2_cor),
            hjust="inward",
-           just="inward", 
+           vjust="inward", 
            color="black")
 
 
 ```
 # Plotting Total 3 comparison
-```{r 2018_2019_total_scatter_plot, include=TRUE, fig.path='figures/', dev=c('png','pdf')}
+```{r 2018_2019_total_scatter_plot_3, include=TRUE, fig.path='figures/', dev=c('png','pdf')}
 cur_sample_num = "3"
 cur_enrich_rep = 1
 
@@ -1581,7 +1568,7 @@ ggplot(cur_sample_total3.tidy) +
   annotate("text", x=5000000, y = 0, 
            label = paste(T3_cor),
            hjust="inward",
-           just="inward", 
+           vjust="inward", 
            color="black")
 
 
@@ -1636,7 +1623,7 @@ ggplot(cur_sample_total4.tidy) +
   annotate("text", x=5000000, y = 0, 
            label = paste(T4_cor),
            hjust="inward",
-           just="inward", 
+           vjust="inward", 
            color="black")
 
 
