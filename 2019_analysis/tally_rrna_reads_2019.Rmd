@@ -10,6 +10,7 @@ knitr::opts_chunk$set(echo=FALSE, include=FALSE)
 
 ```{r}
 source("run_config_2019.R")
+
 library(GenomicFeatures)
 library(Rsamtools)
 library(rtracklayer)
@@ -18,6 +19,8 @@ library(tibble)
 library(readr)
 library(ggplot2)
 library(magrittr)
+library(rstatix)
+library(ggpubr)
 ```
 
 ## Determine rRNA Counts
@@ -150,6 +153,52 @@ ggplot(data=enrich_compare_counts_with_meta,
 
 percent_rrna.plot
 
+```
+
+### Prettier Figure for Publication
+```{r}
+read_csv("rrna_depletion_calculation_2019.csv")
+```
+
+#### Summarize Across Lanes
+```{r}
+enrich_compare_counts_with_meta %>%
+  mutate(enrichment_method=str_replace(enrichment_method,pattern="mRNA",replacement="Poly(A)"),
+         enrichment_method=factor(enrichment_method, levels = c("Total", "Poly(A)", "RNaseH"))) %>%
+  group_by(enrichment_method, RNA_sample_num, sample_year, genotype, condition) %>%
+  summarise(
+    total_reads=sum(total_reads),
+    mapped_reads=sum(mapped_reads),
+    rrna_reads=sum(rrna_reads)) %>%
+  mutate(ratio_rrna=rrna_reads/total_reads,
+         percent_rrna=ratio_rrna*100,
+         log_tranform_ratio=log10(ratio_rrna)) ->
+  rrna_data_2019
+rrna_data_2019
+```
+
+#### Make Pretty BarPlot
+```{r}
+# This chunk modified from plotting_bar_graphs.Rmd
+
+stat.test_2019 <- aov(log_tranform_ratio ~ enrichment_method, data = rrna_data_2019) %>%
+  tukey_hsd()
+stat.test_2019 
+
+ggbarplot(rrna_data_2019, x = "enrichment_method", y = "percent_rrna", add = c("mean_se"),
+          position = position_dodge(),
+          color = "black", palette = c("#A7A8A8", "#BBEFFA", "#DFAEC3"),
+          fill = "enrichment_method",
+          ylim = c(0, 100),
+          order = c("Total", "Poly(A)", "RNaseH"),
+          legend = "none",
+          ylab = "rRNA reads (% total reads)", xlab = " ") +
+  stat_pvalue_manual(
+    stat.test_2019, label = "p.adj.signif", 
+    tip.length = 0,
+    size = 6,
+    bracket.size = 0.75,
+    y.position = c(95, 100, 8.5))
 ```
 
 ## Mapped Reads as a portion of Total Reads
