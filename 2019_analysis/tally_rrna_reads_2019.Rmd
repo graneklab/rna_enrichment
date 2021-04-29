@@ -337,7 +337,7 @@ ggplot(data = rrna_data_combined) +
   aes(x=enrichment_method, y=percent_rrna, color=enrichment_method) +
   geom_boxplot(fill=NA, color="grey70",outlier.color = NA, width=0.5) +
   ylim(0, 100) +
-  geom_jitter(width=0.3, height=0, size = 4, stroke = 1, alpha=0.5) +
+  geom_jitter(width=0.2, height=0, size = 4, stroke = 1, alpha=0.5) +
   scale_colour_brewer(palette = fig_palette, guide = FALSE) +
   labs(x="Enrichment Method ", y="rRNA reads (% total reads)") +
   scale_x_discrete(labels= xlabels) +
