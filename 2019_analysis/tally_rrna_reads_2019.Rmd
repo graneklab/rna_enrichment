@@ -126,14 +126,15 @@ metadata.df = read_tsv(metadata.file)
 enrich_compare_counts %>%
   mutate(Label=str_extract(sample, "^\\d+_\\d+_[A-Z]_[HMT]\\d"), 
          lane=str_extract(sample, "L\\d{3}$")) %>%
-  left_join(metadata.df, by="Label") ->
+  left_join(metadata.df, by="Label") %>%
+  mutate(sequencing_year="2019")->
   enrich_compare_counts_with_meta
 
 kable(enrich_compare_counts_with_meta)
 ```
 
 ## rRNA Reads as a portion of Total Reads
-```{r percent_rrna_plot, include=TRUE, fig.width=10, fig.height=5, fig.path='figures/', dev=c('pdf')}
+```{r percent_rrna_plot}
 
 enrich_compare_counts_with_meta %<>%
    mutate(enrichment_method = factor(enrichment_method, 
@@ -302,4 +303,47 @@ ggbarplot(x = "enrichment_method", y = "percent_rrna", add = c("mean_se"),
     bracket.size = 0.75,
     y.position = c(95, 100, 69))
 ```
+# Combined rRNA Plot
+## Combine rRNA data from 2018 and 2019 
+```{r}
+enrichment_renames = c("mRNA" = "Poly(A)",
+                       "Total" = "Unenriched")
 
+full_data_counts_2018_with_meta %>%
+  dplyr::rename(genotype=Strain,
+                condition=Media) %>%
+  bind_rows(enrich_compare_counts_with_meta) %>%
+  mutate(enrichment_method=str_replace_all(enrichment_method, enrichment_renames),
+         enrichment_method=factor(enrichment_method, levels = c("Unenriched", "RNaseH", "RiboZero", "Poly(A)")),
+         genotype=str_replace(genotype, "H99", "WT")) %>% 
+  group_by(enrichment_method, RNA_sample_num, genotype,condition,sequencing_year) %>%
+  summarise(
+    total_reads=sum(total_reads),
+    mapped_reads=sum(mapped_reads),
+    rrna_reads=sum(rrna_reads)) %>%
+  mutate(ratio_rrna=rrna_reads/total_reads,
+         percent_rrna=ratio_rrna*100,
+         log_tranform_ratio=log10(ratio_rrna)) ->
+  rrna_data_combined
+```
+
+## Make Plot
+```{r include=TRUE}
+set.seed(5)
+fig_palette="Dark2"
+xlabels <- c("Unenriched", "RNase H", "Ribo-Zero", "Poly(A)")
+
+ggplot(data = rrna_data_combined) +
+  aes(x=enrichment_method, y=percent_rrna, color=enrichment_method) +
+  geom_boxplot(fill=NA, color="grey70",outlier.color = NA, width=0.5) +
+  ylim(0, 100) +
+  geom_jitter(width=0.3, height=0, size = 4, stroke = 1, alpha=0.5) +
+  scale_colour_brewer(palette = fig_palette, guide = FALSE) +
+  labs(x="Enrichment Method ", y="rRNA reads (% total reads)") +
+  scale_x_discrete(labels= xlabels) +
+  theme_minimal() +
+  theme(text=element_text(size=10)) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
+
+ggsave(file.path(fig.dir, "Figure_1.tiff"), compression = "lzw", width=15, height=10.71, units = "cm")
+```
