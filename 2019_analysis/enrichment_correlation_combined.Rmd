@@ -11,7 +11,7 @@ knitr::opts_chunk$set(echo=TRUE, include=TRUE)
 # Load paths and libraries
 ```{r include=FALSE}
 source("shared_functions.R")
-source("combined_config.R")
+source("run_config_2019.R")
 
 library(dplyr)
 library(ggplot2)

@@ -94,3 +94,9 @@ Sys.setenv(ENRICH_COMPARE_STAROUT = enrich_compare_starout.dir)
 # 
 count_suffix = "_ReadsPerGene.out.tab"
 bam_suffix = "_Aligned.sortedByCoord.out.bam"
+# #--------------------------------
+
+# From combined_config.R
+starout_2019_dir="/workspace/2019_enrich_samples/enrich_compare_starout"
+starout_2018_dir="/workspace/2018_tot_samples/enrich_compare_starout"
+
