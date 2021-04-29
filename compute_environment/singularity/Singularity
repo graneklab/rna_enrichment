@@ -1,5 +1,5 @@
 BootStrap: library
-From: granek/duke-chsi-informatics/singularity-rnaseq:0003
+From: granek/duke-chsi-informatics/singularity-rnaseq:0004
 
 %labels
     Maintainer Josh Granek
