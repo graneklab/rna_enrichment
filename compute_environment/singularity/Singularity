@@ -1,26 +1,19 @@
 BootStrap: library
-From: granek/duke-chsi-informatics/singularity-rnaseq:0004
+From: granek/duke-chsi-informatics/singularity-rnaseq:0005
 
 %labels
     Maintainer Josh Granek
     Image_Name rna_enrichment
-    Image_Version rna_enrichment_0003
-
-%environment
-  export PATH=$PATH:/usr/lib/rstudio-server/bin/pandoc
-  export SHELL=/bin/bash
-  export LC_ALL=en_US.UTF-8
-  export LANG=en_US.UTF-8
-  export LANGUAGE=en_US.UTF-8
+    Image_Version rna_enrichment_0005
 
 %post
-  # Install extra stuff
+  Rscript -e "install.packages(pkgs = c('rstatix','ggpubr'), repos='https://mirror.las.iastate.edu/CRAN/', dependencies=TRUE, clean = TRUE)"
+  pip3 install --no-cache-dir \
+    RSeQC
 
-  apt-get update && \
-    apt-get install -y --no-install-recommends \
-    fastqc
-
-  Rscript -e "install.packages(pkgs = c('rstatix','ggpubr'), repos='https://cran.revolutionanalytics.com/', dependencies=TRUE, clean = TRUE)"
-  pip3 install --no-cache-dir multiqc
+  #------------------
+  # Install Bioconductor Packages
+  #------------------
+  Rscript -e "if (!requireNamespace('BiocManager')){install.packages('BiocManager')}; BiocManager::install(); BiocManager::install(c('GEOquery','SRAdb','CoverageView','bamsignals'))"
 
   mkdir -p /space
