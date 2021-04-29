@@ -66,8 +66,6 @@ enrich_compare_starout.dir=file.path(out.dir, "enrich_compare_starout")
 # 
 # # Setup Bash variables
 # 
-Sys.setenv(THREADS = threads)
-Sys.setenv(MAX_JOBS = max_jobs)
 # 
 # # Input
 Sys.setenv(RAW_FASTQS = raw_fastq.dir)
@@ -96,5 +94,3 @@ Sys.setenv(ENRICH_COMPARE_STAROUT = enrich_compare_starout.dir)
 # 
 count_suffix = "_ReadsPerGene.out.tab"
 bam_suffix = "_Aligned.sortedByCoord.out.bam"
-# 
-# 

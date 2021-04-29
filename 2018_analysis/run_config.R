@@ -65,10 +65,6 @@ oligo_bam.file = file.path(rrna_oligo_starout.dir, "rrna_oligos_Aligned.sortedBy
 
 # Setup Bash variables
 
-Sys.setenv(THREADS = threads)
-Sys.setenv(TOTAL_THREADS = total_threads)
-Sys.setenv(MAX_JOBS = max_jobs)
-
 # Input
 Sys.setenv(RAW_FASTQS = raw_fastq.dir)
 

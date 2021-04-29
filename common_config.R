@@ -8,6 +8,10 @@ total_threads=60
 # threads=3
 max_jobs=10
 threads=floor(total_threads/max_jobs)
+
+Sys.setenv(THREADS = threads)
+Sys.setenv(TOTAL_THREADS = total_threads)
+Sys.setenv(MAX_JOBS = max_jobs)
 #--------------------------------------
 
 url_part1="ftp://ftp.ensemblgenomes.org/pub/release-39/fungi/"
