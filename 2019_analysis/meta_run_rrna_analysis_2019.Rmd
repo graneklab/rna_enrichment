@@ -36,6 +36,7 @@ list.files(pattern = ".Rmd") ->
 ordered_rmds_to_run = c(
   "download_data_2019.Rmd",
   "run_star_on_enrich_samples.Rmd",
+  "tally_rrna_reads_2019.Rmd",
   "enrichment_correlation_2019.Rmd")
 
 cat(paste("Rmds not run by this meta script:", paste(setdiff(all_rmd_vector, ordered_rmds_to_run), collapse="\n"), sep="\n"), fill=TRUE)

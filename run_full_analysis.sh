@@ -57,7 +57,7 @@ mkdir -p $SINGULARITY_PULLFOLDER $SINGULARITY_CACHEDIR
 #--------------------------------------------------------------------------------
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
-# singularity exec $BIND_ARGS $SINGULARITY_IMAGE pwd
-echo $SCRIPT_DIR
-singularity exec $BIND_ARGS $SINGULARITY_IMAGE Rscript -e "rmarkdown::render('${SCRIPT_DIR}/2018_analysis/meta_run_rrna_analysis.Rmd')"
 # singularity exec $BIND_ARGS $SINGULARITY_IMAGE Rscript -e "rmarkdown::render('${SCRIPT_DIR}/2018_analysis/test_callr.Rmd')"
+singularity exec $BIND_ARGS $SINGULARITY_IMAGE Rscript -e "rmarkdown::render('${SCRIPT_DIR}/2018_analysis/meta_run_rrna_analysis.Rmd')"
+singularity exec $BIND_ARGS $SINGULARITY_IMAGE Rscript -e "rmarkdown::render('${SCRIPT_DIR}/2019_analysis/meta_run_rrna_analysis_2019.Rmd')"
+
