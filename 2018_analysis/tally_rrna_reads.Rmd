@@ -19,6 +19,8 @@ library(stringr)
 library(tibble)
 library(readr)
 library(ggplot2)
+library(rstatix)
+library(ggpubr)
 ```
 
 
@@ -106,8 +108,8 @@ percentRRNA = function(gtf_path, star_out_dir){
   return(combined_counts)
 
 }
-y = percentRRNA(gtf_path=gtf_with_mito_rrna.file, star_out_dir=total_samples_starout.dir)
-kable(y)
+# y = percentRRNA(gtf_path=gtf_with_mito_rrna.file, star_out_dir=total_samples_starout.dir)
+# kable(y)
 ```
 
 
@@ -119,41 +121,86 @@ list.files(total_samples_starout.dir, pattern = paste0(bam_suffix,"$"), full.nam
 
 
 ```{r}
-full_data_counts = percentRRNA(gtf_with_mito_rrna.file, enrich_compare_starout.dir)
+full_data_counts_2018 = percentRRNA(gtf_with_mito_rrna.file, enrich_compare_starout.dir)
 ```
 
 
 ```{r include=TRUE}
 metadata.df = read_tsv(metadata.file)
 
-full_data_counts %>%
+enrichment_names <- c(
+                    "MA" = "Poly(A)",
+                    "RZ" = "RiboZero",
+                    "TOT" = "Total")
+
+full_data_counts_2018 %>%
   mutate(Label=str_extract(sample, "^\\d+_[A-Z]+_[A-Z]"), 
          lane=str_extract(sample, "L\\d{3}$")) %>%
-  left_join(metadata.df, by="Label") ->
-  full_data_counts_with_meta
+  left_join(metadata.df, by="Label") %>%
+  mutate(enrichment_method=str_replace_all(enrichment_method, enrichment_names)) ->
+  full_data_counts_2018_with_meta
 
-kable(full_data_counts_with_meta)
+# kable(full_data_counts_2018_with_meta)
+full_data_counts_2018_with_meta
 ```
 
 ```{r include=TRUE}
-enrichment_names <- c(
-                    `MA` = "polyA",
-                    `RZ` = "RiboZero",
-                    `TOT` = "Total RNA"
-                    )
-
-ggplot(data=full_data_counts_with_meta, 
+ggplot(data=full_data_counts_2018_with_meta, 
        aes(x=RNA_sample_num, y=rrna_percent_total, fill=lane)) +
   geom_bar(stat="identity", 
            position = position_dodge(preserve = "total"),
            color="black") +
-  facet_grid(cols = vars(enrichment_method), scale="free_x",
-             labeller = as_labeller(enrichment_names)) +
+  facet_grid(cols = vars(enrichment_method), scale="free_x") +
   scale_fill_brewer(guide=FALSE) +
   theme_bw() +
   labs(x = "Sample", y="% rRNA reads") +
   ylim(c(0,100))
-
 ```
 
+### Prettier Figure for Publication
 
+#### Summarize Across Lanes
+
+```{r}
+full_data_counts_2018_with_meta %>%
+  mutate(enrichment_method=factor(enrichment_method, levels = c("Total", "Poly(A)", "RiboZero"))) %>%
+  group_by(enrichment_method, RNA_sample_num, Strain, Media) %>%
+  summarise(
+    total_reads=sum(total_reads),
+    mapped_reads=sum(mapped_reads),
+    rrna_reads=sum(rrna_reads)) %>%
+  mutate(ratio_rrna=rrna_reads/total_reads,
+         percent_rrna=ratio_rrna*100,
+         log_tranform_ratio=log10(ratio_rrna)) ->
+  rrna_data_2018
+
+rrna_data_2018 %>%
+  kable
+```
+
+#### Make Pretty BarPlot
+```{r}
+# This chunk modified from plotting_bar_graphs.Rmd
+rrna_data_2018 %>%
+  aov(log_tranform_ratio ~ enrichment_method, data = .) %>%
+  tukey_hsd ->
+  stat.test_2018
+
+# stat.test_2018
+
+rrna_data_2018 %>%
+ggbarplot(x = "enrichment_method", y = "percent_rrna", add = c("mean_se"),
+          position = position_dodge(),
+          color = "black", palette = c("#A7A8A8", "#BBEFFA", "#C2F5D4"),
+          fill = "enrichment_method",
+          ylim = c(0, 100),
+          order = c("Total", "Poly(A)", "RiboZero"),
+          legend = "none",
+          ylab = "rRNA reads (% total reads)", xlab = " ") +
+  stat_pvalue_manual(
+    stat.test_2018, label = "p.adj.signif", 
+    tip.length = 0,
+    size = 6,
+    bracket.size = 0.75,
+    y.position = c(95, 100, 69))
+```
