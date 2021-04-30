@@ -92,19 +92,29 @@ fasterqDump = function(accession, outdir, tempdir=NULL, gzip=TRUE){
 ```
 
 
-```{r}
+```{r eval=FALSE, include=FALSE}
 fasterqDump(accession="SRR12933702",
             outdir=sra_dir, 
             tempdir="/workspace/tmp" )
 ```
 
-```{r}
+```{r eval=FALSE, include=FALSE}
 accessions_with_meta %>%
   pull(Run) %>%
   head(2) %>%
   map(function(x) fasterqDump(accession=x, outdir=sra_dir, tempdir="/workspace/tmp")) ->
   downloaded_fastqs
 ```
+
+
+```{r}
+accessions_with_meta %>%
+  pull(Run) %>%
+  map(function(x) fasterqDump(accession=x, outdir=sra_dir, tempdir="/workspace/tmp")) ->
+  downloaded_fastqs
+```
+
+
 ```{r}
 downloaded_fastqs %>%
   unlist %>%
@@ -117,12 +127,7 @@ downloaded_fastqs %>%
 ```
 
 
-```{r eval=FALSE, include=FALSE}
-accessions_with_meta %>%
-  pull(Run) %>%
-  map(function(x) fasterqDump(accession=x, outdir=sra_dir, tempdir="/workspace/tmp")) ->
-  downloaded_fastqs
-```
+
 ```{r eval=FALSE, include=FALSE}
 accessions_with_meta %>%
   pull(Run) %>%
@@ -137,7 +142,7 @@ fasterqDump(accession="SRR12933557",
 
 # STOPPED HERE
 ```{r}
-stop("Deal with vdb-config")
+warning("Deal with vdb-config")
 ```
 ```{r}
 stop("STOPPED HERE")
@@ -147,46 +152,8 @@ stop("STOPPED HERE")
 cat  ~/.ncbi/user-settings.mkfg 
 ```
 
-```{bash}
-fastq-dump -h
-```
-
-```{bash}
-fasterq-dump -h
-```
-
-```{bash}
-chmod -R u+w /data
-OUTDIR="/data/sra/test"
-rm -rf $OUTDIR
-mkdir -p $OUTDIR
-time fasterq-dump --outdir $OUTDIR  --include-technical SRR12933702 
-```
-
-```{bash}
-chmod -R u+w /data
-OUTDIR="/data/sra/test"
-rm -rf $OUTDIR
-mkdir -p $OUTDIR
-time sh -c "fasterq-dump --outdir $OUTDIR SRR12933702 --force ; gzip $OUTDIR/SRR12933702.fastq"
-```
-
-```{bash}
-chmod -R u+w /data
-OUTDIR="/data/sra/test"
-rm -rf $OUTDIR
-mkdir -p $OUTDIR
-time sh -c "fasterq-dump SRR12933702 --force --stdout; gzip $OUTDIR/SRR12933702.fastq"
-```
-
-
-```{bash}
-chmod -R u+w /data
-OUTDIR="/data/sra/test"
-rm -rf $OUTDIR
-mkdir -p $OUTDIR
-time sh -c "fastq-dump --outdir $OUTDIR --gzip SRR12933702"
-ls -lh $OUTDIR
+```{r eval=FALSE, include=FALSE}
+stop("Deal with vdb-config")
 ```
 
 # Download Data
@@ -203,46 +170,6 @@ ls -lh $OUTDIR
   - esearch
   - GEOquery <https://bioconductor.org/packages/release/bioc/html/GEOquery.html>
   - SRAdb <https://www.bioconductor.org/packages/release/bioc/html/SRAdb.html>
-
-
-
-
-
-
-
-```{r eval=FALSE, include=FALSE}
-library(readr)
-source("run_config.R")
-geo_matrix_url = "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE160nnn/GSE160397/matrix/GSE160397_series_matrix.txt.gz"
-
-geo_matrix_url %>%
-  basename %>%
-  file.path(sra_dir,.) ->
-  geo_matrix_file
-
-
-# geo_matrix_file = 
-download.file(geo_matrix_url, geo_matrix_file)
-
-geo_matrix_file %>%
-  read_tsv(skip=39) ->
-  geo_matrix
-
-```
-
-SRP289700 
-
-```{bash eval=FALSE, include=FALSE}
-fastq-dump --split-spot --maxSpotId 10 SRX9397474 
-# https://standage.github.io/that-darn-cache-configuring-the-sra-toolkit.html
-#$SRA_DIR
-```
-
-
-
-
-
-
 
 
 # SessionInfo
