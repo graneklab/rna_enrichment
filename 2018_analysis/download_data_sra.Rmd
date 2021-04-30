@@ -13,34 +13,52 @@ library(readr)
 library(stringr)
 ```
 
-# Get Accesion-to-Sample Mapping from SRA
+# Make Metadata Table with SRA and GEO Accesion Numbers
+## Get SRA Metadata
 ```{r}
-entrez_search(db="sra", term="PRJNA673133") ->
+entrez_search(db="sra", term="PRJNA673133",retmax=1000) ->
   sra_search
-entrez_fetch(db="sra", id=sra_search$ids, rettype="runinfo") %>%
-  read_csv ->
+
+# check that we got everything
+stopifnot(sra_search[["count"]]==length(sra_search[["ids"]]))
+
+entrez_fetch(db="sra", id=sra_search[["ids"]], rettype="runinfo") %>%
+  read_csv %>%
+  dplyr::select(Run, Experiment, SampleName) %>%
+  filter(Run!="Run") ->
   sra_df
 sra_df
 ```
-# Get Accesion-to-Sample Mapping from GEO
+## Get GEO Metadata
 ```{r}
 getGEO("GSE160397",GSEMatrix=TRUE) ->
   gse
-pData(gse[[1]]) ->
+pData(gse[[1]]) %>%
+  dplyr::select(geo_accession, title, `enrichment method:ch1`, `genotype:ch1`, `media:ch1`, `rna sample number:ch1`) %>%
+  rename_with(str_remove, .cols = everything(), ":ch1") %>%
+  rename_with(str_replace_all, .cols = everything(), " ", "_") %>%
+  filter(rna_sample_number %in% c("2", "3", "4")) %>%
+  mutate(sequencing_batch=ifelse(str_detect(title, "_2018_"),
+                                "2019",
+                                "2018")) %>%
+  arrange(sequencing_batch, enrichment_method, rna_sample_number) ->
   geo_df
 geo_df
 ```
 
+## Join SRA and GEO Metadata
 ```{r}
-left_join(sra_df, 
+right_join(sra_df, 
           geo_df, 
-          by=c("SampleName"="geo_accession")) %>%
-  dplyr::select(Run, Experiment, SampleName, title, `enrichment method:ch1`, `genotype:ch1`, `media:ch1`, `rna sample number:ch1`,`strain:ch1`) %>%
-  rename_with(str_remove, .cols = everything(), ":ch1") %>%
-  rename_with(str_replace_all, .cols = everything(), " ", "_") ->
-  sra_with_meta
+          by=c("SampleName"="geo_accession")) ->
+  accessions_with_meta
+accessions_with_meta
 ```
 
+# STOPPED HERE
+```{r}
+stop("STOPPED HERE")
+```
 
 
 # Download FASTQs from SRA
