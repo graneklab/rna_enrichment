@@ -7,7 +7,7 @@ From: granek/duke-chsi-informatics/singularity-rnaseq:0005
     Image_Version rna_enrichment_0005
 
 %post
-  Rscript -e "install.packages(pkgs = c('rstatix','ggpubr','rentrez'), repos='https://mirror.las.iastate.edu/CRAN/', dependencies=TRUE, clean = TRUE)"
+  Rscript -e "install.packages(pkgs = c('rstatix','ggpubr','rentrez','R.utils'), repos='https://mirror.las.iastate.edu/CRAN/', dependencies=TRUE, clean = TRUE)"
   pip3 install --no-cache-dir \
     RSeQC
 
