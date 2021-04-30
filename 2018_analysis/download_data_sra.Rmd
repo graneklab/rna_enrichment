@@ -6,11 +6,18 @@ output:
 ---
 
 ```{r}
+source("run_config.R")
+
 library(GEOquery)
 library(dplyr)
 library(rentrez)
 library(readr)
 library(stringr)
+library(fs)
+library(R.utils)
+library(purrr)
+library(tibble)
+library(tools)
 ```
 
 # Make Metadata Table with SRA and GEO Accesion Numbers
@@ -55,22 +62,90 @@ right_join(sra_df,
 accessions_with_meta
 ```
 
-# STOPPED HERE
-```{r}
-stop("STOPPED HERE")
-```
+
+
 
 
 # Download FASTQs from SRA
 ## Deal with vdb-config
+
+
+
+```{r}
+fasterqDump = function(accession, outdir, tempdir=NULL, gzip=TRUE){
+  fasterq_args =  c(accession, "--outdir", outdir)
+  if (!is.null(tempdir)){
+    # dir.create(tempdir, recursive = TRUE)
+    fasterq_args =  c(fasterq_args, "--temp", tempdir)
+  }
+  system2(command="fasterq-dump",
+          args=fasterq_args)
+  
+  file.path(outdir, accession) %>%
+    path_ext_set("fastq") ->
+    fastq_path
+  if(gzip==TRUE){
+    fastq_path=gzip(fastq_path)
+  }
+  return(fastq_path)
+}
+```
+
+
+```{r}
+fasterqDump(accession="SRR12933702",
+            outdir=sra_dir, 
+            tempdir="/workspace/tmp" )
+```
+
+```{r}
+accessions_with_meta %>%
+  pull(Run) %>%
+  head(2) %>%
+  map(function(x) fasterqDump(accession=x, outdir=sra_dir, tempdir="/workspace/tmp")) ->
+  downloaded_fastqs
+```
+```{r}
+downloaded_fastqs %>%
+  unlist %>%
+  md5sum %>%
+  enframe %>%
+  dplyr::rename(fullpath=name, md5sum=value) %>%
+  mutate(filename=basename(fullpath)) %>%
+  select(md5sum, filename) %>%
+  write_delim(file.path(sra_dir, "md5_checksums.txt"), col_names = FALSE)
+```
+
+
+```{r eval=FALSE, include=FALSE}
+accessions_with_meta %>%
+  pull(Run) %>%
+  map(function(x) fasterqDump(accession=x, outdir=sra_dir, tempdir="/workspace/tmp")) ->
+  downloaded_fastqs
+```
+```{r eval=FALSE, include=FALSE}
+accessions_with_meta %>%
+  pull(Run) %>%
+  head(2)
+```
+
+```{r eval=FALSE, include=FALSE}
+fasterqDump(accession="SRR12933557",
+            outdir=sra_dir, 
+            tempdir="/workspace/tmp" )
+```
+
+# STOPPED HERE
 ```{r}
 stop("Deal with vdb-config")
+```
+```{r}
+stop("STOPPED HERE")
 ```
 
 ```{bash}
 cat  ~/.ncbi/user-settings.mkfg 
 ```
-
 
 ```{bash}
 fastq-dump -h
@@ -93,8 +168,17 @@ chmod -R u+w /data
 OUTDIR="/data/sra/test"
 rm -rf $OUTDIR
 mkdir -p $OUTDIR
-time sh -c "fasterq-dump --outdir $OUTDIR SRR12933702; gzip $OUTDIR/SRR12933702.fastq"
+time sh -c "fasterq-dump --outdir $OUTDIR SRR12933702 --force ; gzip $OUTDIR/SRR12933702.fastq"
 ```
+
+```{bash}
+chmod -R u+w /data
+OUTDIR="/data/sra/test"
+rm -rf $OUTDIR
+mkdir -p $OUTDIR
+time sh -c "fasterq-dump SRR12933702 --force --stdout; gzip $OUTDIR/SRR12933702.fastq"
+```
+
 
 ```{bash}
 chmod -R u+w /data
