@@ -48,3 +48,9 @@ gtf_url %>%
 
 fig.dir = file.path(out.dir, "figures")
 dir.create(fig.dir)
+
+data_dir="/data"
+file_chmod(data_dir, "u+w")
+sra_dir=file.path(data_dir, "sra_fastqs"); dir.create(sra_dir, recursive = TRUE)
+
+
