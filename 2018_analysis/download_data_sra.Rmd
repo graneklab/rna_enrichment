@@ -63,16 +63,57 @@ accessions_with_meta
 ```
 
 
-
-
-
 # Download FASTQs from SRA
-## Deal with vdb-config
-
-
-
+## fasterqDump Definition
 ```{r}
-fasterqDump = function(accession, outdir, tempdir=NULL, gzip=TRUE){
+fasterqDump = function(accession,
+                       outdir,
+                       tempdir = NULL,
+                       gzip = TRUE,
+                       md5_df) {
+  # Check if file is downloaded and OK
+  outdir = sra_dir
+  accession %>%
+    path_ext_set("fastq") ->
+    fastq_file
+  
+  fastq_file %>%
+    paste0(".gz") ->
+    fastq_gz_file
+  
+  fastq_gz_file %>%
+    file.path(outdir, .) ->
+    fastq_gz_path
+  
+  fastq_file %>%
+    file.path(outdir, .) ->
+    fastq_path
+  
+  if (gzip == TRUE) {
+    final_path = fastq_gz_path
+  }
+  else {
+    final_path = fastq_path
+  }
+  
+  final_path %>%
+    basename ->
+    final_file
+  
+  final_path %>%
+    md5sum ->
+    observed_md5
+  
+  srafastq_md5s %>%
+    filter(filename == final_file) %>%
+    pull(md5sum) ->
+    true_md5
+  
+  if (file.exists(final_path) && true_md5 == observed_md5){
+    cat("MD5sum match", fastq_gz_path, true_md5, fill = TRUE)
+    return(final_path)
+  }
+  cat("Need to download", accession, fill = TRUE)
   fasterq_args =  c(accession, "--outdir", outdir)
   if (!is.null(tempdir)){
     # dir.create(tempdir, recursive = TRUE)
@@ -81,15 +122,81 @@ fasterqDump = function(accession, outdir, tempdir=NULL, gzip=TRUE){
   system2(command="fasterq-dump",
           args=fasterq_args)
   
-  file.path(outdir, accession) %>%
-    path_ext_set("fastq") ->
-    fastq_path
-  if(gzip==TRUE){
-    fastq_path=gzip(fastq_path)
+  if (gzip == TRUE){
+    final_path = gzip(fastq_path)
   }
-  return(fastq_path)
+  return(final_path)
 }
 ```
+
+## Load "True" MD5sums from file
+```{r}
+srafastq_md5file %>%
+  read_delim(delim=" ", 
+             trim_ws = TRUE,
+             col_names = c("md5sum", "filename")) ->
+  srafastq_md5s
+```
+
+## Run Download (with cache check)
+```{r}
+accessions_with_meta %>%
+  pull(Run) %>%
+  map(function(x) fasterqDump(accession=x, outdir=sra_dir, tempdir="/workspace/tmp")) ->
+  downloaded_fastqs
+```
+
+
+
+## Generate MD5 table
+Only need to do this at the beginning
+```{r eval=FALSE, include=FALSE}
+downloaded_fastqs %>%
+  unlist %>%
+  md5sum %>%
+  enframe %>%
+  dplyr::rename(fullpath=name, md5sum=value) %>%
+  mutate(filename=basename(fullpath)) %>%
+  select(md5sum, filename) %>%
+  write_delim(file.path(sra_dir, "md5_checksums.txt"), col_names = FALSE)
+```
+
+
+# CRUFT
+```{r eval=FALSE, include=FALSE}
+accession = "SRR12933557"
+# accession = "SRR1293"
+# Check if file is downloaded and OK
+outdir = sra_dir
+  accession %>%
+    path_ext_set("fastq") ->
+    fastq_file
+  
+  fastq_file %>%
+    paste0(".gz") ->
+    fastq_gz_file
+  
+  fastq_gz_file %>%
+    file.path(outdir, .) ->
+    fastq_gz_path
+  
+  fastq_gz_path %>%
+    md5sum ->
+    observed_md5
+
+srafastq_md5s %>%
+  filter(filename==fastq_gz_file) %>%
+  pull(md5sum) ->
+  true_md5
+
+if(file.exists(fastq_gz_path) && true_md5==observed_md5){
+  cat("MD5sum match", fastq_gz_path, true_md5, fill=TRUE)
+} else{
+  cat("Need to download", accession, fill=TRUE)
+}
+```
+
+
 
 
 ```{r eval=FALSE, include=FALSE}
@@ -107,24 +214,6 @@ accessions_with_meta %>%
 ```
 
 
-```{r}
-accessions_with_meta %>%
-  pull(Run) %>%
-  map(function(x) fasterqDump(accession=x, outdir=sra_dir, tempdir="/workspace/tmp")) ->
-  downloaded_fastqs
-```
-
-
-```{r}
-downloaded_fastqs %>%
-  unlist %>%
-  md5sum %>%
-  enframe %>%
-  dplyr::rename(fullpath=name, md5sum=value) %>%
-  mutate(filename=basename(fullpath)) %>%
-  select(md5sum, filename) %>%
-  write_delim(file.path(sra_dir, "md5_checksums.txt"), col_names = FALSE)
-```
 
 
 
@@ -139,13 +228,11 @@ fasterqDump(accession="SRR12933557",
             outdir=sra_dir, 
             tempdir="/workspace/tmp" )
 ```
+## Deal with vdb-config
 
 # STOPPED HERE
 ```{r}
 warning("Deal with vdb-config")
-```
-```{r}
-stop("STOPPED HERE")
 ```
 
 ```{bash}
