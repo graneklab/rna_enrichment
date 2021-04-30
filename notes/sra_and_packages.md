@@ -16,8 +16,7 @@
 # Stuff to Install
 ## Parent Image?
   - NCBI SRA Toolkit <https://github.com/ncbi/sra-tools/wiki/01.-Downloading-SRA-Toolkit>
-    - https://standage.github.io/that-darn-cache-configuring-the-sra-toolkit.html
-  
+
 ## This Image
   - CRAN geomdb <https://cran.r-project.org/web/packages/geomedb/index.html>?
   - esearch

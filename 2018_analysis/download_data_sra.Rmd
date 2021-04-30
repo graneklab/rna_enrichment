@@ -149,6 +149,20 @@ srafastq_md5file %>%
   srafastq_md5s
 ```
 
+## Deal with vdb-config
+
+# STOPPED HERE
+  - https://standage.github.io/that-darn-cache-configuring-the-sra-toolkit.html
+  - https://www.biostars.org/p/169617/
+  - https://www.biostars.org/p/210819/
+```{r}
+stop("Deal with vdb-config")
+```
+
+```{bash}
+cat  ~/.ncbi/user-settings.mkfg 
+```
+
 ## Run Download (with cache check)
 ```{r}
 accessions_with_meta %>%
@@ -156,7 +170,6 @@ accessions_with_meta %>%
   map(function(x) fasterqDump(accession=x, outdir=sra_dir, tempdir="/workspace/tmp")) ->
   downloaded_fastqs
 ```
-
 
 
 ## Generate MD5 table
@@ -171,104 +184,6 @@ downloaded_fastqs %>%
   select(md5sum, filename) %>%
   write_delim(file.path(sra_dir, "md5_checksums.txt"), col_names = FALSE)
 ```
-
-
-# CRUFT
-```{r eval=FALSE, include=FALSE}
-accession = "SRR12933557"
-# accession = "SRR1293"
-# Check if file is downloaded and OK
-outdir = sra_dir
-  accession %>%
-    path_ext_set("fastq") ->
-    fastq_file
-  
-  fastq_file %>%
-    paste0(".gz") ->
-    fastq_gz_file
-  
-  fastq_gz_file %>%
-    file.path(outdir, .) ->
-    fastq_gz_path
-  
-  fastq_gz_path %>%
-    md5sum ->
-    observed_md5
-
-srafastq_md5s %>%
-  filter(filename==fastq_gz_file) %>%
-  pull(md5sum) ->
-  true_md5
-
-if(file.exists(fastq_gz_path) && true_md5==observed_md5){
-  cat("MD5sum match", fastq_gz_path, true_md5, fill=TRUE)
-} else{
-  cat("Need to download", accession, fill=TRUE)
-}
-```
-
-
-
-
-```{r eval=FALSE, include=FALSE}
-fasterqDump(accession="SRR12933702",
-            outdir=sra_dir, 
-            tempdir="/workspace/tmp" )
-```
-
-```{r eval=FALSE, include=FALSE}
-accessions_with_meta %>%
-  pull(Run) %>%
-  head(2) %>%
-  map(function(x) fasterqDump(accession=x, outdir=sra_dir, tempdir="/workspace/tmp")) ->
-  downloaded_fastqs
-```
-
-
-
-
-
-```{r eval=FALSE, include=FALSE}
-accessions_with_meta %>%
-  pull(Run) %>%
-  head(2)
-```
-
-```{r eval=FALSE, include=FALSE}
-fasterqDump(accession="SRR12933557",
-            outdir=sra_dir, 
-            tempdir="/workspace/tmp" )
-```
-## Deal with vdb-config
-
-# STOPPED HERE
-```{r}
-stop("Deal with vdb-config")
-```
-
-```{bash}
-cat  ~/.ncbi/user-settings.mkfg 
-```
-
-```{r eval=FALSE, include=FALSE}
-stop("Deal with vdb-config")
-```
-
-# Download Data
-  - https://www.ncbi.nlm.nih.gov/home/tools/
-  - https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE160397
-  - https://www.biostars.org/p/111040/
-  - https://bioinformaticsworkbook.org/dataAcquisition/fileTransfer/sra.html#gsc.tab=0
-  - https://www.biostars.org/p/339182/
-  - https://www.biostars.org/p/111040/#113204
-  - https://www.biostars.org/p/160576/
-
-## This Image
-  - CRAN geomdb <https://cran.r-project.org/web/packages/geomedb/index.html>?
-  - esearch
-  - GEOquery <https://bioconductor.org/packages/release/bioc/html/GEOquery.html>
-  - SRAdb <https://www.bioconductor.org/packages/release/bioc/html/SRAdb.html>
-
 
 # SessionInfo
 ```{r}
