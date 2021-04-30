@@ -1,0 +1,167 @@
+---
+title: "Download Data"
+output:
+  html_document:
+    toc: false
+---
+
+```{r}
+library(GEOquery)
+library(dplyr)
+library(rentrez)
+library(readr)
+library(stringr)
+```
+
+# Make Metadata Table with SRA and GEO Accesion Numbers
+## Get SRA Metadata
+```{r}
+entrez_search(db="sra", term="PRJNA673133",retmax=1000) ->
+  sra_search
+
+# check that we got everything
+stopifnot(sra_search[["count"]]==length(sra_search[["ids"]]))
+
+entrez_fetch(db="sra", id=sra_search[["ids"]], rettype="runinfo") %>%
+  read_csv %>%
+  dplyr::select(Run, Experiment, SampleName) %>%
+  filter(Run!="Run") ->
+  sra_df
+sra_df
+```
+## Get GEO Metadata
+```{r}
+getGEO("GSE160397",GSEMatrix=TRUE) ->
+  gse
+pData(gse[[1]]) %>%
+  dplyr::select(geo_accession, title, `enrichment method:ch1`, `genotype:ch1`, `media:ch1`, `rna sample number:ch1`) %>%
+  rename_with(str_remove, .cols = everything(), ":ch1") %>%
+  rename_with(str_replace_all, .cols = everything(), " ", "_") %>%
+  filter(rna_sample_number %in% c("2", "3", "4")) %>%
+  mutate(sequencing_batch=ifelse(str_detect(title, "_2018_"),
+                                "2019",
+                                "2018")) %>%
+  arrange(sequencing_batch, enrichment_method, rna_sample_number) ->
+  geo_df
+geo_df
+```
+
+## Join SRA and GEO Metadata
+```{r}
+right_join(sra_df, 
+          geo_df, 
+          by=c("SampleName"="geo_accession")) ->
+  accessions_with_meta
+accessions_with_meta
+```
+
+# STOPPED HERE
+```{r}
+stop("STOPPED HERE")
+```
+
+
+# Download FASTQs from SRA
+## Deal with vdb-config
+```{r}
+stop("Deal with vdb-config")
+```
+
+```{bash}
+cat  ~/.ncbi/user-settings.mkfg 
+```
+
+
+```{bash}
+fastq-dump -h
+```
+
+```{bash}
+fasterq-dump -h
+```
+
+```{bash}
+chmod -R u+w /data
+OUTDIR="/data/sra/test"
+rm -rf $OUTDIR
+mkdir -p $OUTDIR
+time fasterq-dump --outdir $OUTDIR  --include-technical SRR12933702 
+```
+
+```{bash}
+chmod -R u+w /data
+OUTDIR="/data/sra/test"
+rm -rf $OUTDIR
+mkdir -p $OUTDIR
+time sh -c "fasterq-dump --outdir $OUTDIR SRR12933702; gzip $OUTDIR/SRR12933702.fastq"
+```
+
+```{bash}
+chmod -R u+w /data
+OUTDIR="/data/sra/test"
+rm -rf $OUTDIR
+mkdir -p $OUTDIR
+time sh -c "fastq-dump --outdir $OUTDIR --gzip SRR12933702"
+ls -lh $OUTDIR
+```
+
+# Download Data
+  - https://www.ncbi.nlm.nih.gov/home/tools/
+  - https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE160397
+  - https://www.biostars.org/p/111040/
+  - https://bioinformaticsworkbook.org/dataAcquisition/fileTransfer/sra.html#gsc.tab=0
+  - https://www.biostars.org/p/339182/
+  - https://www.biostars.org/p/111040/#113204
+  - https://www.biostars.org/p/160576/
+
+## This Image
+  - CRAN geomdb <https://cran.r-project.org/web/packages/geomedb/index.html>?
+  - esearch
+  - GEOquery <https://bioconductor.org/packages/release/bioc/html/GEOquery.html>
+  - SRAdb <https://www.bioconductor.org/packages/release/bioc/html/SRAdb.html>
+
+
+
+
+
+
+
+```{r eval=FALSE, include=FALSE}
+library(readr)
+source("run_config.R")
+geo_matrix_url = "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE160nnn/GSE160397/matrix/GSE160397_series_matrix.txt.gz"
+
+geo_matrix_url %>%
+  basename %>%
+  file.path(sra_dir,.) ->
+  geo_matrix_file
+
+
+# geo_matrix_file = 
+download.file(geo_matrix_url, geo_matrix_file)
+
+geo_matrix_file %>%
+  read_tsv(skip=39) ->
+  geo_matrix
+
+```
+
+SRP289700 
+
+```{bash eval=FALSE, include=FALSE}
+fastq-dump --split-spot --maxSpotId 10 SRX9397474 
+# https://standage.github.io/that-darn-cache-configuring-the-sra-toolkit.html
+#$SRA_DIR
+```
+
+
+
+
+
+
+
+
+# SessionInfo
+```{r}
+sessionInfo()
+```
