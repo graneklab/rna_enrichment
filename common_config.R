@@ -29,7 +29,7 @@ gtf_url = h99_gtf_url
 basedir = "/workspace"
 out.dir=file.path(basedir, "2018_tot_samples")
 srafastq_md5file = here("info/sra_fastq_md5checksums.txt")
-
+accessions_file = here("info/accession_table.csv")
 
 # The following are determined in 2018_analysis/enrichment_correlation.Rmd 
 all_rrna_homologs = c("CNAG_12438","CNAG_07466","CNAG_10500",

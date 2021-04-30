@@ -22,7 +22,8 @@ library(tools)
 
 # Make Metadata Table with SRA and GEO Accesion Numbers
 ## Get SRA Metadata
-```{r}
+This chunk doesn't need to be run because info is loaded from a file in the repo
+```{r eval=FALSE, include=FALSE}
 entrez_search(db="sra", term="PRJNA673133",retmax=1000) ->
   sra_search
 
@@ -37,15 +38,16 @@ entrez_fetch(db="sra", id=sra_search[["ids"]], rettype="runinfo") %>%
 sra_df
 ```
 ## Get GEO Metadata
-```{r}
+This chunk doesn't need to be run because info is loaded from a file in the repo
+```{r eval=FALSE, include=FALSE}
 getGEO("GSE160397",GSEMatrix=TRUE) ->
   gse
 pData(gse[[1]]) %>%
-  dplyr::select(geo_accession, title, `enrichment method:ch1`, `genotype:ch1`, `media:ch1`, `rna sample number:ch1`) %>%
+  dplyr::select(geo_accession, sample_id=title, `enrichment method:ch1`, `genotype:ch1`, `media:ch1`, `rna sample number:ch1`) %>%
   rename_with(str_remove, .cols = everything(), ":ch1") %>%
   rename_with(str_replace_all, .cols = everything(), " ", "_") %>%
   filter(rna_sample_number %in% c("2", "3", "4")) %>%
-  mutate(sequencing_batch=ifelse(str_detect(title, "_2018_"),
+  mutate(sequencing_batch=ifelse(str_detect(sample_id, "_2018_"),
                                 "2019",
                                 "2018")) %>%
   arrange(sequencing_batch, enrichment_method, rna_sample_number) ->
@@ -54,14 +56,23 @@ geo_df
 ```
 
 ## Join SRA and GEO Metadata
-```{r}
+This chunk doesn't need to be run because info is loaded from a file in the repo
+```{r eval=FALSE, include=FALSE}
 right_join(sra_df, 
           geo_df, 
           by=c("SampleName"="geo_accession")) ->
   accessions_with_meta
+
+accessions_with_meta %>%
+  write_csv(accessions_file)
+```
+## Load Metadata From File
+```{r}
+accessions_file %>%
+  read_csv ->
+  accessions_with_meta
 accessions_with_meta
 ```
-
 
 # Download FASTQs from SRA
 ## fasterqDump Definition
@@ -232,7 +243,7 @@ fasterqDump(accession="SRR12933557",
 
 # STOPPED HERE
 ```{r}
-warning("Deal with vdb-config")
+stop("Deal with vdb-config")
 ```
 
 ```{bash}
