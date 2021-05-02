@@ -12,12 +12,12 @@ source("run_config.R")
 ```
 
 ```{bash engine.path="/bin/bash"}
-ls $TRIMMED/[234]_TOT*L00[1234]*.fq.gz
+ls $TRIMMED/*.fq.gz
 ```
 
 # FASTQC on Trimmed reads
 ```{bash engine.path="/bin/bash"}
-fastqc --quiet --threads $TOTAL_THREADS $TRIMMED/[234]_TOT*L00[1234]*.fq.gz --adapters $FASTQC_ADAPTERS --outdir $QC_TRIM_DIR
+fastqc --quiet --threads $TOTAL_THREADS $TRIMMED/*.fq.gz --adapters $FASTQC_ADAPTERS --outdir $QC_TRIM_DIR
 ```
 
 ```{bash engine.path="/bin/bash"}
