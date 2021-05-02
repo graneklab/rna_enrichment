@@ -7,6 +7,9 @@ output:
 
 ```{r}
 source("run_config.R")
+
+library(readr)
+library(dplyr)
 ```
 
 # Genome
@@ -28,6 +31,7 @@ set -u
 mkdir -p ${TOTAL_SAMPLES_STAROUT}
 STAR \
     --runMode genomeGenerate \
+    --runThreadN $TOTAL_THREADS \
     --genomeDir $GENOME_DIR \
     --genomeFastaFiles ${FA} \
     --sjdbGTFfile ${GTF} \
@@ -36,19 +40,33 @@ STAR \
 # --genomeSAindexNbases 6
 ```
 
+```{r}
+accessions_file %>%
+  read_csv %>%
+  filter(sequencing_batch=="2018", 
+         enrichment_method=="Unenriched") %>%
+  pull(Run) %>%
+  paste0(".fastq.gz") %>%
+  file.path(sra_dir,.) ->
+  unenriched_2018_fastq_paths
+
+unenriched_2018_fastq_paths
+
+unenriched_2018_fastq_paths %>%
+  paste(collapse = " ") %>%
+  Sys.setenv(UNENRICHED_2018_FASTQS=.)
+```
+
 ## Trim and Map Reads
 ```{bash engine.path="/bin/bash"}
 set -u
 mkdir -p ${TOTAL_SAMPLES_STAROUT} ${TRIMMED}
 trim_and_star_func() {
     FASTQ=$1
-    FASTQ_BASE=${FASTQ##*/} # strip directory from file path
-    SAMPLE="${FASTQ_BASE%_R1_001.fastq.gz}" # strip .fq.gz file extension
+    SAMPLE="$(basename ${FASTQ} .fastq.gz)" # directory and strip .fastq.gz file extension
     FASTQ_TRIMMED="$TRIMMED/${SAMPLE}_trimmed.fq.gz"
     echo $SAMPLE
     echo $FASTQ
-    echo $FASTQ_BASE
-    # exit 1
 
 
     # make a pipe for trimmed fastq
@@ -82,11 +100,7 @@ trim_and_star_func() {
 }
 export -f trim_and_star_func
 
-# parallel --jobs $MAX_JOBS trim_and_star_func ::: $RAW_FASTQS/*.fastq.gz
-# parallel --jobs $MAX_JOBS trim_and_star_func ::: $RAW_FASTQS/?_TOT*L00[12]*.fastq.gz
-parallel --jobs $MAX_JOBS trim_and_star_func ::: $RAW_FASTQS/[234]_TOT*L00[1234]*.fastq.gz
-# parallel --jobs $MAX_JOBS trim_and_star_func ::: $RAW_FASTQS/[234]_*_S*_L00*_R1_001.fastq.gz
-
+parallel --jobs $MAX_JOBS trim_and_star_func ::: $UNENRICHED_2018_FASTQS
 ```
 
 
