@@ -17,6 +17,8 @@ library(rtracklayer)
 library(plyr)
 library(stringr)
 library(tibble)
+library(dplyr)
+library(readr)
 ```
 
 ## Load Data
@@ -54,19 +56,33 @@ range_15s_region = GRanges(seqnames = short_mito_name,
 
 
 
-
-
 ```{r}
-tot_bam_files = dir_ls(total_samples_starout.dir,glob = "*TOT*L00*.bam") 
+accessions_file %>%
+  read_csv %>%
+  filter(sequencing_batch=="2018", 
+         enrichment_method=="Unenriched") ->
+  tot_2018_metadata
+
+tot_2018_metadata %>%
+  group_by(sample_id) %>%
+  slice(1) %>%
+  pull(Run) %>%
+  paste0("_Aligned.sortedByCoord.out.bam") %>%
+  file.path(total_samples_starout.dir,.) ->
+  tot_L1_bam_files
+
+tot_2018_metadata %>%
+  pull(Run) %>%
+  paste0("_Aligned.sortedByCoord.out.bam") %>%
+  file.path(total_samples_starout.dir,.) ->
+tot_bam_files
+
 tot_bams = BamFileList(tot_bam_files, paste0(tot_bam_files, ".bai"))
+tot_L1_bams = BamFileList(tot_L1_bam_files, paste0(tot_L1_bam_files, ".bai"))
+
 tot_bam_files
 ```
 
-```{r}
-tot_L1_bam_files = dir_ls(total_samples_starout.dir,glob = "*TOT*L001*.bam") 
-tot_L1_bams = BamFileList(tot_L1_bam_files, paste0(tot_L1_bam_files, ".bai"))
-tot_L1_bam_files
-```
 # Whole Genome
 ```{r}
 autoplot(tot_L1_bams, which = whole_mito_gr, geom = "area") +
@@ -395,7 +411,7 @@ write.table(mito_rrdna_gtf.gf,
             quote = FALSE, sep = "\t",
             row.names = FALSE,
             col.names = FALSE)
-file_copy(gtf_with_mito_rrna.file, file_S2_path)
+file_copy(gtf_with_mito_rrna.file, file_S2_path, overwrite = TRUE)
 ```
 
 
@@ -408,7 +424,7 @@ grep -i rRNA /workspace/2018_tot_samples/genome/Cryptococcus_neoformans_var_grub
 ```
 
 ```{bash}
-grep CNAG_10500 $TOTAL_SAMPLES_STAROUT/*_L001_ReadsPerGene.out.tab
+grep CNAG_10500 $TOTAL_SAMPLES_STAROUT/*_ReadsPerGene.out.tab
 ```
 
 # Figures for Manuscript
