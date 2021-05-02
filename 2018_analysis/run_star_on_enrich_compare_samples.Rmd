@@ -7,22 +7,36 @@ output:
 
 ```{r}
 source("run_config.R")
+
+library(readr)
+library(dplyr)
 ```
 
+```{r}
+accessions_file %>%
+  read_csv %>%
+  filter(sequencing_batch=="2018") %>%
+  pull(Run) %>%
+  paste0(".fastq.gz") %>%
+  file.path(sra_dir,.) ->
+  all_2018_fastq_paths
+
+all_2018_fastq_paths
+
+all_2018_fastq_paths %>%
+  paste(collapse = " ") %>%
+  Sys.setenv(ALL_2018_FASTQS=.)
+```
 
 ```{bash}
 set -u
 mkdir -p ${ENRICH_COMPARE_STAROUT}
 trim_and_star_func() {
     FASTQ=$1
-    FASTQ_BASE=${FASTQ##*/} # strip directory from file path
-    SAMPLE="${FASTQ_BASE%_R1_001.fastq.gz}" # strip .fq.gz file extension
+    SAMPLE="$(basename ${FASTQ} .fastq.gz)" # directory and strip .fastq.gz file extension
     FASTQ_TRIMMED="$TRIMMED/${SAMPLE}_trimmed.fq.gz"
     echo $SAMPLE
     echo $FASTQ
-    echo $FASTQ_BASE
-    # exit 1
-
 
     # make a pipe for trimmed fastq
     # CUR_PIPE=`mktemp --dry-run`_${SAMPLE}_pipe.fq
@@ -55,9 +69,8 @@ trim_and_star_func() {
 }
 export -f trim_and_star_func
 
-parallel --jobs $MAX_JOBS trim_and_star_func ::: $RAW_FASTQS/[234]_*_S*_L00*_R1_001.fastq.gz
-# parallel --jobs $MAX_JOBS trim_and_star_func ::: $RAW_FASTQS/2_TOT*L00[12]*.fastq.gz
-
+parallel --jobs $MAX_JOBS trim_and_star_func ::: $ALL_2018_FASTQS
+# This needs to be here to knit. Knitting fails if the line above is the last line in the chunk!
 ```
 
 ### Check that custom GTF (with MTrRNA) was used
