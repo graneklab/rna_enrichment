@@ -1,0 +1,51 @@
+---
+title: "Run QC"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+source("run_config.R")
+
+library(readr)
+library(dplyr)
+```
+
+## Load Metadata From File
+```{r}
+accessions_file %>%
+  read_csv %>%
+  filter(sequencing_batch=="2018") ->
+  accessions_with_meta_2018
+accessions_with_meta_2018
+```
+```{r}
+accessions_with_meta_2018 %>%
+  pull(Run) %>%
+  paste0(".fastq.gz") %>%
+  file.path(sra_dir,.) ->
+  fastq_2018_paths
+fastq_2018_paths
+```
+
+```{r}
+fastq_2018_paths %>%
+  paste(collapse = " ") %>%
+  Sys.setenv(FASTQS_2018=.)
+```
+
+
+```{bash engine.path="/bin/bash"}
+echo $FASTQS_2018
+```
+
+```{bash engine.path="/bin/bash"}
+fastqc --quiet --threads $TOTAL_THREADS $FASTQS_2018 --adapters $FASTQC_ADAPTERS --outdir $QC_RAW_DIR
+```
+
+```{bash engine.path="/bin/bash"}
+multiqc --force $QC_RAW_DIR --outdir ${QC_DIR} --filename multiqc_total_reads_raw.html
+```
