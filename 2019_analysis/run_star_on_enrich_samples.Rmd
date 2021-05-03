@@ -10,22 +10,6 @@ source("run_config_2019.R")
 library(tools)
 ```
 
-
-# Make adapter file
-```{bash}
-set -u
-mkdir -p $INFO
-echo ">Adapter
-AGATCGGAAGAGCACACGTCTGAACTCCAGTCA
->AdapterRead2
-AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT
->Adapter_rc
-TGACTGGAGTTCAGACGTGTGCTCTTCCGATCT
->AdapterRead2_rc
-ACACTCTTTCCCTACACGACGCTCTTCCGATCT" >  $ADAPTERS
-head $ADAPTERS
-```
-
 # Download and Index Genome
 ## Download
 ```{bash}
