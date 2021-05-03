@@ -132,10 +132,28 @@ fasterqDump = function(accession,
     fasterq_args =  c(fasterq_args, "--temp", tempdir)
   }
   system2(command="fasterq-dump",
-          args=fasterq_args)
+          args=fasterq_args,
+          stdout = TRUE,
+          stderr = TRUE) ->
+    std_err_out
+  
+  print(std_err_out)
   
   if (gzip == TRUE){
-    final_path = gzip(fastq_path)
+    if (file.exists(fastq_path)){
+      final_path = gzip(fastq_path)
+    } else {
+      # check for paired reads
+      r1_path = str_replace(fastq_path,".fastq", "_1.fastq")
+      r2_path = str_replace(fastq_path,".fastq", "_2.fastq")
+      final_path = c()
+      if (file.exists(r1_path)){
+        final_path = c(final_path, gzip(r1_path))
+      }
+      if (file.exists(r2_path)){
+        final_path = c(final_path, gzip(r2_path))
+      }
+    }
   }
   return(final_path)
 }
