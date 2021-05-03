@@ -76,13 +76,15 @@ genecounts[1:6,1:6] %>%
   kable
 ```
 
-### Extract library specific label
+### Get sample labels by joining with accession metadata
 ```{r}
-genecounts %>%
-  mutate(Label=str_extract(expid, "^\\d+_[A-Z]+_[A-Z]")) %>%
-  dplyr::select(Label, everything()) %>%
-  dplyr::select(-expid) ->
+accessions_file %>%
+  read_csv %>%
+  select(Run, Label=sample_id) %>%
+  right_join(genecounts,by=c("Run"="expid")) %>%
+  select(-Run) ->
   genecounts_with_label
+
 genecounts_with_label[1:8,1:6] %>%
   kable
 ```
@@ -350,18 +352,17 @@ genecounts_for_desesq[1:6,1:6]
 
 ### Make Metadata dataframe for DESeq
 ```{r}
-# read_tsv(metadata.file) %>%
-#   dplyr::select(Label, enrichment_method, RNA_sample_num) ->
-#   metadata.df
-
-genecounts %>%
-  select(expid) %>%
-  mutate(library=str_extract(expid, "^\\d+_[A-Z]+_[A-Z]")) %>%
-  left_join(metadata.df, by=c("library"="Label")) %>%
+accessions_file %>%
+  read_csv %>%
+  left_join(genecounts,.,by=c("expid"="Run")) %>%
+  select(expid, Label=sample_id) %>%
+  left_join(metadata.df, by="Label") %>%
   mutate(enrichment_method=factor(enrichment_method, 
                                   levels = c("TOT", "MA", "RZ"))) %>%
+  dplyr::rename(library=Label) %>%
   column_to_rownames(var="expid") ->
   sample_df
+
 head(sample_df)
 ```
 
