@@ -18,7 +18,8 @@ out.dir="/workspace/2019_enrich_samples"
 RZ_out.dir="/workspace/2018_tot_samples"
 info.dir=file.path(out.dir, "info")
 adapters.file= file.path(info.dir, "neb_e7600_adapters_withrc.fasta")
-# trimmed.dir=file.path(out.dir, "trimmed_fastqs")
+
+trimmed.dir=file.path(out.dir, "trimmed_fastqs")
 genome.dir=file.path(out.dir, "genome")
 enrich_samples_starout.dir=file.path(out.dir, "enrich_samples_starout")
 RZ_enrich_samples_starout.dir=file.path(RZ_out.dir,"enrich_compare_starout")
@@ -74,7 +75,7 @@ Sys.setenv(RAW_FASTQS = raw_fastq.dir)
 # Sys.setenv(CUROUT = out.dir)
 Sys.setenv(INFO = info.dir)
 Sys.setenv(ADAPTERS = adapters.file)
-# Sys.setenv(TRIMMED = trimmed.dir)
+Sys.setenv(TRIMMED = trimmed.dir)
 # Sys.setenv(GENOME_DIR = genome.dir)
 # 
 Sys.setenv(FA_URL = fa_url)

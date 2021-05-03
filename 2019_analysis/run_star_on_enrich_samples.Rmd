@@ -8,6 +8,9 @@ output:
 ```{r load_libraries_rs}
 source("run_config_2019.R")
 library(tools)
+
+library(readr)
+library(dplyr)
 ```
 
 # Download and Index Genome
@@ -18,9 +21,9 @@ mkdir -p $GENOME_WITH_MITO_RRNA_DIR
 wget --no-verbose --directory-prefix ${GENOME_WITH_MITO_RRNA_DIR} ${FA_URL} 
 gunzip -f ${FA_WITH_MITO_RRNA}.gz
 ```
+
 ```{r check_md5_rs}
 stopifnot(md5sum(fa_for_mito_rrna.file) == "77e35feb6e9fb4deb279df882d933f7d")
-
 ```
 
 ## Index Genome
@@ -29,6 +32,7 @@ set -u
 mkdir -p ${ENRICH_COMPARE_STAROUT}
 STAR \
     --runMode genomeGenerate \
+    --runThreadN $TOTAL_THREADS \
     --genomeDir $GENOME_WITH_MITO_RRNA_DIR \
     --genomeFastaFiles ${FA_WITH_MITO_RRNA} \
     --sjdbGTFfile ${GTF_WITH_MITO_RRNA} \
@@ -38,39 +42,62 @@ STAR \
 ```
 
 
-
-
 ```{bash}
 set -u
-
-ls $RAW_FASTQS
+mkdir -p $INFO
+echo ">Adapter
+AGATCGGAAGAGCACACGTCTGAACTCCAGTCA
+>AdapterRead2
+AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT
+>Adapter_rc
+TGACTGGAGTTCAGACGTGTGCTCTTCCGATCT
+>AdapterRead2_rc
+ACACTCTTTCCCTACACGACGCTCTTCCGATCT" >  $ADAPTERS
+head $ADAPTERS
 ```
 
 # Run Mapping
+```{r}
+accessions_file %>%
+  read_csv %>%
+  filter(sequencing_batch=="2019") %>%
+  pull(Run) %>%
+  paste0(".fastq.gz") %>%
+  file.path(sra_dir,.) ->
+  all_2019_fastq_paths
+
+all_2019_fastq_paths
+
+all_2019_fastq_paths %>%
+  paste(collapse = " ") %>%
+  Sys.setenv(ALL_2019_FASTQS=.)
+```
+
+```{bash}
+echo $ALL_2019_FASTQS
+echo $ADAPTERS
+```
 
 ```{bash}
 set -u
-mkdir -p ${ENRICH_COMPARE_STAROUT}
+mkdir -p ${ENRICH_COMPARE_STAROUT} ${TRIMMED}
 trim_and_star_func() {
     FASTQ=$1
-    FASTQ_BASE=${FASTQ##*/} # strip directory from file path
-    SAMPLE="${FASTQ_BASE%_R1_001.fastq.gz}" # strip .fq.gz file extension
+    SAMPLE="$(basename ${FASTQ} .fastq.gz)" # directory and strip .fastq.gz file extension
+    FASTQ_TRIMMED="$TRIMMED/${SAMPLE}_trimmed.fq.gz"
     echo $SAMPLE
     echo $FASTQ
-    echo $FASTQ_BASE
-    # exit 1
-
 
     # make a pipe for trimmed fastq
-    CUR_PIPE=`mktemp --dry-run`_${SAMPLE}_pipe.fq
-    mkfifo $CUR_PIPE
+    # CUR_PIPE=`mktemp --dry-run`_${SAMPLE}_pipe.fq
+    # mkfifo $CUR_PIPE
 
     # Run fastq-mcf
     fastq-mcf \
         $ADAPTERS \
         $FASTQ \
-        -o $CUR_PIPE \
-        -q 20 -x 0.5 &
+        -o $FASTQ_TRIMMED \
+        -q 20 -x 0.5
         
     STAR \
     --runMode alignReads \
@@ -84,19 +111,16 @@ trim_and_star_func() {
     --outFileNamePrefix ${ENRICH_COMPARE_STAROUT}/${SAMPLE}_ \
     --outFilterScoreMinOverLread 0 --outFilterMatchNminOverLread 0 \
     --outFilterMatchNmin 0 --outFilterMismatchNmax 2 \
-    --readFilesIn $CUR_PIPE        
+    --readFilesCommand zcat \
+    --readFilesIn $FASTQ_TRIMMED        
         
-    rm -f $CUR_PIPE
+    # rm -f $CUR_PIPE
     samtools index ${ENRICH_COMPARE_STAROUT}/${SAMPLE}_Aligned.sortedByCoord.out.bam
 }
 export -f trim_and_star_func
 
-parallel --jobs $MAX_JOBS trim_and_star_func ::: $RAW_FASTQS/*.fastq.gz
-
-# parallel --jobs $MAX_JOBS trim_and_star_func ::: $RAW_FASTQS/[234]_2018_P_*L00[1234]*.fastq.gz
-# A few test samples
-# parallel --jobs $MAX_JOBS trim_and_star_func ::: $RAW_FASTQS/4_2018_P_*_S*_L001_R1_001.fastq.gz
-# All enrichment samples
+parallel --jobs $MAX_JOBS trim_and_star_func ::: $ALL_2019_FASTQS
+# This needs to be here to knit. Knitting fails if the line above is the last line in the chunk!
 ```
 
 # SessionInfo
