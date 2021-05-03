@@ -108,9 +108,13 @@ percentRRNA = function(gtf_path, star_out_dir, bam_subset_regex=".*"){
 
 
 
+```{r}
+list.files(enrich_compare_starout.dir)
+```
+
 
 ```{r}
-enrich_compare_counts = percentRRNA(gtf_with_mito_rrna.file, enrich_compare_starout.dir, bam_subset_regex="_2018_P_")
+enrich_compare_counts = percentRRNA(gtf_with_mito_rrna.file, enrich_compare_starout.dir)
 ```
 
 ## Merge rRNA Counts with Metadata
@@ -119,19 +123,21 @@ enrich_compare_counts = percentRRNA(gtf_with_mito_rrna.file, enrich_compare_star
 enrich_compare_counts[1:6,1:6]
 ```
 
-
 ```{r}
 metadata.df = read_tsv(metadata.file)
 
-enrich_compare_counts %>%
-  mutate(Label=str_extract(sample, "^\\d+_\\d+_[A-Z]_[HMT]\\d"), 
-         lane=str_extract(sample, "L\\d{3}$")) %>%
-  left_join(metadata.df, by="Label") %>%
-  mutate(sequencing_year="2019")->
+accessions_file %>%
+  read_csv %>%
+  select(Label=sample_id, Run, sequencing_year=sequencing_batch) %>%
+  group_by(Label) %>%
+  mutate(lane = as.character(row_number())) %>%
+  left_join(enrich_compare_counts,.,by=c("sample"="Run")) %>%
+  left_join(metadata.df, by="Label")  ->
   enrich_compare_counts_with_meta
 
 kable(enrich_compare_counts_with_meta)
 ```
+
 
 ## rRNA Reads as a portion of Total Reads
 ```{r percent_rrna_plot}
@@ -223,6 +229,12 @@ list.files(RZ_enrich_samples_starout.dir)
 full_data_counts_2018 = percentRRNA(gtf_with_mito_rrna.file, RZ_enrich_samples_starout.dir)
 ```
 
+
+```{r}
+full_data_counts_2018
+```
+
+
 ```{r include=TRUE}
 metadata.df = read_tsv(metadata_2018.file)
 
@@ -231,15 +243,17 @@ enrichment_names <- c(
                     "RZ" = "RiboZero",
                     "TOT" = "Total")
 
-full_data_counts_2018 %>%
-  mutate(Label=str_extract(sample, "^\\d+_[A-Z]+_[A-Z]"), 
-         lane=str_extract(sample, "L\\d{3}$")) %>%
-  left_join(metadata.df, by="Label") %>%
-  mutate(enrichment_method=str_replace_all(enrichment_method, enrichment_names),
-         sequencing_year="2018") ->
+
+accessions_file %>%
+  read_csv %>%
+  select(Label=sample_id, Run, sequencing_year=sequencing_batch) %>%
+  group_by(Label) %>%
+  mutate(lane = as.character(row_number())) %>%
+  left_join(full_data_counts_2018,.,by=c("sample"="Run")) %>%
+  left_join(metadata.df, by="Label")  %>%
+  mutate(enrichment_method=str_replace_all(enrichment_method, enrichment_names)) ->
   full_data_counts_2018_with_meta
 
-# kable(full_data_counts_2018_with_meta)
 full_data_counts_2018_with_meta
 ```
 
