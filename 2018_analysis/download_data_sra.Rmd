@@ -81,9 +81,8 @@ fasterqDump = function(accession,
                        outdir,
                        tempdir = NULL,
                        gzip = TRUE,
-                       md5_df) {
+                       md5_df = NULL) {
   # Check if file is downloaded and OK
-  outdir = sra_dir
   accession %>%
     path_ext_set("fastq") ->
     fastq_file
@@ -107,22 +106,24 @@ fasterqDump = function(accession,
     final_path = fastq_path
   }
   
-  final_path %>%
-    basename ->
-    final_file
-  
-  final_path %>%
-    md5sum ->
-    observed_md5
-  
-  srafastq_md5s %>%
-    filter(filename == final_file) %>%
-    pull(md5sum) ->
-    true_md5
-  
-  if (file.exists(final_path) && true_md5 == observed_md5){
-    cat("MD5sum match", fastq_gz_path, true_md5, fill = TRUE)
-    return(final_path)
+  if(!is.null(md5_df)){
+    final_path %>%
+      basename ->
+      final_file
+    
+    final_path %>%
+      md5sum ->
+      observed_md5
+    
+    md5_df %>%
+      filter(filename == final_file) %>%
+      pull(md5sum) ->
+      true_md5
+    
+    if (file.exists(final_path) && true_md5 == observed_md5){
+      cat("MD5sum match", fastq_gz_path, true_md5, fill = TRUE)
+      return(final_path)
+    }
   }
   cat("Need to download", accession, fill = TRUE)
   fasterq_args =  c(accession, "--outdir", outdir)
@@ -163,11 +164,17 @@ stop("Deal with vdb-config")
 cat  ~/.ncbi/user-settings.mkfg 
 ```
 
+```{bash eval=FALSE, include=FALSE}
+cp  ~/.ncbi/user-settings.mkfg   ~/.ncbi/user-settings.mkfg.BACKUP
+chmod a-w ~/.ncbi/user-settings.mkfg.BACKUP
+```
+
+
 ## Run Download (with cache check)
 ```{r}
 accessions_with_meta %>%
   pull(Run) %>%
-  map(function(x) fasterqDump(accession=x, outdir=sra_dir, tempdir="/workspace/tmp")) ->
+  map(function(x) fasterqDump(accession=x, outdir=sra_dir, tempdir="/workspace/tmp", md5_df=srafastq_md5s)) ->
   downloaded_fastqs
 ```
 
