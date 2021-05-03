@@ -26,8 +26,7 @@ library(knitr)
 ## Load STAR Count Data
 ```{r}
 
-list.files(enrich_compare_starout.dir, pattern = paste0(count_suffix,"$"), full.names = TRUE) %>%
-      path_filter(regex="_2018_P_") ->
+list.files(enrich_compare_starout.dir, pattern = paste0(count_suffix,"$"), full.names = TRUE) ->
   countfiles
 
 countfiles
@@ -78,16 +77,14 @@ genecounts[1:6,1:6] %>%
 ```
 
 ### Extract library specific label
-
-```{r}
-genecounts %>%
-  mutate(Label=str_extract(expid, "^\\d+_\\d+_[A-Z]_[HMT]\\d")) %>%
-  dplyr::select(Label, everything()) %>%
-  dplyr::select(-expid) ->
+```{r include=TRUE}
+accessions_file %>%
+  read_csv %>%
+  select(Run, Label=sample_id) %>%
+  right_join(genecounts,by=c("Run"="expid")) %>%
+  select(-Run)->
   genecounts_with_label
 ```
-
-
 
 ### Combine per library counts across lanes
 ```{r}
@@ -150,9 +147,7 @@ dim(genecounts_lanes_combined_no_rrna)
 
 ```
 
-
 ### Generate scatterplots for mRNA vs Total and RNaseH vs Total
-
 ```{r}
 
 cur_sample_num = 2
@@ -284,7 +279,6 @@ h99_granges %>%
 ```
 
 ```{r}
-
 all_non_protein_coding_and_rrna_homologs_gene_IDs = 
   union(all_non_protein_coding_gene_IDs, strand_specific_rrna_homologs)
 
@@ -517,6 +511,7 @@ ggplot(cur_sample.tidy, alpha = 1/2) +
 
 
 ```
+
 ### 
 ```{r correlation_scatter_plot_2, include=TRUE, fig.path='figures/', dev=c('png','pdf')}
 
@@ -996,11 +991,12 @@ genecountsRZ[1:6,1:6] %>%
 ```
 ### Extract library specific label
 
-```{r}
-genecountsRZ %>%
-  mutate(Label=str_extract(expid, "(^\\d+_\\d+_[A-Z]_[HMT]\\d)|(^\\d+_[A-Z]+_[A-Z])")) %>%
-  dplyr::select(Label, everything()) %>%
-  dplyr::select(-expid) ->
+```{r include=TRUE}
+accessions_file %>%
+  read_csv %>%
+  select(Run, Label=sample_id) %>%
+  right_join(genecountsRZ,by=c("Run"="expid")) %>%
+  select(-Run)->
   genecountsRZ_with_label
 
 genecountsRZ_with_label[1:6,1:6] %>%
@@ -1036,7 +1032,7 @@ genecountsRZ_lanes_combined %<>%
   left_join(metadata_combined.df, by="Label") %>%
   dplyr::select(library=Label, enrichment_method, RNA_sample_num, enrich_rep, everything())
 
-genecountsRZ_lanes_combined %>%
+genecountsRZ_lanes_combined[1:6,1:6] %>%
   kable
 ```
 ## Compare library preps
@@ -1457,7 +1453,7 @@ genecountsRZ_lanes_combined %>%
   dplyr::select(-all_non_protein_coding_and_rrna_homologs_gene_IDs) ->
   genecountsRZ_lanes_combined_protein_coding_only
 
-genecountsRZ_lanes_combined_protein_coding_only %>%
+genecountsRZ_lanes_combined_protein_coding_only[1:6,1:6] %>%
   kable
 ```
 # Plotting Total 2 comparison
