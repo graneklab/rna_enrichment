@@ -7,6 +7,8 @@ From: granek/duke-chsi-informatics/singularity-rnaseq:0005
     Image_Version rna_enrichment_0005
 
 %post
+  export DEBIAN_FRONTEND=noninteractive
+  apt-get update
   apt-get install -y --no-install-recommends \
     uuid-runtime # need for vdb-config
     
