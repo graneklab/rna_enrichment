@@ -37,6 +37,7 @@ entrez_fetch(db="sra", id=sra_search[["ids"]], rettype="runinfo") %>%
   sra_df
 sra_df
 ```
+
 ## Get GEO Metadata
 This chunk doesn't need to be run because info is loaded from a file in the repo
 ```{r eval=FALSE, include=FALSE}
@@ -66,6 +67,7 @@ right_join(sra_df,
 accessions_with_meta %>%
   write_csv(accessions_file)
 ```
+
 ## Load Metadata From File
 ```{r}
 accessions_file %>%
@@ -75,6 +77,25 @@ accessions_with_meta
 ```
 
 # Download FASTQs from SRA
+## Make NCBI config File
+
+  - https://github.com/ncbi/sra-tools/issues/409#issuecomment-801344783
+    - https://github.com/ncbi/sra-tools/blob/e2117adf073f748cc48412c55acdc9bfe679a2d1/build/docker/Dockerfile.delite#L50-L52    
+
+```{bash}
+NCBI_CONFIG=${HOME}/.ncbi/user-settings.mkfg
+if [ -f "$NCBI_CONFIG" ]; then
+    echo "$NCBI_CONFIG exists."
+    cat $NCBI_CONFIG
+else 
+    echo "Need to make $NCBI_CONFIG . . ."
+    mkdir -p $(basename $NCBI_CONFIG)
+    vdb-config --set "/LIBS/GUID =`uuidgen`"
+    vdb-config --set "/repository/user/main/public/root = /workspace/sra_cache" 
+    cat $NCBI_CONFIG
+fi
+```
+
 ## fasterqDump Definition
 ```{r}
 fasterqDump = function(accession,
@@ -168,26 +189,6 @@ srafastq_md5file %>%
   srafastq_md5s
 ```
 
-## Deal with vdb-config
-
-# STOPPED HERE
-  - https://standage.github.io/that-darn-cache-configuring-the-sra-toolkit.html
-  - https://www.biostars.org/p/169617/
-  - https://www.biostars.org/p/210819/
-```{r}
-stop("Deal with vdb-config")
-```
-
-```{bash}
-cat  ~/.ncbi/user-settings.mkfg 
-```
-
-```{bash eval=FALSE, include=FALSE}
-cp  ~/.ncbi/user-settings.mkfg   ~/.ncbi/user-settings.mkfg.BACKUP
-chmod a-w ~/.ncbi/user-settings.mkfg.BACKUP
-```
-
-
 ## Run Download (with cache check)
 ```{r}
 accessions_with_meta %>%
@@ -195,7 +196,6 @@ accessions_with_meta %>%
   map(function(x) fasterqDump(accession=x, outdir=sra_dir, tempdir="/workspace/tmp", md5_df=srafastq_md5s)) ->
   downloaded_fastqs
 ```
-
 
 ## Generate MD5 table
 Only need to do this at the beginning
