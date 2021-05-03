@@ -7,6 +7,9 @@ From: granek/duke-chsi-informatics/singularity-rnaseq:0005
     Image_Version rna_enrichment_0005
 
 %post
+  apt-get install -y --no-install-recommends \
+    uuid-runtime # need for vdb-config
+    
   Rscript -e "install.packages(pkgs = c('rstatix','ggpubr','rentrez','R.utils'), repos='https://mirror.las.iastate.edu/CRAN/', dependencies=TRUE, clean = TRUE)"
   pip3 install --no-cache-dir \
     RSeQC
@@ -17,3 +20,9 @@ From: granek/duke-chsi-informatics/singularity-rnaseq:0005
   Rscript -e "if (!requireNamespace('BiocManager')){install.packages('BiocManager')}; BiocManager::install(); BiocManager::install(c('GEOquery','CoverageView','bamsignals'))"
 
   mkdir -p /space
+
+  #------------------
+  # Final apt cleanup
+  #------------------
+  apt-get clean
+  rm -rf /var/lib/apt/lists/*
