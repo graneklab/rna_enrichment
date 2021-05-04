@@ -5,12 +5,12 @@ library(dplyr)
 source("../common_config.R")
 
 # # input
-raw_fastq.dir="/data/hts_2019_data/hts2019_pilot_rawdata"
-metadata.file=file.path(raw_fastq.dir, "2019_pilot_metadata.tsv")
+# raw_fastq.dir="/data/hts_2019_data/hts2019_pilot_rawdata"
+metadata.file=here("info/2019_pilot_metadata.tsv")
 
 # input
-raw_fastq_2018.dir="/data/hts_2018_data/hts2018_pilot_rawdata"
-metadata_2018.file=file.path(raw_fastq_2018.dir, "2018_pilot_metadata.tsv")
+# raw_fastq_2018.dir="/data/hts_2018_data/hts2018_pilot_rawdata"
+metadata_2018.file=here("info/2018_pilot_metadata.tsv")
 
 # 
 # # output
@@ -69,7 +69,7 @@ enrich_compare_starout.dir=file.path(out.dir, "enrich_compare_starout")
 # 
 # 
 # # Input
-Sys.setenv(RAW_FASTQS = raw_fastq.dir)
+# Sys.setenv(RAW_FASTQS = raw_fastq.dir)
 # 
 # # Output
 # Sys.setenv(CUROUT = out.dir)

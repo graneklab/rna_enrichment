@@ -5,8 +5,9 @@ library(dplyr)
 
 
 # input
-raw_fastq.dir="/data/hts_2018_data/hts2018_pilot_rawdata"
-metadata.file=file.path(raw_fastq.dir, "2018_pilot_metadata.tsv")
+# raw_fastq.dir="/data/hts_2018_data/hts2018_pilot_rawdata"
+metadata.file=here("info/2018_pilot_metadata.tsv")
+
 
 # output
 info.dir=file.path(out.dir, "info")
@@ -66,7 +67,7 @@ oligo_bam.file = file.path(rrna_oligo_starout.dir, "rrna_oligos_Aligned.sortedBy
 # Setup Bash variables
 
 # Input
-Sys.setenv(RAW_FASTQS = raw_fastq.dir)
+# Sys.setenv(RAW_FASTQS = raw_fastq.dir)
 
 # Output
 Sys.setenv(CUROUT = out.dir)
