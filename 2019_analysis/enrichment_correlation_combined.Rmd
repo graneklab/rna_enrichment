@@ -28,7 +28,7 @@ fig_palette="Dark2"
 ## Load STAR Count Data
 ```{r}
 starout_2019_dir %>%
-  list.files(pattern = paste0("_2018_.*",count_suffix,"$"), full.names = TRUE) %>%
+  list.files(pattern = paste0(count_suffix,"$"), full.names = TRUE) %>%
   loadStarCounts ->
   genecounts_2019_run
 
@@ -41,24 +41,23 @@ starout_2018_dir %>%
 ## Load Data in DESeq2
 ### Make Metadata dataframe for DESeq
 ```{r}
-genecounts_2018_run %>%
-  dplyr::select(expid) %>%
-  dplyr::mutate(library=str_extract(expid, "^\\d+_[A-Z]+_[A-Z]"),
-         exp_year=2018,
-         enrichment_rep="1") %>%
+accessions_file %>%
+  read_csv(col_types="ccccccccc") %>%
+  left_join(genecounts_2018_run,.,by=c("expid"="Run")) %>%
+  mutate(enrichment_rep="1") %>%
+  select(expid, library=sample_id, enrichment_rep, exp_year=sequencing_batch) %>%
   tidyr::separate(library, 
-           into = c("RNA_sample_num", "enrichment_method",NA),
-           sep="_", remove=FALSE) ->
+                  into = c("RNA_sample_num", "enrichment_method",NA),
+                  sep="_", remove=FALSE) ->
   sample_df_2018
-
-# knitr::kable(sample_df_2018)
+sample_df_2018
 ```
 
 ```{r}
-genecounts_2019_run %>%
-  select(expid) %>%
-  mutate(library=str_extract(expid, "^\\d+_2018_[A-Z]+_[HMT]\\d"),
-         exp_year=2019) %>%
+accessions_file %>%
+  read_csv(col_types="ccccccccc") %>%
+  left_join(genecounts_2019_run,.,by=c("expid"="Run")) %>%
+  select(expid, library=sample_id, RNA_sample_num=rna_sample_number, enrichment_method, exp_year=sequencing_batch) %>%
   separate(library, 
            into = c("RNA_sample_num", NA, NA,"method_rep"),
            sep="_", remove=FALSE) %>%
@@ -66,9 +65,10 @@ genecounts_2019_run %>%
            into = c("enrichment_method", "enrichment_rep"),
            sep=1) ->
   sample_df_2019
-knitr::kable(sample_df_2019)
- 
+sample_df_2019
+```
 
+```{r}
 bind_rows(sample_df_2018, sample_df_2019) %>%
   mutate(enrichment_method = case_when(enrichment_method == "H" ~ "RNase H",
                                        enrichment_method %in% c("T","TOT") ~ "Unenriched",
@@ -81,6 +81,7 @@ bind_rows(sample_df_2018, sample_df_2019) %>%
                                   levels = c("Unenriched", "RNase H", "Ribo-Zero", "Poly(A)"))) %>%
   column_to_rownames(var="expid") ->
   sample_df
+sample_df
 # knitr::kable(sample_df)
 ```
 
