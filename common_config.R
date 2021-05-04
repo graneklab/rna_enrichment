@@ -48,12 +48,41 @@ gtf_url %>%
   file.path(here::here("info"), .) ->
   gtf_with_mito_rrna.file
 
-fig.dir = file.path(out.dir, "figures")
-dir.create(fig.dir)
+fig.dir = file.path(basedir, "figures"); dir.create(fig.dir)
+info.dir=file.path(out.dir, "info")
+Sys.setenv(INFO = info.dir)
+adapters.file= file.path(info.dir, "neb_e7600_adapters_withrc.fasta")
+adapters.fastqc= file.path(info.dir, "neb_e7600_adapters_fastqc.txt")
+info.dir=file.path(out.dir, "info")
+knit_output_dir = file.path(basedir, "knit_output_html"); dir.create(knit_output_dir, recursive = TRUE)
+
 
 data_dir="/data"
 file_chmod(data_dir, "u+w")
 sra_dir=file.path(data_dir, "sra_fastqs"); dir.create(sra_dir, recursive = TRUE)
 sra_tmp=file.path(basedir, "sra_tmp"); dir.create(sra_dir, recursive = TRUE)
 
+# Genome with mito rRNA
+genome_with_mito_rrna.dir=file.path(out.dir, "genome_with_mito_rrna")
+
+genome.dir=file.path(out.dir, "genome")
+
+gtf_url %>% 
+  basename %>%
+  path_ext_remove %>%
+  file.path(genome.dir, .) ->
+  gtf.file
+
+fa_url %>% 
+  basename %>%
+  path_ext_remove %>%
+  file.path(genome.dir, .) ->
+  fa.file
+
+fa.file %>% 
+  basename %>%
+  file.path(genome_with_mito_rrna.dir, .) ->
+  fa_for_mito_rrna.file
+
+Sys.setenv(GENOME_WITH_MITO_RRNA_DIR = genome_with_mito_rrna.dir)
 

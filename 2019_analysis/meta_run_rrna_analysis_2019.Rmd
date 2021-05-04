@@ -7,7 +7,6 @@ output:
 
 Rscript -e "rmarkdown::render('meta_run_rrna_analysis_2019.Rmd')"
 
-
 ```{r setup_metarun}
 source("run_config_2019.R")
 
@@ -24,9 +23,6 @@ library(callr)
 ```{r prepare_output_dir}
 
 if (dir_exists(out.dir)) {dir_delete(out.dir)}
-
-regression_output_dir = file.path(out.dir, "full_run_html")
-dir.create(regression_output_dir, recursive = TRUE)
 ```
 
 ```{r find_rmds}
@@ -48,7 +44,7 @@ for (cur_rmd in ordered_rmds_to_run) {
   print(cur_rmd)
   path_file(cur_rmd) %>%
     path_ext_set("html") %>%
-    file.path(regression_output_dir, .) ->
+    file.path(knit_output_dir, .) ->
     cur_out
   # Run render in callr::r to avoid library leakage between Rmds. This fixes a problem knitting enrichment_correlation.Rmd
   callr::r(

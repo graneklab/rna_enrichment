@@ -16,11 +16,9 @@ metadata_2018.file=here("info/2018_pilot_metadata.tsv")
 # # output
 out.dir="/workspace/2019_enrich_samples"
 RZ_out.dir="/workspace/2018_tot_samples"
-info.dir=file.path(out.dir, "info")
-adapters.file= file.path(info.dir, "neb_e7600_adapters_withrc.fasta")
 
 trimmed.dir=file.path(out.dir, "trimmed_fastqs")
-genome.dir=file.path(out.dir, "genome")
+# genome.dir=file.path(out.dir, "genome")
 enrich_samples_starout.dir=file.path(out.dir, "enrich_samples_starout")
 RZ_enrich_samples_starout.dir=file.path(RZ_out.dir,"enrich_compare_starout")
 # mosdepth.dir=file.path(out.dir, "mosdepth")
@@ -37,11 +35,11 @@ RZ_enrich_samples_starout.dir=file.path(RZ_out.dir,"enrich_compare_starout")
 #   file.path(genome.dir, .) ->
 #   gtf.file
 # 
-fa_url %>%
-  basename %>%
-  path_ext_remove %>%
-  file.path(genome.dir, .) ->
-  fa.file
+# fa_url %>%
+#   basename %>%
+#   path_ext_remove %>%
+#   file.path(genome.dir, .) ->
+#   fa.file
 # 
 # 
 # gtf.file %>%
@@ -53,13 +51,6 @@ fa_url %>%
 
 # gtf_with_mito_rrna.file="../info/Cryptococcus_neoformans_var_grubii_h99.CNA3.39__with_mito_rrna.gtf"
 # 
-# 
-# # Genome with mito rRNA
-genome_with_mito_rrna.dir=file.path(out.dir, "genome_with_mito_rrna")
-fa.file %>%
-  basename %>%
-  file.path(genome_with_mito_rrna.dir, .) ->
-  fa_for_mito_rrna.file
 # 
 rrna_oligo_starout.dir=file.path(out.dir, "rrna_oligo_starout")
 enrich_compare_starout.dir=file.path(out.dir, "enrich_compare_starout")
@@ -87,7 +78,6 @@ Sys.setenv(FA_URL = fa_url)
 # 
 Sys.setenv(GTF_WITH_MITO_RRNA = gtf_with_mito_rrna.file)
 Sys.setenv(FA_WITH_MITO_RRNA = fa_for_mito_rrna.file)
-Sys.setenv(GENOME_WITH_MITO_RRNA_DIR = genome_with_mito_rrna.dir)
 # Sys.setenv(RRNA_OLIGOS_FASTQ = rrna_oligos.fastq)
 Sys.setenv(RRNA_OLIGO_STAROUT = rrna_oligo_starout.dir)
 # #--------------------------------

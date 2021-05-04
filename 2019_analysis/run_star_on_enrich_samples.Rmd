@@ -42,20 +42,6 @@ STAR \
 ```
 
 
-```{bash}
-set -u
-mkdir -p $INFO
-echo ">Adapter
-AGATCGGAAGAGCACACGTCTGAACTCCAGTCA
->AdapterRead2
-AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT
->Adapter_rc
-TGACTGGAGTTCAGACGTGTGCTCTTCCGATCT
->AdapterRead2_rc
-ACACTCTTTCCCTACACGACGCTCTTCCGATCT" >  $ADAPTERS
-head $ADAPTERS
-```
-
 # Run Mapping
 ```{r}
 accessions_file %>%

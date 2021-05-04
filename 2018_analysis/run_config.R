@@ -10,12 +10,8 @@ metadata.file=here("info/2018_pilot_metadata.tsv")
 
 
 # output
-info.dir=file.path(out.dir, "info")
-adapters.file= file.path(info.dir, "neb_e7600_adapters_withrc.fasta")
-adapters.fastqc= file.path(info.dir, "neb_e7600_adapters_fastqc.txt")
 
 trimmed.dir=file.path(out.dir, "trimmed_fastqs")
-genome.dir=file.path(out.dir, "genome")
 total_samples_starout.dir=file.path(out.dir, "total_samples_starout")
 mosdepth.dir=file.path(out.dir, "mosdepth")
 seq.dir = file.path(out.dir, "seq_out"); dir.create(seq.dir, recursive = TRUE)
@@ -27,17 +23,7 @@ qc.trim.dir = file.path(qc.dir, "trimmed_read_qc"); dir.create(qc.trim.dir, recu
 
 # genome
 
-gtf_url %>% 
-  basename %>%
-  path_ext_remove %>%
-  file.path(genome.dir, .) ->
-  gtf.file
 
-fa_url %>% 
-  basename %>%
-  path_ext_remove %>%
-  file.path(genome.dir, .) ->
-  fa.file
 
 
 gtf.file %>%
@@ -53,12 +39,6 @@ rrna_oligos.file = file.path(fig.dir, "rrna_oligos.tsv")
 rrna_oligos.fastq = file.path(seq.dir, "rrna_oligos.fastq")
 rrna_oligos.fastq = file.path(seq.dir, "rrna_oligos.fastq")
 
-# Genome with mito rRNA
-genome_with_mito_rrna.dir=file.path(out.dir, "genome_with_mito_rrna")
-fa.file %>% 
-  basename %>%
-  file.path(genome_with_mito_rrna.dir, .) ->
-  fa_for_mito_rrna.file
 
 rrna_oligo_starout.dir=file.path(out.dir, "rrna_oligo_starout")
 enrich_compare_starout.dir=file.path(out.dir, "enrich_compare_starout")
@@ -71,7 +51,6 @@ oligo_bam.file = file.path(rrna_oligo_starout.dir, "rrna_oligos_Aligned.sortedBy
 
 # Output
 Sys.setenv(CUROUT = out.dir)
-Sys.setenv(INFO = info.dir)
 Sys.setenv(ADAPTERS = adapters.file)
 Sys.setenv(FASTQC_ADAPTERS = adapters.fastqc)
 Sys.setenv(TRIMMED = trimmed.dir)
@@ -91,7 +70,6 @@ Sys.setenv(FA = fa.file)
 
 Sys.setenv(GTF_WITH_MITO_RRNA = gtf_with_mito_rrna.file)
 Sys.setenv(FA_WITH_MITO_RRNA = fa_for_mito_rrna.file)
-Sys.setenv(GENOME_WITH_MITO_RRNA_DIR = genome_with_mito_rrna.dir)
 Sys.setenv(RRNA_OLIGOS_FASTQ = rrna_oligos.fastq)
 Sys.setenv(RRNA_OLIGO_STAROUT = rrna_oligo_starout.dir)
 #--------------------------------
