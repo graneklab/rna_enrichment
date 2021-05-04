@@ -26,7 +26,7 @@ library(knitr)
 ## Load STAR Count Data
 ```{r}
 
-list.files(enrich_compare_starout.dir, pattern = paste0(count_suffix,"$"), full.names = TRUE) ->
+list.files(starout_2019_dir, pattern = paste0(count_suffix,"$"), full.names = TRUE) ->
   countfiles
 
 countfiles
@@ -924,7 +924,7 @@ for (cur_sample in 2:4) {
 ## Load STAR count data for RZ comparisons
 ```{r}
 
-list.files(RZ_enrich_samples_starout.dir, pattern = paste0(count_suffix,"$"), full.names = TRUE) %>%
+list.files(starout_2018_dir, pattern = paste0(count_suffix,"$"), full.names = TRUE) %>%
       path_filter(regex="_") ->
   countfiles2018
 

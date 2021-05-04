@@ -23,7 +23,7 @@ delete_outdir=TRUE
 
 ```{r prepare_output_dir}
 
-if (delete_outdir & dir_exists(out.dir)) {dir_delete(out.dir)}
+if (delete_outdir & dir_exists(outdir_2018)) {dir_delete(outdir_2018)}
 ```
 
 ```{r find_rmds}

@@ -11,13 +11,13 @@ metadata.file=here("info/2018_pilot_metadata.tsv")
 
 # output
 
-trimmed.dir=file.path(out.dir, "trimmed_fastqs")
-total_samples_starout.dir=file.path(out.dir, "total_samples_starout")
-mosdepth.dir=file.path(out.dir, "mosdepth")
-seq.dir = file.path(out.dir, "seq_out"); dir.create(seq.dir, recursive = TRUE)
+trimmed.dir=file.path(outdir_2018, "trimmed_fastqs")
+total_samples_starout.dir=file.path(outdir_2018, "total_samples_starout")
+mosdepth.dir=file.path(outdir_2018, "mosdepth")
+seq.dir = file.path(outdir_2018, "seq_out"); dir.create(seq.dir, recursive = TRUE)
 # export final_counts=$data_base/star_counts
-igv_tarball = file.path(out.dir, "visualize_oligos.tgz")
-qc.dir = file.path(out.dir, "qc"); dir.create(qc.dir, recursive = TRUE)
+igv_tarball = file.path(outdir_2018, "visualize_oligos.tgz")
+qc.dir = file.path(outdir_2018, "qc"); dir.create(qc.dir, recursive = TRUE)
 qc.raw.dir = file.path(qc.dir, "raw_read_qc"); dir.create(qc.raw.dir, recursive = TRUE)
 qc.trim.dir = file.path(qc.dir, "trimmed_read_qc"); dir.create(qc.trim.dir, recursive = TRUE)
 
@@ -40,8 +40,8 @@ rrna_oligos.fastq = file.path(seq.dir, "rrna_oligos.fastq")
 rrna_oligos.fastq = file.path(seq.dir, "rrna_oligos.fastq")
 
 
-rrna_oligo_starout.dir=file.path(out.dir, "rrna_oligo_starout")
-enrich_compare_starout.dir=file.path(out.dir, "enrich_compare_starout")
+rrna_oligo_starout.dir=file.path(outdir_2018, "rrna_oligo_starout")
+
 oligo_bam.file = file.path(rrna_oligo_starout.dir, "rrna_oligos_Aligned.sortedByCoord.out.bam")
 
 # Setup Bash variables
@@ -50,7 +50,7 @@ oligo_bam.file = file.path(rrna_oligo_starout.dir, "rrna_oligos_Aligned.sortedBy
 # Sys.setenv(RAW_FASTQS = raw_fastq.dir)
 
 # Output
-Sys.setenv(CUROUT = out.dir)
+Sys.setenv(CUROUT = outdir_2018)
 Sys.setenv(ADAPTERS = adapters.file)
 Sys.setenv(FASTQC_ADAPTERS = adapters.fastqc)
 Sys.setenv(TRIMMED = trimmed.dir)
@@ -73,7 +73,7 @@ Sys.setenv(FA_WITH_MITO_RRNA = fa_for_mito_rrna.file)
 Sys.setenv(RRNA_OLIGOS_FASTQ = rrna_oligos.fastq)
 Sys.setenv(RRNA_OLIGO_STAROUT = rrna_oligo_starout.dir)
 #--------------------------------
-Sys.setenv(ENRICH_COMPARE_STAROUT = enrich_compare_starout.dir)
+Sys.setenv(ENRICH_COMPARE_STAROUT = starout_2018_dir)
 
 count_suffix = "_ReadsPerGene.out.tab"
 bam_suffix = "_Aligned.sortedByCoord.out.bam"

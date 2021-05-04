@@ -19,12 +19,12 @@ library(stringr)
 library(tibble)
 library(dplyr)
 library(readr)
+
+source("run_config.R")
 ```
 
 ## Load Data
 ```{r}
-source("run_config.R")
-
 # get paths from source run_star_config.sh?
 h99_genome = readDNAStringSet(fa.file)
 
@@ -414,13 +414,9 @@ write.table(mito_rrdna_gtf.gf,
 file_copy(gtf_with_mito_rrna.file, file_S2_path, overwrite = TRUE)
 ```
 
-
-
-
 ```{bash}
-# head /workspace/2018_tot_samples/genome/Cryptococcus_neoformans_var_grubii_h99.CNA3.39.gtf
-grep -i rRNA /workspace/2018_tot_samples/genome/Cryptococcus_neoformans_var_grubii_h99.CNA3.39.gtf
-
+set -u
+grep -i rRNA $GTF
 ```
 
 ```{bash}

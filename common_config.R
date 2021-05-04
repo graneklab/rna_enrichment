@@ -27,7 +27,12 @@ fa_url = h99_genome_url
 gtf_url = h99_gtf_url
 
 basedir = "/workspace"
-out.dir=file.path(basedir, "2018_tot_samples")
+
+outdir_2018=file.path(basedir, "2018_sample_out")
+outdir_2019=file.path(basedir, "2019_sample_out")
+starout_2019_dir=file.path(outdir_2019, "enrich_compare_starout")
+starout_2018_dir=file.path(outdir_2018, "enrich_compare_starout")
+
 srafastq_md5file = here("info/sra_fastq_md5checksums.txt")
 accessions_file = here("info/accession_table.csv")
 
@@ -49,11 +54,14 @@ gtf_url %>%
   gtf_with_mito_rrna.file
 
 fig.dir = file.path(basedir, "figures"); dir.create(fig.dir)
-info.dir=file.path(out.dir, "info")
+info.dir=file.path(outdir_2018, "info")
 Sys.setenv(INFO = info.dir)
 adapters.file= file.path(info.dir, "neb_e7600_adapters_withrc.fasta")
 adapters.fastqc= file.path(info.dir, "neb_e7600_adapters_fastqc.txt")
-info.dir=file.path(out.dir, "info")
+info.dir=file.path(outdir_2018, "info")
+Sys.setenv(INFO = info.dir)
+Sys.setenv(ADAPTERS = adapters.file)
+
 knit_output_dir = file.path(basedir, "knit_output_html"); dir.create(knit_output_dir, recursive = TRUE)
 
 
@@ -63,9 +71,9 @@ sra_dir=file.path(data_dir, "sra_fastqs"); dir.create(sra_dir, recursive = TRUE)
 sra_tmp=file.path(basedir, "sra_tmp"); dir.create(sra_dir, recursive = TRUE)
 
 # Genome with mito rRNA
-genome_with_mito_rrna.dir=file.path(out.dir, "genome_with_mito_rrna")
+genome_with_mito_rrna.dir=file.path(outdir_2018, "genome_with_mito_rrna")
 
-genome.dir=file.path(out.dir, "genome")
+genome.dir=file.path(outdir_2018, "genome")
 
 gtf_url %>% 
   basename %>%
@@ -85,4 +93,3 @@ fa.file %>%
   fa_for_mito_rrna.file
 
 Sys.setenv(GENOME_WITH_MITO_RRNA_DIR = genome_with_mito_rrna.dir)
-

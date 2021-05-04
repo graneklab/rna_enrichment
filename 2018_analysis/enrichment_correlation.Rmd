@@ -28,7 +28,7 @@ library(knitr)
 
 ## Load STAR Count Data
 ```{r}
-countfiles = list.files(enrich_compare_starout.dir, pattern = paste0(count_suffix,"$"), full.names = TRUE)
+countfiles = list.files(starout_2018_dir, pattern = paste0(count_suffix,"$"), full.names = TRUE)
 countfiles
 ```
 

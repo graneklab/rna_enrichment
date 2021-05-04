@@ -22,7 +22,7 @@ library(callr)
 
 ```{r prepare_output_dir}
 
-if (dir_exists(out.dir)) {dir_delete(out.dir)}
+if (dir_exists(outdir_2019)) {dir_delete(outdir_2019)}
 ```
 
 ```{r find_rmds}

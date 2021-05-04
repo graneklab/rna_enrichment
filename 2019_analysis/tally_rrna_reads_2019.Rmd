@@ -109,12 +109,12 @@ percentRRNA = function(gtf_path, star_out_dir, bam_subset_regex=".*"){
 
 
 ```{r}
-list.files(enrich_compare_starout.dir)
+list.files(starout_2019_dir)
 ```
 
 
 ```{r}
-enrich_compare_counts = percentRRNA(gtf_with_mito_rrna.file, enrich_compare_starout.dir)
+enrich_compare_counts = percentRRNA(gtf_with_mito_rrna.file, starout_2019_dir)
 ```
 
 ## Merge rRNA Counts with Metadata
@@ -221,12 +221,12 @@ ggplot(data=enrich_compare_counts_with_meta,
 # Include 2018 Data
 
 ```{r}
-list.files(RZ_enrich_samples_starout.dir)
+list.files(starout_2018_dir)
 ```
 
 
 ```{r}
-full_data_counts_2018 = percentRRNA(gtf_with_mito_rrna.file, RZ_enrich_samples_starout.dir)
+full_data_counts_2018 = percentRRNA(gtf_with_mito_rrna.file, starout_2018_dir)
 ```
 
 
