@@ -193,7 +193,7 @@ srafastq_md5file %>%
 ```{r}
 accessions_with_meta %>%
   pull(Run) %>%
-  map(function(x) fasterqDump(accession=x, outdir=sra_dir, tempdir="/workspace/tmp", md5_df=srafastq_md5s)) ->
+  map(function(x) fasterqDump(accession=x, outdir=sra_dir, tempdir=sra_tmp, md5_df=srafastq_md5s)) ->
   downloaded_fastqs
 ```
 

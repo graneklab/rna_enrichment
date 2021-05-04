@@ -54,5 +54,6 @@ dir.create(fig.dir)
 data_dir="/data"
 file_chmod(data_dir, "u+w")
 sra_dir=file.path(data_dir, "sra_fastqs"); dir.create(sra_dir, recursive = TRUE)
+sra_tmp=file.path(basedir, "sra_tmp"); dir.create(sra_dir, recursive = TRUE)
 
 
