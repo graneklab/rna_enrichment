@@ -2,9 +2,9 @@
 
 set -u
 SINGULARITY_DIR="$HOME/container_images"
-SINGULARITY_CACHEDIR="$SINGULARITY_DIR/cachedir"
+SINGULARITY_CACHEDIR="${SINGULARITY_CACHEDIR:-$SINGULARITY_DIR/cachedir}"
+SINGULARITY_PULLFOLDER="${SINGULARITY_PULLFOLDER:-$SINGULARITY_DIR/pulldir}"
 export SINGULARITY_CACHEDIR
-SINGULARITY_PULLFOLDER="$SINGULARITY_DIR/pulldir"
 export SINGULARITY_PULLFOLDER
 
 SINGULARITY_IMAGE="${1:-library://granek/published/rna_enrichment:latest}"
@@ -44,7 +44,7 @@ fi
 
 
 #-----------------
-SINGTMP="/tmp/${USER}_`date +%s`_tmp"
+SINGTMP="${WORKSPACE_BASE_DIR}/.tmp/`date +%s`_tmp"
 mkdir -p $SINGTMP
 echo "Binding /tmp to $SINGTMP"
 
@@ -54,8 +54,3 @@ BIND_ARGS="$BIND_ARGS --bind $SINGTMP:/tmp"
 #-----------------
 
 mkdir -p $SINGULARITY_PULLFOLDER $SINGULARITY_CACHEDIR
-#--------------------------------------------------------------------------------
-
-singularity run $BIND_ARGS $SINGULARITY_IMAGE
-
-
