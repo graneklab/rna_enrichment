@@ -91,7 +91,7 @@ else
     echo "Need to make $NCBI_CONFIG . . ."
     mkdir -p $(basename $NCBI_CONFIG)
     vdb-config --set "/LIBS/GUID =`uuidgen`"
-    vdb-config --set "/repository/user/main/public/root = /workspace/sra_cache" 
+    vdb-config --set "/repository/user/main/public/root =/workspace/sra_cache" 
     cat $NCBI_CONFIG
 fi
 ```
