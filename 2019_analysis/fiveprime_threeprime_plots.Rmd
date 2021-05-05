@@ -1,0 +1,472 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+source("../common_config.R")
+
+library(CoverageView)
+library(readr)
+```
+
+# Vingette Demos
+
+```{r}
+# get the sample BAM file for chr19
+# H3K4me3_BAM_url="http://www.ebi.ac.uk/~ernesto/H3K4me3.chr19.bam"
+# download.file(H3K4me3_BAM_url,"./H3K4me3.chr19.bam")
+# # get also the index for the previous file
+# H3K4me3_BAI_url="http://www.ebi.ac.uk/~ernesto/H3K4me3.chr19.bam.bai"
+# download.file(H3K4me3_BAI_url,"./H3K4me3.chr19.bam.bai")
+# 
+# #get the control BAM file for chr19
+# H3K4me3_Control_BAM_url="http://www.ebi.ac.uk/~ernesto/H3K4me3_Control.chr19.bam"
+# download.file(H3K4me3_Control_BAM_url,"./H3K4me3_Control.chr19.bam")
+# # get also the index for the previous file
+# H3K4me3_Control_BAI_url="http://www.ebi.ac.uk/~ernesto/H3K4me3_Control.chr19.bam.bai"
+# download.file(H3K4me3_Control_BAI_url,"./H3K4me3_Control.chr19.bam.bai")
+
+
+###################################################
+### code chunk number 13: example-cov.matrix-histone-2 (eval = FALSE)
+###################################################
+trm<-CoverageBamFile("./H3K4me3.chr19.bam",reads_mapped=864924)
+ctl<-CoverageBamFile("./H3K4me3_Control.chr19.bam",reads_mapped=319369)
+
+
+###################################################
+### code chunk number 14: example-cov.matrix-histone-3
+###################################################
+H3K4me3_chr19_bed<-system.file("extdata","H3K4me3.chr19.bed", package="CoverageView")
+
+
+###################################################
+### code chunk number 15: example-cov.matrix-histone-4 (eval = FALSE)
+###################################################
+DF_H3K4me3<-cov.matrix(trm,coordfile=H3K4me3_chr19_bed,no_windows=100,
+                       offset=10,num_cores=total_threads,normalization="rpm")
+DF_H3K4me3_ctl<-cov.matrix(ctl,coordfile=H3K4me3_chr19_bed,no_windows=100,
+                           offset=10,num_cores=total_threads,normalization="rpm")
+
+input_list=list(DF_H3K4me3,DF_H3K4me3_ctl) 
+draw.profile(data=input_list,ylab="avg coverage",outfile="H3K4me3cmp.png",main="H3K4me3")
+
+
+###################################################
+### code chunk number 18: example-cov.matrix-histone-6
+###################################################
+input_list=list(DF_H3K4me3,DF_H3K4me3_ctl) 
+draw.heatmap(data=input_list,outfile="H3K4me3cmp_heatmap.png")
+```
+
+```{r}
+H3K4me3_chr19_bed %>%
+  read_tsv(col_names = c("chrom", "chromStart", "chromEnd", "name", "score", "strand"))
+```
+
+
+
+```{r}
+H3K4me3_chr19_bed
+```
+
+
+
+## draw the heatmap for a coverate matrix that was previously calculated 
+  # using the cov.matrix function for a BAM file containing ChIP-seq data 
+  # from a H3K36me3 histone modification experiment
+  data(DF_H3K36me3)
+  draw.heatmap(DF_H3K36me3,outfile="testHeatmap.png")
+  
+  ## Now, draw two heatmaps for 2 different coverage matrices previously 
+  # obtained for the same H3K36me3 histone modification experiment and its
+  # respective 'control' file
+  data(DF_H3K36me3_control)
+  
+  # create a list with the two matrices
+  input_l=list(DF_H3K36me3,DF_H3K36me3_control)
+  draw.heatmap(input_l,outfile="testHeatmap.png")
+  
+## Generating a coverage matrix with 2 BAM files
+  
+```{r}
+## Generating a coverage matrix with 2 BAM files
+  
+#get 2 BAM test files
+treatBAMfile<-system.file("extdata","treat.bam",package="CoverageView")
+ctrlBAMfile<-system.file("extdata","ctrl.bam",package="CoverageView")
+  
+#get a BED file with the TSS (transcription start site) coordinates of some genes
+bedfile<-system.file("extdata","testTSS.bed",package="CoverageView")
+  
+#create 2 CoverageBamFile objects
+trm<-CoverageBamFile(treatBAMfile,reads_mapped=28564510)
+ctl<-CoverageBamFile(ctrlBAMfile,reads_mapped=26713667)
+  
+#generate the coverage matrix extending 100 nts on each side of the TSS provided
+#in the bedfile and normalize the resulting coverages.The matrix elements are obtained
+#by computing the ratio of the coverages of the trm against the ctl objects and then
+#calculating the log2 of the ratios
+DF4=cov.matrix(tr=trm,ctl=ctl,coordfile=bedfile,extend=100,normalization="rpm",do="log2ratio",num_cores=2)
+```
+
+```{r}
+draw.heatmap(DF4)
+```
+
+
+```{r}
+ 
+## Generating a coverage matrix with a single BAM file
+  
+#get a BAM test file
+aBAMfile<-system.file("extdata","treat.bam",package="CoverageView")
+  
+#get a BED file with the TSS (transcription start site) coordinates of some genes
+bedfile<-system.file("extdata","testTSS.bed",package="CoverageView")
+  
+#create the CoverageBamFile object
+trm<-CoverageBamFile(aBAMfile,reads_mapped=28564510)
+  
+#generate the coverage matrix extending 100 nts on each side of the provided TSS
+#in the bedfile
+DF1=cov.matrix(tr=trm,coordfile=bedfile,extend=100,num_cores=2)
+  
+#generate the coverage matrix extending 100 nts on each side of the TSS provided
+#in the bedfile and normalize the resulting coverages
+DF2=cov.matrix(tr=trm,coordfile=bedfile,extend=100,normalization="rpm",num_cores=2)
+  
+#generate the coverage matrix extending 100 nts on each side of the TSS provided
+#in the bedfile and normalize the resulting coverages. This time we calculate the average
+#coverage in bins of 2 nucleotides
+DF3=cov.matrix(tr=trm,coordfile=bedfile,extend=100,normalization="rpm",bin_width=2,num_cores=2)
+```
+
+```{r}
+draw.heatmap(DF1, "DF1.png")
+```
+
+![alt text here](DF1.png)
+
+```{r}
+draw.heatmap(DF2, "DF2.png")
+```
+
+![alt text here](DF2.png)
+
+```{r}
+draw.heatmap(DF3, "DF3.png")
+```
+
+![alt text here](DF3.png)
+```{r}
+read_tsv(bedfile, col_names = FALSE)
+```
+
+# Playing with Crypto
+```{r}
+starout_2019_dir %>%
+  list.files(pattern = "_ReadsPerGene.out.tab$", full.names = TRUE) %>%
+  head(1) %>%
+  read_tsv(col_names = c("gene", "unstranded", "sense", "antisense")) %>%
+  arrange(desc(antisense)) 
+```
+
+```{r}
+starout_2019_dir %>%
+  list.files(pattern = ".bam$", full.names = TRUE) %>%
+  head(1) %>%
+  CoverageBamFile ->
+  mybam
+```
+
+```{r}
+demo_gtf = file.path(outdir_2019,"demo.gff")
+Sys.setenv(DEMO_GTF=demo_gtf)
+```
+
+```{bash}
+set -u
+grep CNAG_06125 $GTF | egrep -v "start_codon|five_prime_utr|three_prime_utr|CDS" > $DEMO_GTF
+```
+
+```{r}
+cov.matrix(mybam, coordfile=demo_gtf,no_windows=100,
+           offset=10,num_cores=total_threads,normalization="rpm") ->
+  demo_matrix
+draw.heatmap(data=demo_matrix,outfile="demo.png")
+```
+```{bash}
+cat $DEMO_GTF
+```
+
+```{r}
+mybam
+```
+
+
+
+```{bash}
+read_distribution.py -h
+```
+
+
+###################################################
+### code chunk number 13: example-cov.matrix-histone-2 (eval = FALSE)
+###################################################
+trm<-CoverageBamFile("./H3K4me3.chr19.bam",reads_mapped=864924)
+ctl<-CoverageBamFile("./H3K4me3_Control.chr19.bam",reads_mapped=319369)
+
+
+###################################################
+### code chunk number 14: example-cov.matrix-histone-3
+###################################################
+H3K4me3_chr19_bed<-system.file("extdata","H3K4me3.chr19.bed", package="CoverageView")
+
+
+###################################################
+### code chunk number 15: example-cov.matrix-histone-4 (eval = FALSE)
+###################################################
+DF_H3K4me3<-cov.matrix(trm,coordfile=H3K4me3_chr19_bed,no_windows=100,
+                       offset=10,num_cores=total_threads,normalization="rpm")
+DF_H3K4me3_ctl<-cov.matrix(ctl,coordfile=H3K4me3_chr19_bed,no_windows=100,
+                           offset=10,num_cores=total_threads,normalization="rpm")
+
+input_list=list(DF_H3K4me3,DF_H3K4me3_ctl) 
+draw.profile(data=input_list,ylab="avg coverage",outfile="H3K4me3cmp.png",main="H3K4me3")
+
+
+###################################################
+### code chunk number 18: example-cov.matrix-histone-6
+###################################################
+input_list=list(DF_H3K4me3,DF_H3K4me3_ctl) 
+draw.heatmap(data=input_list,outfile="H3K4me3cmp_heatmap.png")
+
+
+
+
+```{bash}
+
+```
+
+
+
+
+
+
+
+```{r}
+import(gtf_with_mito_rrna.file, format="gtf") %>%
+  as.data.frame ->
+  h99_granges
+```
+
+
+
+```{bash}
+PicardCommandLine 
+```
+
+```{r}
+source("../coverage_play/CoverageView/R/coord.to.granges.R")
+x = .bed.to.GRanges("../coverage_play/hg19.HouseKeepingGenes.bed")
+
+```
+
+```{r}
+gtf_url
+```
+
+# HERE!!!!
+```{r}
+library(R.utils)
+
+release_50_gff_url = "ftp://ftp.ensemblgenomes.org/pub/fungi/release-50/gff3/fungi_basidiomycota1_collection/cryptococcus_neoformans_var_grubii_h99_gca_000149245/Cryptococcus_neoformans_var_grubii_h99_gca_000149245.CNA3.50.gff3.gz"
+
+# release_39_gff_url = "ftp://ftp.ensemblgenomes.org/pub/fungi/release-39/gff3/fungi_basidiomycota1_collection/cryptococcus_neoformans_var_grubii_h99_gca_000149245/Cryptococcus_neoformans_var_grubii_h99_gca_000149245.CNA3.39.gff3.gz"
+
+release_39_gff_url = "ftp://ftp.ensemblgenomes.org/pub/fungi/release-39/gff3/fungi_basidiomycota1_collection/cryptococcus_neoformans_var_grubii_h99/Cryptococcus_neoformans_var_grubii_h99.CNA3.39.gff3.gz"
+ 
+#  Biostats-Mac-06:cryptococcus_neoformans_var_grubii_h99 josh$ pwd
+# /Volumes/ftp.ensemblgenomes.org/pub/fungi/release-39/gff3/fungi_basidiomycota1_collection/cryptococcus_neoformans_var_grubii_h99
+
+
+h99_gff_file="../coverage_play/h99_r39.gff"
+download.file(release_39_gff_url, paste0(h99_gff_file,".gz"))
+gunzip(paste0(h99_gff_file,".gz"))
+
+h99_CNAG_06125_gff_file="../coverage_play/h99_r39_CNAG_06125.gff"
+mybed="../coverage_play/h99_r39_CNAG_06125.bed"
+full_bed="../coverage_play/h99_r39.bed"
+
+Sys.setenv(H99_GFF=h99_gff_file)
+Sys.setenv(H99_CNAG_06125_GFF=h99_CNAG_06125_gff_file)
+Sys.setenv(MYBED=mybed)
+Sys.setenv(FULLBED=full_bed)
+```
+
+```{bash}
+egrep "CNAG_06125|AFR98350" $H99_GFF > $H99_CNAG_06125_GFF
+```
+
+
+```{r}
+library(rtracklayer)
+library(GenomicFeatures)
+makeTxDbFromGFF(h99_CNAG_06125_gff_file) ->
+  my_txdb
+  
+my_txdb %>%
+  export(mybed, "BED")
+
+# columns(my_txdb)
+# 
+# my_txdb %>%
+#   asBED ->
+#   my_bed
+# 
+# 
+# txdb_dump <- as.list(my_txdb)
+# txdb_dump
+# 
+
+makeTxDbFromGFF(h99_gff_file) %>%
+  export(full_bed, "BED")
+```
+
+
+```{bash}
+set -u
+geneBody_coverage.py -h
+```
+
+
+```{bash}
+set -u
+geneBody_coverage.py -r $MYBED -i /workspace/2019_sample_out/enrich_compare_starout/SRR12933729_Aligned.sortedByCoord.out.bam  -o ../coverage_play/r39_CNAG_06125
+geneBody_coverage.py -r "../coverage_play/hack.bed" -i /workspace/2019_sample_out/enrich_compare_starout/SRR12933729_Aligned.sortedByCoord.out.bam  -o ../coverage_play/hack
+geneBody_coverage.py -r $MYBED -i /workspace/2019_sample_out/enrich_compare_starout/  -o ../coverage_play/all_bams_r39_CNAG_06125
+```
+
+
+```{bash}
+set -u
+geneBody_coverage.py -r $FULLBED -i /workspace/2019_sample_out/enrich_compare_starout/  -o ../coverage_play/all_bams_r39_full
+```
+
+
+
+
+
+
+
+
+```{bash}
+cd ../coverage_play
+gff2bed < blah.gff > blah.bed
+```
+```{r}
+mybam
+```
+
+```{bash}
+set -u
+egrep "CNAG_06125|AFR98350" ../coverage_play/blah.bed > ../coverage_play/CNAG_06125.bed
+
+# geneBody_coverage.py -r hg19.housekeeping.bed -i test.bam  -o output
+geneBody_coverage.py -r ../coverage_play/CNAG_06125.bed -i /workspace/2019_sample_out/enrich_compare_starout/SRR12933729_Aligned.sortedByCoord.out.bam  -o ../coverage_play/blah_blah
+```
+
+
+
+```{r}
+library(rtracklayer)
+library(GenomicFeatures)
+makeTxDbFromGFF(gtf.file) %>%
+  asBED
+
+
+
+  my_txdb
+  
+my_txdb %>%
+  export("../coverage_play/blah.bed", "BED")
+
+my_txdb %>%
+  export("../coverage_play/blah.bed15", "BED15")
+
+
+
+  asBED ->
+  mybed
+
+# 
+# 
+# %>%
+#   exonsBy
+# 
+# 
+# 
+#   asBED
+```
+
+
+
+```{r}
+my_txdb %>%
+  asBED
+```
+
+```{r}
+read_tsv("../coverage_play/CNAG_06125.bed")
+```
+
+```{bash}
+grep 375937 ../coverage_play/blah.bed > ../coverage_play/CNAG_06125.bed
+```
+
+```{bash}
+set -u
+# geneBody_coverage.py -r hg19.housekeeping.bed -i test.bam  -o output
+geneBody_coverage.py -r ../coverage_play/CNAG_06125.bed -i /workspace/2019_sample_out/enrich_compare_starout/SRR12933729_Aligned.sortedByCoord.out.bam  -o ../coverage_play/blah_blah
+```
+
+
+```{bash}
+egrep "CNAG_06125|AFR98350" ../coverage_play/blah.gff | egrep -v "polya_site|five_prime_UTR|three_prime_UTR|CDS" > ../coverage_play/CNAG_06125.gff
+```
+
+
+```{r}
+starout_2019_dir %>%
+  list.files(pattern = ".bam$", full.names = TRUE) %>%
+  head(1) %>%
+  CoverageBamFile ->
+  mybam
+```
+
+```{bash}
+set -u
+grep CNAG_06125 $GTF | egrep -v "start_codon|five_prime_utr|three_prime_utr|CDS" > $DEMO_GTF
+```
+
+```{bash}
+cat ../coverage_play/CNAG_06125.gff
+```
+
+
+```{r}
+cov.matrix(mybam, coordfile="../coverage_play/CNAG_06125.gff",no_windows=100,
+           offset=10,num_cores=total_threads,normalization="rpm") ->
+  demo_matrix
+draw.heatmap(data=demo_matrix,outfile="demo.png")
+```
+
+
+
+
