@@ -19,7 +19,7 @@ From: granek/duke-chsi-informatics/singularity-rnaseq:0005
   #------------------
   # Install Bioconductor Packages
   #------------------
-  Rscript -e "if (!requireNamespace('BiocManager')){install.packages('BiocManager')}; BiocManager::install(); BiocManager::install(c('GEOquery','CoverageView','bamsignals'))"
+  Rscript -e "if (!requireNamespace('BiocManager')){install.packages('BiocManager')}; BiocManager::install(); BiocManager::install(c('GEOquery','CoverageView','bamsignals','RCAS'))"
 
   mkdir -p /space
 
