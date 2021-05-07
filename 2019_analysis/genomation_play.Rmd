@@ -223,6 +223,32 @@ polya_plot_list[[2]]
 polya_plot_list[[3]]
 ```
 
+## Random Protein Coding Genes
+```{r fig.width = 7, fig.height = 7}
+
+set.seed(1)
+
+unenriched_count_file %>%
+  read_csv %>%
+  mutate(total_count = rowSums(across(where(is.numeric)))) ->
+  unenriched_counts 
+
+gffToGRanges(gtf.file, filter = "exon") %>%
+  as_tibble %>%
+  select(gene_id, transcript_id, transcript_biotype) %>%
+  distinct %>%
+  right_join(unenriched_counts, by="gene_id") %>%
+  filter(total_count>=unenriched_low_counts, # get rid of genes with low counts 
+         transcript_biotype=="protein_coding") %>% 
+  anti_join(lost_polya_df, by="gene_id") %>% # get rid of genes lost in polya
+  slice_sample(n=length(lost_polya_protein)) %>%
+  pull(transcript_id) %>%
+  transcriptCoverageAnalysis(gtf.file, test_bam, .) ->
+  random_gene_plot_list
+
+random_gene_plot_list[[1]]
+random_gene_plot_list[[2]]
+random_gene_plot_list[[3]]
 ```
 
 ## Protein Coding Genes Lost in Poly(A) Enrichment
