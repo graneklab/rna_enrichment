@@ -26,130 +26,10 @@ source("../common_config.R")
 
 ```{r include=TRUE}
 warning("Merge Total BAMs")
-```
-
-
-# Playing with genomation
-```{r}
-rcas_outdir=file.path(basedir, "rcas_out")
-rcas_outdir %>%
-  dir.create(recursive = TRUE)
 test_bam = file.path(starout_2019_dir, "SRR12933729_Aligned.sortedByCoord.out.bam")
 ```
 
-```{r eval=FALSE, include=FALSE}
-release_39_gff_url = "ftp://ftp.ensemblgenomes.org/pub/fungi/release-39/gff3/fungi_basidiomycota1_collection/cryptococcus_neoformans_var_grubii_h99/Cryptococcus_neoformans_var_grubii_h99.CNA3.39.gff3.gz"
-
-release_39_gff_url %>%
-  basename %>%
-  path_ext_remove %>%
-  file.path(rcas_outdir,.) ->
-  h99_gff_file
-
-h99_gff_file %>%
-  path_ext_set(".bed") ->
-  h99_bed_file
-
-
-if (!file.exists(h99_gff_file)){
-  download.file(release_39_gff_url, paste0(h99_gff_file,".gz"))
-  gunzip(paste0(h99_gff_file,".gz"))
-}
-
-if (!file.exists(h99_bed_file)){
-  h99_gff_file %>%
-    makeTxDbFromGFF %>%
-    export(h99_bed_file, "BED")
-}
-
-#------------------------------
-file.path(rcas_outdir,"CNAG_06125.gff") ->
-  onegene_gff_file
-
-onegene_gff_file %>%
-  path_ext_set(".bed") ->
-  onegene_bed_file
-
-if (!file.exists(onegene_gff_file)){
-  h99_gff_file %>%
-  read_lines %>%
-  str_subset("CNAG_06125|AFR98350|##") %>%
-  str_subset("###", negate=TRUE) %>%
-  write_lines(onegene_gff_file)
-}
-
-if (!file.exists(onegene_bed_file)){
-  onegene_gff_file %>%
-    makeTxDbFromGFF %>%
-    export(onegene_bed_file, "BED")
-}
-#------------------------------
-file.path(rcas_outdir,"twogene.gff") ->
-  twogene_gff_file
-
-twogene_gff_file %>%
-  path_ext_set(".bed") ->
-  twogene_bed_file
-
-if (!file.exists(twogene_gff_file)){
-  h99_gff_file %>%
-  read_lines %>%
-  str_subset("CNAG_06125|AFR98350|CNAG_09009|AFR99111|##") %>%
-  str_subset("###", negate=TRUE) %>%
-  write_lines(twogene_gff_file)
-}
-
-if (!file.exists(twogene_bed_file)){
-  twogene_gff_file %>%
-    makeTxDbFromGFF %>%
-    export(twogene_bed_file, "BED")
-}
-
-
-```
-
-## Work with a list of transcripts/genes
-```{r}
-transcript_list = c("AFR99111","AFR98350")
-# transcript_list = c("AFR98350")
-exons = gffToGRanges(gtf.file, filter = "exon")
-transcripts = split(exons, exons$transcript_id)
-transcript_sm = ScoreMatrixBin(target = test_bam, windows = transcripts[transcript_list], bin.num = 100, strand.aware=TRUE)
-```
-
-### Plot with genomation
-```{r}
-plotMeta(transcript_sm)
-heatMatrix(transcript_sm, col=heat.colors(10))
-```
-
-### Plot with GGplot2
-```{r}
-transcript_sm %>%
-  t %>%
-  as.data.frame %>%
-  rename_with(~ transcript_list) %>%
-  mutate(mean_coverage = rowMeans(across(where(is.numeric))),
-         position_5_3=row_number()) ->
-  transcript_sm_df
-
-transcript_sm_df %>%
-  ggplot(aes(x=position_5_3,y=mean_coverage)) +
-    geom_line()
-
-transcript_sm_df %>%
-  select(-mean_coverage) %>%
-  pivot_longer(cols=!position_5_3, names_to="transcript", values_to="depth") %>%
-  ggplot(aes(x=position_5_3, y=transcript, fill=depth)) +
-    geom_tile() +
-    scale_fill_gradientn(colours = heat.colors(10))
-
-warning("Transcripts are mislabelled!!!")
-```
-
-
 # Plot Depth Across Genes to Check for 3' degradation
-
 ## Coverage Depth Function
 ```{r}
 transcriptCoverageAnalysis <- function(gtf_file, bam_path, target_transcript_ids) {
@@ -330,4 +210,50 @@ param <- ScanBamParam(which=intergenic_gr, what=c("groupid"))
 
 countBam(test_bam, param = param)
 ```
+
+# CRUFT Playing with genomation
+## Work with a list of transcripts/genes
+```{r}
+transcript_list = c("AFR99111","AFR98350")
+# transcript_list = c("AFR98350")
+exons = gffToGRanges(gtf.file, filter = "exon")
+transcripts = split(exons, exons$transcript_id)
+transcript_sm = ScoreMatrixBin(target = test_bam, windows = transcripts[transcript_list], bin.num = 100, strand.aware=TRUE)
+```
+
+### Plot with genomation
+```{r}
+plotMeta(transcript_sm)
+heatMatrix(transcript_sm, col=heat.colors(10))
+```
+
+### Plot with GGplot2
+```{r}
+transcript_sm %>%
+  t %>%
+  as.data.frame %>%
+  rename_with(~ transcript_list) %>%
+  mutate(mean_coverage = rowMeans(across(where(is.numeric))),
+         position_5_3=row_number()) ->
+  transcript_sm_df
+
+transcript_sm_df %>%
+  ggplot(aes(x=position_5_3,y=mean_coverage)) +
+    geom_line()
+
+transcript_sm_df %>%
+  select(-mean_coverage) %>%
+  pivot_longer(cols=!position_5_3, names_to="transcript", values_to="depth") %>%
+  ggplot(aes(x=position_5_3, y=transcript, fill=depth)) +
+    geom_tile() +
+    scale_fill_gradientn(colours = heat.colors(10))
+
+warning("Transcripts are mislabelled!!!")
+```
+
+# Session Info
+```{r}
+sessionInfo()
+```
+
 
