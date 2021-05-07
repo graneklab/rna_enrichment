@@ -27,9 +27,9 @@ use_all_bams=TRUE
 ```
 
 # Merge Unenriched BAMs
-```{r}
+```{r echo=FALSE}
 accessions_file %>%
-  read_csv %>%
+  read_csv(col_types = "cccccccii") %>%
   filter(sequencing_batch=="2019",
          enrichment_method=="Unenriched") %>%
   pull(Run) %>%
@@ -54,8 +54,7 @@ print(analysis_bam)
 ```
 
 # Plot Depth Across Genes to Check for 3' degradation
-
-```{r CoverageDepthFunction}
+```{r CoverageDepthFunction, echo=FALSE}
 transcriptCoverageAnalysis <- function(gtf_file, bam_path, target_transcript_ids) {
   
   exons = gffToGRanges(gtf_file, filter = "exon")
@@ -120,14 +119,13 @@ We identified a small number of genes that are expressed, as identified in unenr
 
 Read depth across transcripts is visualized in three ways - a plot of the average depth across all lost protein coding transcripts, and each transcript visualized individually as a filled area plot and a heatmap. While transcript AFR92445 (CNAG_00311) shows a strong peak at its 5'-end, the other transcripts do not appear to have any 5'-bias, suggesting that partial transcript degradation is not the cause of loss of these transcripts by the Poly(A) method. 
 
-
-```{r fig.width = 7, fig.height = 7}
+```{r echo=FALSE, fig.width = 7, fig.height = 7}
 gffToGRanges(gtf.file, filter = "exon") %>%
   as_tibble %>%
   select(gene_id, transcript_id) %>%
   distinct %>%
   inner_join(lost_polya_file %>%
-               read_csv, 
+               read_csv(col_types="ccc"), 
              by=c("gene_id"="Gene")) ->
   lost_polya_df
 
@@ -146,11 +144,11 @@ polya_plot_list[[3]]
 
 ## Control 1: Random Protein Coding Genes
 As a control we similarly examined the read depth across the transcripts of a random sample of protein coding genes. Genes were excluded that were in the "lost" gene set or had low counts (fewer than `r unenriched_low_counts` total reads across the unenriched samples). Compared with "lost" transcript there are no obvious differences, except the lost transcripts have much higher expression. Therefore we re-ran this analysis with a random sample of genes that more similar expression to the lost genes (genes were sampled that had total counts across the unenriched libraries in the same range as the lost genes). Examination found the same results.
-```{r fig.width = 7, fig.height = 7}
+```{r echo=FALSE, fig.width = 7, fig.height = 7}
 set.seed(1)
 
 unenriched_count_file %>%
-  read_csv %>%
+  read_csv(col_types = "ciiiiii") %>%
   mutate(total_count = rowSums(across(where(is.numeric)))) ->
   unenriched_counts 
 
@@ -173,9 +171,11 @@ random_gene_plot_list[[3]]
 ```
 
 ## Control 2: Random Protein Coding Genes with similar count range as PolyA Lost genes (quantile)
-```{r fig.width = 7, fig.height = 7}
+```{r echo=FALSE, fig.width = 7, fig.height = 7}
+set.seed(1)
+
 unenriched_count_file %>%
-  read_csv %>%
+  read_csv(col_types = "ciiiiii") %>%
   mutate(total_count = rowSums(across(where(is.numeric)))) ->
   unenriched_counts 
 
@@ -207,7 +207,7 @@ random_gene_count_range_plot_list[[3]]
 
 ## Work with a Single Gene
 #### Plot by Transcripts From GFF - One Gene
-```{r}
+```{r eval=FALSE, include=FALSE}
 transcript_list = c("AFR99111")
 exons = gffToGRanges(gtf.file, filter = "exon")
 transcripts = split(exons, exons$transcript_id)
@@ -215,7 +215,7 @@ transcripts_sm = ScoreMatrixBin(target = single_bam, windows = transcripts[trans
 plotMeta(transcripts_sm)
 ```
 
-```{r}
+```{r eval=FALSE, include=FALSE}
 gene_list = c("CNAG_06125")
 genes = gffToGRanges(gtf.file, filter = "gene")
 gene_sm = ScoreMatrixBin(target = single_bam, windows = genes[genes$gene_id %in% gene_list], bin.num = 2316)# , bin.num = 2316, strand.aware=TRUE, bin.op="sum")
@@ -227,12 +227,12 @@ plotMeta(gene_sm)
 Based on above, it seems that ScoreMatrixBin is counting reads that skip introns toward the intron coverage depths (should also be true for any region skipped by a read). 
 
 Let's check this and figure out if there is a way around it
-```{r}
+```{r eval=FALSE, include=FALSE}
 library(Rsamtools)
 scanBamWhat()
 ```
 
-```{r}
+```{r eval=FALSE, include=FALSE}
 intronic_gr = GRanges("12", IRanges(376990,377029))
 
 param <- ScanBamParam(which=intronic_gr)
@@ -242,53 +242,13 @@ countBam(single_bam, param = param)
 # scanBamWhat()
 # bamWhat
 ```
-```{r}
+```{r eval=FALSE, include=FALSE}
 intergenic_gr = GRanges("12", IRanges(378300,378900))
 
 param <- ScanBamParam(which=intergenic_gr, what=c("groupid"))
 #                      flag=scanBamFlag(isUnmappedQuery=FALSE))
 
 countBam(single_bam, param = param)
-```
-
-## CRUFT Playing with genomation
-### Work with a list of transcripts/genes
-```{r}
-transcript_list = c("AFR99111","AFR98350")
-# transcript_list = c("AFR98350")
-exons = gffToGRanges(gtf.file, filter = "exon")
-transcripts = split(exons, exons$transcript_id)
-transcript_sm = ScoreMatrixBin(target = single_bam, windows = transcripts[transcript_list], bin.num = 100, strand.aware=TRUE)
-```
-
-#### Plot with genomation
-```{r}
-plotMeta(transcript_sm)
-heatMatrix(transcript_sm, col=heat.colors(10))
-```
-
-#### Plot with GGplot2
-```{r}
-transcript_sm %>%
-  t %>%
-  as.data.frame %>%
-  rename_with(~ transcript_list) %>%
-  mutate(mean_coverage = rowMeans(across(where(is.numeric))),
-         position_5_3=row_number()) ->
-  transcript_sm_df
-
-transcript_sm_df %>%
-  ggplot(aes(x=position_5_3,y=mean_coverage)) +
-    geom_line()
-
-transcript_sm_df %>%
-  select(-mean_coverage) %>%
-  pivot_longer(cols=!position_5_3, names_to="transcript", values_to="depth") %>%
-  ggplot(aes(x=position_5_3, y=transcript, fill=depth)) +
-    geom_tile() +
-    scale_fill_gradientn(colours = heat.colors(10))
-
-warning("Transcripts are mislabelled!!!")
 ```
 
 # Session Info
