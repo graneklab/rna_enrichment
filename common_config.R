@@ -63,6 +63,9 @@ Sys.setenv(INFO = info.dir)
 Sys.setenv(ADAPTERS = adapters.file)
 
 lost_polya_file = file.path(fig.dir, "Table_S1.csv")
+unenriched_count_file = file.path(outdir_2019, "unenriched_counts.csv")
+unenriched_low_counts = 50
+
 
 knit_output_dir = file.path(basedir, "knit_output_html"); dir.create(knit_output_dir, recursive = TRUE)
 

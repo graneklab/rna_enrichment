@@ -208,16 +208,36 @@ transcript_sm_long %>%
 ## Random Protein Coding Genes
 ```{r}
 set.seed(1)
-transcripts[!names(transcripts) %in% lost_polya_protein] %>%
-  sample(size=length(lost_polya_protein), replace=FALSE) ->
-  random_proteins
 
-random_protein_sm = ScoreMatrixBin(target = test_bam, windows = random_proteins, bin.num = 100, strand.aware=TRUE)
+unenriched_count_file %>%
+  read_csv %>%
+  mutate(total_count = rowSums(across(where(is.numeric)))) ->
+  unenriched_counts 
+
+gffToGRanges(gtf.file, filter = "exon") %>%
+  as_tibble %>%
+  select(gene_id, transcript_id, transcript_biotype) %>%
+  distinct %>%
+  right_join(unenriched_counts, by="gene_id") %>%
+  filter(total_count>=unenriched_low_counts, # get rid of genes with low counts 
+         transcript_biotype=="protein_coding") %>% 
+  anti_join(lost_polya_df, by="gene_id") %>% # get rid of genes lost in polya
+  slice_sample(n=length(lost_polya_protein)) %>%
+  pull(transcript_id) ->
+  random_transcript_ids
+  # get genes lost in polya
+  
+
+# transcripts[!names(transcripts) %in% lost_polya_protein] %>%
+#   sample(size=length(lost_polya_protein), replace=FALSE) ->
+#   random_proteins
+
+random_protein_sm = ScoreMatrixBin(target = test_bam, windows = transcripts[random_transcript_ids], bin.num = 100, strand.aware=TRUE)
 
 random_protein_sm %>%
   t %>%
   as.data.frame %>%
-  rename_with(~ names(random_proteins)) %>%
+  rename_with(~ random_transcript_ids) %>%
   mutate(mean_coverage = rowMeans(across(where(is.numeric))),
          position_5_3=row_number()) ->
   transcript_sm_df

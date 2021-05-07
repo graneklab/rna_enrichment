@@ -511,12 +511,14 @@ results(dds, contrast=c("enrichment_method","Unenriched","RNase H")) %>%
 
 # Pre-filtering to drop genes <50 reads in gold standard
 ```{r}
-unenriched_low_counts = 50
 unenriched_low_counts
 
-keep <- rowSums(counts(dds[enrichment_method = 'Unenriched'])) >= unenriched_low_counts
+keep <- rowSums(counts(dds[,dds$enrichment_method== 'Unenriched'])) >= unenriched_low_counts
 dds_no_low_counts <- dds[keep,]
-dds_no_low_counts
+
+counts(dds[,dds$enrichment_method== 'Unenriched']) %>%
+  as_tibble(rownames="gene_id") %>%
+  write_csv(unenriched_count_file)
 ```
 #DE analysis to ID genes with decreased expression in Poly(A) compared to Unenriched
 ```{r}
