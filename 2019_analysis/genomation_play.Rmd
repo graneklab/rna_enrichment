@@ -151,6 +151,71 @@ warning("Transcripts are mislabelled!!!")
 
 
 # Plot Depth Across Genes to Check for 3' degradation
+
+## Coverage Depth Function
+```{r}
+transcriptCoverageAnalysis <- function(gtf_file, bam_path, target_transcript_ids) {
+  
+  exons = gffToGRanges(gtf_file, filter = "exon")
+  exons = exons[exons$gene_biotype=="protein_coding"]
+  transcripts = split(exons, exons$transcript_id)
+  
+  ScoreMatrixBin(target = bam_path, windows = transcripts[target_transcript_ids], bin.num = 100, strand.aware=TRUE) ->
+    target_transcript_sm
+    
+    target_transcript_sm %>%
+    t %>%
+    as.data.frame %>%
+    rename_with(~ target_transcript_ids) %>%
+    mutate(mean_coverage = rowMeans(across(where(is.numeric))),
+           position_5_3=row_number()) ->
+    transcript_sm_df
+  
+  transcript_sm_df %>%
+    ggplot(aes(x=position_5_3,y=mean_coverage)) +
+      geom_area(fill="grey50") +
+      theme_bw() ->
+    average_coverage_plot
+    
+  transcript_sm_df %>%
+    select(-mean_coverage) %>%
+    pivot_longer(cols=!position_5_3, names_to="transcript", values_to="depth") ->
+    transcript_sm_long
+  
+  transcript_sm_long %>%
+    ggplot(aes(x=position_5_3,y=depth, group=transcript, fill=transcript)) +
+      geom_area() +
+      facet_grid(rows="transcript", scales = "free_y") +
+      scale_y_continuous(breaks = scales::pretty_breaks(n = 2)) +
+      theme(strip.text.y = element_text(angle = 0), legend.position="none") ->
+    facet_coverage_plot
+  
+  transcript_sm_long %>%
+    ggplot(aes(x=position_5_3, y=transcript, fill=depth)) +
+      geom_tile() +
+      scale_fill_gradient(low="white", high="blue") ->
+    heatmap_coverage_plot
+  
+  return(list(average_coverage_plot, facet_coverage_plot, heatmap_coverage_plot))
+}
+
+gffToGRanges(gtf.file, filter = "exon") %>%
+  as_tibble %>%
+  select(gene_id, transcript_id) %>%
+  distinct %>%
+  inner_join(lost_polya_file %>%
+               read_csv, 
+             by=c("gene_id"="Gene")) %>%
+  filter(`Gene type`== "protein_coding") %>%
+  pull(transcript_id) %>%
+  transcriptCoverageAnalysis(gtf.file, test_bam, .) ->
+  blah
+
+blah[[1]]
+blah[[2]]
+blah[[3]]
+```
+
 ## Protein Coding Genes Lost in Poly(A) Enrichment
 ```{r fig.width = 7, fig.height = 7}
 gffToGRanges(gtf.file, filter = "exon") %>%
