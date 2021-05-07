@@ -172,7 +172,7 @@ random_gene_plot_list[[2]]
 random_gene_plot_list[[3]]
 ```
 
-## Control 2: Random Protein Coding Genes with similar count range as PolyA Lost genes
+## Control 2: Random Protein Coding Genes with similar count range as PolyA Lost genes (quantile)
 ```{r fig.width = 7, fig.height = 7}
 unenriched_count_file %>%
   read_csv %>%
@@ -182,17 +182,17 @@ unenriched_count_file %>%
 # Find Total Count Range for Poly-Lost Genes  
 left_join(lost_polya_df, unenriched_counts, by="gene_id") %>%
   filter(`Gene type`=="protein_coding") %>%
-  summarise(min_count = min(total_count), max_count=max(total_count)) ->
-  polya_count_range
-  polya_min = pull(polya_count_range, min_count)
-  polya_max = pull(polya_count_range, max_count)
+  pull(total_count) ->
+  total_counts
+  quant_25 = quantile(total_counts, type=1)[2] 
+  quant_75 = quantile(total_counts, type=1)[4] 
 
 gffToGRanges(gtf.file, filter = "exon") %>%
   as_tibble %>%
   select(gene_id, transcript_id, transcript_biotype) %>%
   distinct %>%
   right_join(unenriched_counts, by="gene_id") %>%
-  filter(between(total_count, polya_min, polya_max), # only include genes with total counts in same range as the polya-lost genes
+  filter(between(total_count, quant_25, quant_75), # only include genes with total counts in same range as the polya-lost genes
          transcript_biotype=="protein_coding") %>% 
   anti_join(lost_polya_df, by="gene_id") %>% # get rid of genes lost in polya
   slice_sample(n=length(lost_polya_protein)) %>%
