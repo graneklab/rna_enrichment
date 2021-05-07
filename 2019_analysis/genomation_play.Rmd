@@ -10,8 +10,7 @@ output:
 # knitr::opts_chunk$set(warning = FALSE, message = FALSE, eval = TRUE, fig.width = 7, fig.height = 4.2)
 ```
 
-
-```{r load_libraries, results='hide', warning=FALSE}
+```{r load_libraries, results='hide', warning=FALSE, include=FALSE}
 # library(R.utils)
 # library(rtracklayer)
 library(GenomicFeatures)
@@ -27,7 +26,6 @@ source("../common_config.R")
 
 ```{r include=TRUE}
 warning("Merge Total BAMs")
-warning("Choose genes that have higher expression")
 ```
 
 
@@ -212,10 +210,15 @@ gffToGRanges(gtf.file, filter = "exon") %>%
   distinct %>%
   inner_join(lost_polya_file %>%
                read_csv, 
-             by=c("gene_id"="Gene")) %>%
+             by=c("gene_id"="Gene")) ->
+  lost_polya_df
+
+lost_polya_df %>%
   filter(`Gene type`== "protein_coding") %>%
-  pull(transcript_id) %>%
-  transcriptCoverageAnalysis(gtf.file, test_bam, .) ->
+  pull(transcript_id) ->
+  lost_polya_protein
+  
+  transcriptCoverageAnalysis(gtf.file, test_bam, lost_polya_protein) ->
   polya_plot_list
 
 polya_plot_list[[1]]
@@ -225,7 +228,6 @@ polya_plot_list[[3]]
 
 ## Random Protein Coding Genes
 ```{r fig.width = 7, fig.height = 7}
-
 set.seed(1)
 
 unenriched_count_file %>%
@@ -251,15 +253,41 @@ random_gene_plot_list[[2]]
 random_gene_plot_list[[3]]
 ```
 
+## Random Protein Coding Genes With Counts in same range as PolyA Lost genes
+```{r fig.width = 7, fig.height = 7}
+unenriched_count_file %>%
+  read_csv %>%
+  mutate(total_count = rowSums(across(where(is.numeric)))) ->
+  unenriched_counts 
 
+# Find Total Count Range for Poly-Lost Genes  
+left_join(lost_polya_df, unenriched_counts, by="gene_id") %>%
+  filter(`Gene type`=="protein_coding") %>%
+  summarise(min_count = min(total_count), max_count=max(total_count)) ->
+  polya_count_range
+  polya_min = pull(polya_count_range, min_count)
+  polya_max = pull(polya_count_range, max_count)
 
+gffToGRanges(gtf.file, filter = "exon") %>%
+  as_tibble %>%
+  select(gene_id, transcript_id, transcript_biotype) %>%
+  distinct %>%
+  right_join(unenriched_counts, by="gene_id") %>%
+  filter(between(total_count, polya_min, polya_max), # only include genes with total counts in same range as the polya-lost genes
+         transcript_biotype=="protein_coding") %>% 
+  anti_join(lost_polya_df, by="gene_id") %>% # get rid of genes lost in polya
+  slice_sample(n=length(lost_polya_protein)) %>%
+  pull(transcript_id) %>%
+  transcriptCoverageAnalysis(gtf.file, test_bam, .) ->
+  random_gene_count_range_plot_list
 
-
-
+random_gene_count_range_plot_list[[1]]
+random_gene_count_range_plot_list[[2]]
+random_gene_count_range_plot_list[[3]]
+```
 
 ## Work with a Single Gene
 #### Plot by Transcripts From GFF - One Gene
-
 ```{r}
 transcript_list = c("AFR99111")
 exons = gffToGRanges(gtf.file, filter = "exon")
