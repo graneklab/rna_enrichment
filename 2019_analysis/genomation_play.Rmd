@@ -187,18 +187,25 @@ transcriptCoverageAnalysis <- function(gtf_file, bam_path, target_transcript_ids
       geom_area() +
       facet_grid(rows="transcript", scales = "free_y") +
       scale_y_continuous(breaks = scales::pretty_breaks(n = 2)) +
+      theme_bw() +
       theme(strip.text.y = element_text(angle = 0), legend.position="none") ->
     facet_coverage_plot
   
   transcript_sm_long %>%
     ggplot(aes(x=position_5_3, y=transcript, fill=depth)) +
       geom_tile() +
-      scale_fill_gradient(low="white", high="blue") ->
+      scale_fill_gradient(low="white", high="blue") +
+      scale_x_discrete(expand=c(0,0)) + 
+      scale_y_discrete(expand=c(0,0)) +
+      theme_bw() ->
     heatmap_coverage_plot
   
   return(list(average_coverage_plot, facet_coverage_plot, heatmap_coverage_plot))
 }
+```
 
+## Protein Coding Genes Lost in Poly(A) Enrichment
+```{r fig.width = 7, fig.height = 7}
 gffToGRanges(gtf.file, filter = "exon") %>%
   as_tibble %>%
   select(gene_id, transcript_id) %>%
@@ -209,11 +216,13 @@ gffToGRanges(gtf.file, filter = "exon") %>%
   filter(`Gene type`== "protein_coding") %>%
   pull(transcript_id) %>%
   transcriptCoverageAnalysis(gtf.file, test_bam, .) ->
-  blah
+  polya_plot_list
 
-blah[[1]]
-blah[[2]]
-blah[[3]]
+polya_plot_list[[1]]
+polya_plot_list[[2]]
+polya_plot_list[[3]]
+```
+
 ```
 
 ## Protein Coding Genes Lost in Poly(A) Enrichment
