@@ -62,6 +62,8 @@ info.dir=file.path(outdir_2018, "info")
 Sys.setenv(INFO = info.dir)
 Sys.setenv(ADAPTERS = adapters.file)
 
+lost_polya_file = file.path(fig.dir, "Table_S1.csv")
+
 knit_output_dir = file.path(basedir, "knit_output_html"); dir.create(knit_output_dir, recursive = TRUE)
 
 
@@ -97,3 +99,4 @@ Sys.setenv(ADAPTERS = adapters.file)
 Sys.setenv(FASTQC_ADAPTERS = adapters.fastqc)
 Sys.setenv(GTF = gtf.file)
 Sys.setenv(FA = fa.file)
+

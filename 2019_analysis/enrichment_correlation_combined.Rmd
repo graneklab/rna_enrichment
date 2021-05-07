@@ -567,7 +567,7 @@ import(gtf_with_mito_rrna.file, format = "gtf") %>%
   arrange(`Gene type`, Chromosome) -> genes_lost_in_polya
 
 genes_lost_in_polya %>%
-  write.csv(file.path(fig.dir, "Table_S1.csv"), row.names = FALSE)
+  write.csv(lost_polya_file, row.names = FALSE)
 
 ```
 

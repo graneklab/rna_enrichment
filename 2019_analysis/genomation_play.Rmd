@@ -1,21 +1,17 @@
 ---
-title: "The RNA Centric Analysis System Report"
-author: "Bora Uyar, Dilmurat Yusuf, Ricardo Wurmus, Altuna Akalin"
-date: "`r Sys.Date()`"
-output: rmarkdown::html_vignette
-vignette: >
-  %\VignetteIndexEntry{Introduction - single sample analysis}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
+title: "Check 5'-3' Depth of Lost Genes"
+output:
+  html_document:
+    toc: false
 ---
 
 
 ```{r global_options, include=FALSE}
-knitr::opts_chunk$set(warning = FALSE, message = FALSE, eval = TRUE, fig.width = 7, fig.height = 4.2)
+# knitr::opts_chunk$set(warning = FALSE, message = FALSE, eval = TRUE, fig.width = 7, fig.height = 4.2)
 ```
 
 
-```{r load_libraries, results='hide'}
+```{r load_libraries, results='hide', warning=FALSE}
 # library(R.utils)
 # library(rtracklayer)
 library(GenomicFeatures)
@@ -24,12 +20,18 @@ library(genomation)
 library(dplyr)
 library(tidyr)
 library(ggplot2)
+library(readr)
 
 source("../common_config.R")
 ```
 
+```{r include=TRUE}
+warning("Merge Total BAMs")
+warning("Choose genes that have higher expression")
+```
 
 
+# Playing with genomation
 ```{r}
 rcas_outdir=file.path(basedir, "rcas_out")
 rcas_outdir %>%
@@ -147,6 +149,105 @@ transcript_sm_df %>%
 warning("Transcripts are mislabelled!!!")
 ```
 
+
+# Plot Depth Across Genes to Check for 3' degradation
+## Protein Coding Genes Lost in Poly(A) Enrichment
+```{r}
+gffToGRanges(gtf.file, filter = "exon") %>%
+  as_tibble %>%
+  select(gene_id, transcript_id) %>%
+  distinct %>%
+  inner_join(lost_polya_file %>%
+               read_csv, 
+             by=c("gene_id"="Gene")) ->
+  lost_polya_df
+  
+lost_polya_df %>%
+  filter(`Gene type`== "protein_coding") %>%
+  pull(transcript_id) ->
+  lost_polya_protein
+# transcript_list = c("AFR99111","AFR98350")
+# transcript_list = c("AFR98350")
+
+exons = gffToGRanges(gtf.file, filter = "exon")
+exons = exons[exons$gene_biotype=="protein_coding"]
+transcripts = split(exons, exons$transcript_id)
+
+
+lost_polya_protein_sm = ScoreMatrixBin(target = test_bam, windows = transcripts[lost_polya_protein], bin.num = 100, strand.aware=TRUE)
+
+lost_polya_protein_sm %>%
+  t %>%
+  as.data.frame %>%
+  rename_with(~ lost_polya_protein) %>%
+  mutate(mean_coverage = rowMeans(across(where(is.numeric))),
+         position_5_3=row_number()) ->
+  transcript_sm_df
+
+transcript_sm_df %>%
+  ggplot(aes(x=position_5_3,y=mean_coverage)) +
+    geom_line()
+
+transcript_sm_df %>%
+  select(-mean_coverage) %>%
+  pivot_longer(cols=!position_5_3, names_to="transcript", values_to="depth") ->
+  transcript_sm_long
+
+transcript_sm_long %>%
+  ggplot(aes(x=position_5_3,y=depth, group=transcript, fill=transcript)) +
+    geom_area() +
+    facet_grid(rows="transcript", scales = "free_y")
+
+
+transcript_sm_long %>%
+  ggplot(aes(x=position_5_3, y=transcript, fill=depth)) +
+    geom_tile() +
+      scale_fill_distiller(palette = "RdPu") 
+```
+
+## Random Protein Coding Genes
+```{r}
+set.seed(1)
+transcripts[!names(transcripts) %in% lost_polya_protein] %>%
+  sample(size=length(lost_polya_protein), replace=FALSE) ->
+  random_proteins
+
+random_protein_sm = ScoreMatrixBin(target = test_bam, windows = random_proteins, bin.num = 100, strand.aware=TRUE)
+
+random_protein_sm %>%
+  t %>%
+  as.data.frame %>%
+  rename_with(~ names(random_proteins)) %>%
+  mutate(mean_coverage = rowMeans(across(where(is.numeric))),
+         position_5_3=row_number()) ->
+  transcript_sm_df
+
+transcript_sm_df %>%
+  ggplot(aes(x=position_5_3,y=mean_coverage)) +
+    geom_line()
+
+transcript_sm_df %>%
+  select(-mean_coverage) %>%
+  pivot_longer(cols=!position_5_3, names_to="transcript", values_to="depth") ->
+  transcript_sm_long
+
+transcript_sm_long %>%
+  ggplot(aes(x=position_5_3,y=depth, group=transcript, fill=transcript)) +
+    geom_area() +
+    facet_grid(rows="transcript", scales = "free_y")
+
+
+transcript_sm_long %>%
+  ggplot(aes(x=position_5_3, y=transcript, fill=depth)) +
+    geom_tile() +
+      scale_fill_distiller(palette = "RdPu") 
+```
+
+
+
+
+
+
 ## Work with a Single Gene
 #### Plot by Transcripts From GFF - One Gene
 
@@ -164,3 +265,32 @@ genes = gffToGRanges(gtf.file, filter = "gene")
 gene_sm = ScoreMatrixBin(target = test_bam, windows = genes[genes$gene_id %in% gene_list], bin.num = 2316)# , bin.num = 2316, strand.aware=TRUE, bin.op="sum")
 plotMeta(gene_sm)
 ```
+
+# Check Intron Read Depth
+Based on above, it seems that ScoreMatrixBin is counting reads that skip introns toward the intron coverage depths (should also be true for any region skipped by a read). 
+
+Let's check this and figure out if there is a way around it
+```{r}
+library(Rsamtools)
+scanBamWhat()
+```
+
+```{r}
+intronic_gr = GRanges("12", IRanges(376990,377029))
+
+param <- ScanBamParam(which=intronic_gr)
+
+countBam(test_bam, param = param)
+# scanBam(test_bam, param = param)
+# scanBamWhat()
+# bamWhat
+```
+```{r}
+intergenic_gr = GRanges("12", IRanges(378300,378900))
+
+param <- ScanBamParam(which=intergenic_gr, what=c("groupid"))
+#                      flag=scanBamFlag(isUnmappedQuery=FALSE))
+
+countBam(test_bam, param = param)
+```
+
