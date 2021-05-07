@@ -61,6 +61,7 @@ trim_and_star_func() {
     --outFileNamePrefix ${ENRICH_COMPARE_STAROUT}/${SAMPLE}_ \
     --outFilterScoreMinOverLread 0 --outFilterMatchNminOverLread 0 \
     --outFilterMatchNmin 0 --outFilterMismatchNmax 2 \
+    --alignIntronMax 1000 --alignMatesGapMax 1000 \
     --readFilesCommand zcat \
     --readFilesIn $FASTQ_TRIMMED        
         
