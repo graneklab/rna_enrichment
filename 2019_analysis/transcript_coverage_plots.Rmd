@@ -54,8 +54,8 @@ print(analysis_bam)
 ```
 
 # Plot Depth Across Genes to Check for 3' degradation
-## Coverage Depth Function
-```{r}
+
+```{r CoverageDepthFunction}
 transcriptCoverageAnalysis <- function(gtf_file, bam_path, target_transcript_ids) {
   
   exons = gffToGRanges(gtf_file, filter = "exon")
@@ -76,7 +76,9 @@ transcriptCoverageAnalysis <- function(gtf_file, bam_path, target_transcript_ids
   transcript_sm_df %>%
     ggplot(aes(x=position_5_3,y=mean_coverage)) +
       geom_area(fill="grey50") +
-      theme_bw() ->
+      theme_bw() +
+      labs(x ="Position Along Transcript", y="Average Read Depth") +
+      scale_x_discrete(expand=c(0,0)) ->
     average_coverage_plot
     
   transcript_sm_df %>%
@@ -90,23 +92,35 @@ transcriptCoverageAnalysis <- function(gtf_file, bam_path, target_transcript_ids
       facet_grid(rows="transcript", scales = "free_y") +
       scale_y_continuous(breaks = scales::pretty_breaks(n = 2)) +
       theme_bw() +
-      theme(strip.text.y = element_text(angle = 0), legend.position="none") ->
+      theme(strip.text.y = element_text(angle = 0), legend.position="none") +
+      labs(x ="Position Along Transcript", y="Read Depth") +
+      scale_x_discrete(breaks = c(10,90),
+                       labels = c("5'","3'")) ->
     facet_coverage_plot
   
   transcript_sm_long %>%
     ggplot(aes(x=position_5_3, y=transcript, fill=depth)) +
       geom_tile() +
       scale_fill_gradient(low="white", high="blue") +
-      scale_x_discrete(expand=c(0,0)) + 
-      scale_y_discrete(expand=c(0,0)) +
+      scale_x_discrete(breaks = c(1,100),
+                       labels = c("5'","3'")) + 
+      labs(x ="Position Along Transcript", x ="Transcript ID", fill = "Read Depth") +
       theme_bw() ->
     heatmap_coverage_plot
   
   return(list(average_coverage_plot, facet_coverage_plot, heatmap_coverage_plot))
 }
+# scale_x_discrete(breaks = c(10,90),
+#                  labels = c("5'","3'"),
+#                  expand=c(0,0)) ->
 ```
 
 ## Protein Coding Genes Lost in Poly(A) Enrichment
+We identified a small number of genes that are expressed, as identified in unenriched libraries and libraries enriched with Ribo-Zero and the RNase H method. However these genes are "lost" by the Poly(A) enrichment method - these genes have very few counts in libraries enriched by the Poly(A) method. About half of these genes are annotated as ncRNA, and are therefore expected to be lost by the Poly(A) method because, in general, only protein coding transcripts are polyadenylated. The rest of the genes encode proteins; one possible explanation for loss of these transcripts by the Poly(A) method is that these transcripts are being rapidly turned over, and therefore the Poly(A) tails are degraded. To investigate this possibility, we examined the read coverage across these transcripts. If these transcripts were being rapidly degraded, we would expect a 5' bias in transcript read coverage (i.e. increasing read depth toward the 5' end), since mRNA is degraded from the 3' end [REF]. Note that in the figures transcript lengths are normalized, so the left end of the the plot corresponds to th 5' end of each transcript and the right end corresponds to the 3' end. Also note that only predicted transcripts are shown, so introns are not show.
+
+Read depth across transcripts is visualized in three ways - a plot of the average depth across all lost protein coding transcripts, and each transcript visualized individually as a filled area plot and a heatmap. While transcript AFR92445 (CNAG_00311) shows a strong peak at its 5'-end, the other transcripts do not appear to have any 5'-bias, suggesting that partial transcript degradation is not the cause of loss of these transcripts by the Poly(A) method. 
+
+
 ```{r fig.width = 7, fig.height = 7}
 gffToGRanges(gtf.file, filter = "exon") %>%
   as_tibble %>%
@@ -130,7 +144,8 @@ polya_plot_list[[2]]
 polya_plot_list[[3]]
 ```
 
-## Random Protein Coding Genes
+## Control 1: Random Protein Coding Genes
+As a control we similarly examined the read depth across the transcripts of a random sample of protein coding genes. Genes were excluded that were in the "lost" gene set or had low counts (fewer than `r unenriched_low_counts` total reads across the unenriched samples). Compared with "lost" transcript there are no obvious differences, except the lost transcripts have much higher expression. Therefore we re-ran this analysis with a random sample of genes that more similar expression to the lost genes (genes were sampled that had total counts across the unenriched libraries in the same range as the lost genes). Examination found the same results.
 ```{r fig.width = 7, fig.height = 7}
 set.seed(1)
 
@@ -157,7 +172,7 @@ random_gene_plot_list[[2]]
 random_gene_plot_list[[3]]
 ```
 
-## Random Protein Coding Genes With Counts in same range as PolyA Lost genes
+## Control 2: Random Protein Coding Genes with similar count range as PolyA Lost genes
 ```{r fig.width = 7, fig.height = 7}
 unenriched_count_file %>%
   read_csv %>%
