@@ -152,7 +152,7 @@ warning("Transcripts are mislabelled!!!")
 
 # Plot Depth Across Genes to Check for 3' degradation
 ## Protein Coding Genes Lost in Poly(A) Enrichment
-```{r}
+```{r fig.width = 7, fig.height = 7}
 gffToGRanges(gtf.file, filter = "exon") %>%
   as_tibble %>%
   select(gene_id, transcript_id) %>%
@@ -196,17 +196,19 @@ transcript_sm_df %>%
 transcript_sm_long %>%
   ggplot(aes(x=position_5_3,y=depth, group=transcript, fill=transcript)) +
     geom_area() +
-    facet_grid(rows="transcript", scales = "free_y")
-
+    facet_grid(rows="transcript", scales = "free_y") +
+    scale_y_continuous(breaks = scales::pretty_breaks(n = 2)) +
+    theme(strip.text.y = element_text(angle = 0), legend.position="none")
 
 transcript_sm_long %>%
   ggplot(aes(x=position_5_3, y=transcript, fill=depth)) +
     geom_tile() +
-      scale_fill_distiller(palette = "RdPu") 
+    scale_fill_gradient(low="white", high="blue") 
 ```
 
 ## Random Protein Coding Genes
-```{r}
+```{r fig.width = 7, fig.height = 7}
+
 set.seed(1)
 
 unenriched_count_file %>%
@@ -254,13 +256,14 @@ transcript_sm_df %>%
 transcript_sm_long %>%
   ggplot(aes(x=position_5_3,y=depth, group=transcript, fill=transcript)) +
     geom_area() +
-    facet_grid(rows="transcript", scales = "free_y")
-
+    facet_grid(rows="transcript", scales = "free_y") +
+    scale_y_continuous(breaks = scales::pretty_breaks(n = 2)) +
+    theme(strip.text.y = element_text(angle = 0), legend.position="none")
 
 transcript_sm_long %>%
   ggplot(aes(x=position_5_3, y=transcript, fill=depth)) +
     geom_tile() +
-      scale_fill_distiller(palette = "RdPu") 
+    scale_fill_gradient(low="white", high="blue")
 ```
 
 
