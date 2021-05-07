@@ -93,3 +93,7 @@ fa.file %>%
   fa_for_mito_rrna.file
 
 Sys.setenv(GENOME_WITH_MITO_RRNA_DIR = genome_with_mito_rrna.dir)
+Sys.setenv(ADAPTERS = adapters.file)
+Sys.setenv(FASTQC_ADAPTERS = adapters.fastqc)
+Sys.setenv(GTF = gtf.file)
+Sys.setenv(FA = fa.file)

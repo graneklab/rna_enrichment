@@ -51,8 +51,7 @@ oligo_bam.file = file.path(rrna_oligo_starout.dir, "rrna_oligos_Aligned.sortedBy
 
 # Output
 Sys.setenv(CUROUT = outdir_2018)
-Sys.setenv(ADAPTERS = adapters.file)
-Sys.setenv(FASTQC_ADAPTERS = adapters.fastqc)
+
 Sys.setenv(TRIMMED = trimmed.dir)
 Sys.setenv(GENOME_DIR = genome.dir)
 Sys.setenv(TOTAL_SAMPLES_STAROUT = total_samples_starout.dir)
@@ -65,8 +64,6 @@ Sys.setenv(FA_URL = fa_url)
 Sys.setenv(GTF_URL = gtf_url)
 
 
-Sys.setenv(GTF = gtf.file)
-Sys.setenv(FA = fa.file)
 
 Sys.setenv(GTF_WITH_MITO_RRNA = gtf_with_mito_rrna.file)
 Sys.setenv(FA_WITH_MITO_RRNA = fa_for_mito_rrna.file)
