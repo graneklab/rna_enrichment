@@ -22,11 +22,35 @@ library(ggplot2)
 library(readr)
 
 source("../common_config.R")
+
+use_all_bams=TRUE
 ```
 
-```{r include=TRUE}
-warning("Merge Total BAMs")
-test_bam = file.path(starout_2019_dir, "SRR12933729_Aligned.sortedByCoord.out.bam")
+# Merge Unenriched BAMs
+```{r}
+accessions_file %>%
+  read_csv %>%
+  filter(sequencing_batch=="2019",
+         enrichment_method=="Unenriched") %>%
+  pull(Run) %>%
+  paste0("_Aligned.sortedByCoord.out.bam") %>%
+  file.path(starout_2019_dir,.) ->
+  unenriched_2019_bam_paths
+
+single_bam = file.path(starout_2019_dir, "SRR12933729_Aligned.sortedByCoord.out.bam")
+if(use_all_bams){
+  analysis_bam = merged_unenriched_2019_bam
+  if (!file.exists(merged_unenriched_2019_bam)){
+    mergeBam(unenriched_2019_bam_paths, 
+             merged_unenriched_2019_bam,
+             overwrite=TRUE,
+             maxMemory=max_memory_mb)
+    indexBam(merged_unenriched_2019_bam)
+  }
+} else{
+  analysis_bam = single_bam
+}
+print(analysis_bam)
 ```
 
 # Plot Depth Across Genes to Check for 3' degradation
@@ -98,7 +122,7 @@ lost_polya_df %>%
   pull(transcript_id) ->
   lost_polya_protein
   
-  transcriptCoverageAnalysis(gtf.file, test_bam, lost_polya_protein) ->
+  transcriptCoverageAnalysis(gtf.file, analysis_bam, lost_polya_protein) ->
   polya_plot_list
 
 polya_plot_list[[1]]
@@ -125,7 +149,7 @@ gffToGRanges(gtf.file, filter = "exon") %>%
   anti_join(lost_polya_df, by="gene_id") %>% # get rid of genes lost in polya
   slice_sample(n=length(lost_polya_protein)) %>%
   pull(transcript_id) %>%
-  transcriptCoverageAnalysis(gtf.file, test_bam, .) ->
+  transcriptCoverageAnalysis(gtf.file, analysis_bam, .) ->
   random_gene_plot_list
 
 random_gene_plot_list[[1]]
@@ -158,7 +182,7 @@ gffToGRanges(gtf.file, filter = "exon") %>%
   anti_join(lost_polya_df, by="gene_id") %>% # get rid of genes lost in polya
   slice_sample(n=length(lost_polya_protein)) %>%
   pull(transcript_id) %>%
-  transcriptCoverageAnalysis(gtf.file, test_bam, .) ->
+  transcriptCoverageAnalysis(gtf.file, analysis_bam, .) ->
   random_gene_count_range_plot_list
 
 random_gene_count_range_plot_list[[1]]
@@ -172,18 +196,19 @@ random_gene_count_range_plot_list[[3]]
 transcript_list = c("AFR99111")
 exons = gffToGRanges(gtf.file, filter = "exon")
 transcripts = split(exons, exons$transcript_id)
-transcripts_sm = ScoreMatrixBin(target = test_bam, windows = transcripts[transcript_list], bin.num = 100, strand.aware=TRUE)
+transcripts_sm = ScoreMatrixBin(target = single_bam, windows = transcripts[transcript_list], bin.num = 100, strand.aware=TRUE)
 plotMeta(transcripts_sm)
 ```
 
 ```{r}
 gene_list = c("CNAG_06125")
 genes = gffToGRanges(gtf.file, filter = "gene")
-gene_sm = ScoreMatrixBin(target = test_bam, windows = genes[genes$gene_id %in% gene_list], bin.num = 2316)# , bin.num = 2316, strand.aware=TRUE, bin.op="sum")
+gene_sm = ScoreMatrixBin(target = single_bam, windows = genes[genes$gene_id %in% gene_list], bin.num = 2316)# , bin.num = 2316, strand.aware=TRUE, bin.op="sum")
 plotMeta(gene_sm)
 ```
 
-# Check Intron Read Depth
+# Testing Things Out
+## Check Intron Read Depth
 Based on above, it seems that ScoreMatrixBin is counting reads that skip introns toward the intron coverage depths (should also be true for any region skipped by a read). 
 
 Let's check this and figure out if there is a way around it
@@ -197,8 +222,8 @@ intronic_gr = GRanges("12", IRanges(376990,377029))
 
 param <- ScanBamParam(which=intronic_gr)
 
-countBam(test_bam, param = param)
-# scanBam(test_bam, param = param)
+countBam(single_bam, param = param)
+# scanBam(single_bam, param = param)
 # scanBamWhat()
 # bamWhat
 ```
@@ -208,26 +233,26 @@ intergenic_gr = GRanges("12", IRanges(378300,378900))
 param <- ScanBamParam(which=intergenic_gr, what=c("groupid"))
 #                      flag=scanBamFlag(isUnmappedQuery=FALSE))
 
-countBam(test_bam, param = param)
+countBam(single_bam, param = param)
 ```
 
-# CRUFT Playing with genomation
-## Work with a list of transcripts/genes
+## CRUFT Playing with genomation
+### Work with a list of transcripts/genes
 ```{r}
 transcript_list = c("AFR99111","AFR98350")
 # transcript_list = c("AFR98350")
 exons = gffToGRanges(gtf.file, filter = "exon")
 transcripts = split(exons, exons$transcript_id)
-transcript_sm = ScoreMatrixBin(target = test_bam, windows = transcripts[transcript_list], bin.num = 100, strand.aware=TRUE)
+transcript_sm = ScoreMatrixBin(target = single_bam, windows = transcripts[transcript_list], bin.num = 100, strand.aware=TRUE)
 ```
 
-### Plot with genomation
+#### Plot with genomation
 ```{r}
 plotMeta(transcript_sm)
 heatMatrix(transcript_sm, col=heat.colors(10))
 ```
 
-### Plot with GGplot2
+#### Plot with GGplot2
 ```{r}
 transcript_sm %>%
   t %>%

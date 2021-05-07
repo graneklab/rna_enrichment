@@ -8,6 +8,7 @@ total_threads=60
 # threads=3
 max_jobs=10
 threads=floor(total_threads/max_jobs)
+max_memory_mb=275000
 
 Sys.setenv(THREADS = threads)
 Sys.setenv(TOTAL_THREADS = total_threads)
@@ -65,7 +66,7 @@ Sys.setenv(ADAPTERS = adapters.file)
 lost_polya_file = file.path(fig.dir, "Table_S1.csv")
 unenriched_count_file = file.path(outdir_2019, "unenriched_counts.csv")
 unenriched_low_counts = 50
-
+merged_unenriched_2019_bam = file.path(outdir_2019, "merged_unenriched_2019.bam")
 
 knit_output_dir = file.path(basedir, "knit_output_html"); dir.create(knit_output_dir, recursive = TRUE)
 
