@@ -1,17 +1,22 @@
 #!/bin/bash
 
 set -u
-SINGULARITY_DIR="$HOME/container_images"
-SINGULARITY_CACHEDIR="${SINGULARITY_CACHEDIR:-$SINGULARITY_DIR/cachedir}"
-SINGULARITY_PULLFOLDER="${SINGULARITY_PULLFOLDER:-$SINGULARITY_DIR/pulldir}"
-export SINGULARITY_CACHEDIR
-export SINGULARITY_PULLFOLDER
-
-SINGULARITY_IMAGE="${1:-library://granek/published/rna_enrichment:latest}"
 
 DATA_BASE_DIR="${DATA_BASE_DIR:-$HOME}"
 WORKSPACE_BASE_DIR="${WORKSPACE_BASE_DIR:-$HOME}"
 SPACE_DIR="${SPACE_BASE_DIR:-$HOME}"
+SINGULARITY_DIR="$HOME/container_images"
+SINGULARITY_CACHEDIR="${SINGULARITY_CACHEDIR:-$SINGULARITY_DIR/cachedir}"
+SINGULARITY_PULLFOLDER="${SINGULARITY_PULLFOLDER:-$SINGULARITY_DIR/pulldir}"
+
+#-------------------------------------------------
+# DO NOT MODIFY ANYTHING BELOW HERE!
+#-------------------------------------------------
+
+export SINGULARITY_CACHEDIR
+export SINGULARITY_PULLFOLDER
+
+SINGULARITY_IMAGE="${1:-library://granek/published/rna_enrichment:latest}"
 
 DATA="$DATA_BASE_DIR/rnaseq_enrichment/rawdata"
 WORKSPACE="$WORKSPACE_BASE_DIR/rnaseq_enrichment/workspace"
