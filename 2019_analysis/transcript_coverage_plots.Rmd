@@ -122,7 +122,7 @@ Read depth across transcripts is visualized in three ways - a plot of the averag
 ```{r echo=FALSE, fig.width = 7, fig.height = 7}
 gffToGRanges(gtf.file, filter = "exon") %>%
   as_tibble %>%
-  select(gene_id, transcript_id) %>%
+  dplyr::select(gene_id, transcript_id) %>%
   distinct %>%
   inner_join(lost_polya_file %>%
                read_csv(col_types="ccc"), 
@@ -141,10 +141,40 @@ polya_plot_list[[1]]
 polya_plot_list[[2]]
 polya_plot_list[[3]]
 ```
+### Drop Mito Genes
+
+```{r echo=FALSE, fig.width = 7, fig.height = 3}
+gffToGRanges(gtf.file, filter = "exon") %>%
+  as_tibble %>%
+  select(gene_id, transcript_id) %>%
+  distinct %>%
+  inner_join(lost_polya_file %>%
+               read_csv(col_types="ccc"), 
+             by=c("gene_id"="Gene")) %>%
+  filter(Chromosome != "Mt") ->
+  lost_polya_df
+
+lost_polya_df
+
+lost_polya_df %>%
+  filter(`Gene type`== "protein_coding") %>%
+  pull(transcript_id) ->
+  lost_polya_protein
+  
+  transcriptCoverageAnalysis(gtf.file, analysis_bam, lost_polya_protein) ->
+  polya_plot_list
+
+polya_plot_list[[1]]
+polya_plot_list[[2]]
+polya_plot_list[[3]]
+```
+
+
+
 
 ## Control 1: Random Protein Coding Genes
 As a control we similarly examined the read depth across the transcripts of a random sample of protein coding genes. Genes were excluded that were in the "lost" gene set or had low counts (fewer than `r unenriched_low_counts` total reads across the unenriched samples). Compared with "lost" transcript there are no obvious differences, except the lost transcripts have much higher expression. Therefore we re-ran this analysis with a random sample of genes that more similar expression to the lost genes (genes were sampled that had total counts across the unenriched libraries in the same range as the lost genes). Examination found the same results.
-```{r echo=FALSE, fig.width = 7, fig.height = 7}
+```{r echo=FALSE, fig.width = 7, fig.height = 3}
 set.seed(1)
 
 unenriched_count_file %>%
@@ -171,7 +201,7 @@ random_gene_plot_list[[3]]
 ```
 
 ## Control 2: Random Protein Coding Genes with similar count range as PolyA Lost genes (quantile)
-```{r echo=FALSE, fig.width = 7, fig.height = 7}
+```{r echo=FALSE, fig.width = 7, fig.height = 3}
 set.seed(1)
 
 unenriched_count_file %>%
