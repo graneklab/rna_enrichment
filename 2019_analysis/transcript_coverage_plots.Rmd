@@ -39,20 +39,19 @@ accessions_file %>%
   file.path(starout_2019_dir,.) ->
   unenriched_2019_bam_paths
 
-single_bam = file.path(starout_2019_dir, "SRR12933729_Aligned.sortedByCoord.out.bam")
-if(use_all_bams){
-  analysis_bam = merged_unenriched_2019_bam
-  if (!file.exists(merged_unenriched_2019_bam)){
-    mergeBam(unenriched_2019_bam_paths, 
-             merged_unenriched_2019_bam,
-             overwrite=TRUE,
-             maxMemory=max_memory_mb)
-    indexBam(merged_unenriched_2019_bam)
-  }
-} else{
-  analysis_bam = single_bam
+if (!file.exists(merged_unenriched_2019_bam)){
+  # samtools merge [-nurlf] [-h inh.sam] [-b <bamlist.fofn>] <out.bam> <in1.bam> [<in2.bam> ... <inN.bam>]
+  # samtools merge -f --threads INT
+  system2("samtools", args=c("merge",
+                             "-f",
+                             "--threads", total_threads,
+                             merged_unenriched_2019_bam,
+                             unenriched_2019_bam_paths))
+
+  system2("samtools", args=c("index",
+                             "-@", total_threads,
+                             merged_unenriched_2019_bam))
 }
-print(analysis_bam)
 ```
 
 # Plot Depth Across Genes to Check for 3' degradation
@@ -136,7 +135,7 @@ lost_polya_df %>%
   pull(transcript_id) ->
   lost_polya_protein
   
-  transcriptCoverageAnalysis(gtf.file, analysis_bam, lost_polya_protein) ->
+  transcriptCoverageAnalysis(gtf.file, merged_unenriched_2019_bam, lost_polya_protein) ->
   polya_plot_list
 
 polya_plot_list[[1]]
@@ -163,7 +162,7 @@ lost_polya_df %>%
   pull(transcript_id) ->
   lost_polya_protein
   
-  transcriptCoverageAnalysis(gtf.file, analysis_bam, lost_polya_protein) ->
+  transcriptCoverageAnalysis(gtf.file, merged_unenriched_2019_bam, lost_polya_protein) ->
   polya_plot_list
 
 polya_plot_list[[1]]
@@ -194,7 +193,7 @@ gffToGRanges(gtf.file, filter = "exon") %>%
   anti_join(lost_polya_df, by="gene_id") %>% # get rid of genes lost in polya
   slice_sample(n=length(lost_polya_protein)) %>%
   pull(transcript_id) %>%
-  transcriptCoverageAnalysis(gtf.file, analysis_bam, .) ->
+  transcriptCoverageAnalysis(gtf.file, merged_unenriched_2019_bam, .) ->
   random_gene_plot_list
 
 random_gene_plot_list[[1]]
@@ -229,7 +228,7 @@ gffToGRanges(gtf.file, filter = "exon") %>%
   anti_join(lost_polya_df, by="gene_id") %>% # get rid of genes lost in polya
   slice_sample(n=length(lost_polya_protein)) %>%
   pull(transcript_id) %>%
-  transcriptCoverageAnalysis(gtf.file, analysis_bam, .) ->
+  transcriptCoverageAnalysis(gtf.file, merged_unenriched_2019_bam, .) ->
   random_gene_count_range_plot_list
 
 random_gene_count_range_plot_list[[1]]
