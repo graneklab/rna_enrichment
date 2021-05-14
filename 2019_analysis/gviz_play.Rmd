@@ -20,19 +20,27 @@ source("../common_config.R")
 ```
 
 # Combine ALL BAMs
-```{r eval=FALSE, include=FALSE}
+```{r}
 use_all_bams = TRUE
 
 all_bam_paths = c(list.files(starout_2019_dir, pattern = ".bam$", full.names = TRUE),
                   list.files(starout_2018_dir, pattern = ".bam$", full.names = TRUE))
-all_merged_bam_path = file.path(outdir_2019, "merged_all.bam")
+# all_bam_paths = all_bam_paths[1:3]
+all_merged_bam = file.path(outdir_2019, "merged_all.bam")
 
-if (!file.exists(all_merged_bam_path)){
-  mergeBam(all_bam_paths, 
-           all_merged_bam_path,
-           overwrite=TRUE,
-           maxMemory=max_memory_mb)
-    indexBam(all_merged_bam_path)
+print(all_merged_bam)
+if (!file.exists(all_merged_bam)){
+  # samtools merge [-nurlf] [-h inh.sam] [-b <bamlist.fofn>] <out.bam> <in1.bam> [<in2.bam> ... <inN.bam>]
+  # samtools merge -f --threads INT
+  system2("samtools", args=c("merge",
+                             "-f",
+                             "--threads", total_threads,
+                             all_merged_bam,
+                             all_bam_paths))
+
+  system2("samtools", args=c("index",
+                             "-@", total_threads,
+                             all_merged_bam))
 }
 ```
 
@@ -108,12 +116,14 @@ plotTracks(c(alTrack), from = 800462, to = 800543,
 read_csv("novel_lncrna.csv") ->
   lncrna_df
 
+all_bam_track <- AlignmentsTrack(all_merged_bam, isPaired = FALSE)
+
 lncrna_df
 for (row in seq(nrow(lncrna_df))){
   chrom = lncrna_df[[row,"Chromosome"]]
   start = lncrna_df[[row,"Start"]]
   end = lncrna_df[[row,"End"]]
-  plotTracks(c(alTrack), from = start, to = end, chromosome = chrom)
+  plotTracks(c(all_bam_track), from = start, to = end, chromosome = chrom)
 }
 
 
