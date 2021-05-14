@@ -21,8 +21,6 @@ source("../common_config.R")
 
 # Combine ALL BAMs
 ```{r}
-use_all_bams = TRUE
-
 all_bam_paths = c(list.files(starout_2019_dir, pattern = ".bam$", full.names = TRUE),
                   list.files(starout_2018_dir, pattern = ".bam$", full.names = TRUE))
 # all_bam_paths = all_bam_paths[1:3]
@@ -47,71 +45,6 @@ if (!file.exists(all_merged_bam)){
 
 https://bioconductor.org/packages/release/bioc/vignettes/Gviz/inst/doc/Gviz.html#49_AlignmentsTrack
 
-```{r eval=FALSE, include=FALSE}
-bm <- useMart(host = "grch37.ensembl.org", 
-              biomart = "ENSEMBL_MART_ENSEMBL", 
-              dataset = "hsapiens_gene_ensembl")
-# biomTrack <- BiomartGeneRegionTrack(genome = "hg19", chromosome = chr, 
-#                                     start = 20e6, end = 21e6,
-#                                     name = "ENSEMBL", 
-#                                     filter = list(with_refseq_mrna=TRUE), 
-#                                     biomart = bm)
-# plotTracks(biomTrack, col.line = NULL, col = NULL, stackHeight = 0.3)
-```
-
-
-```{r eval=FALSE, include=FALSE}
-afrom <- 2960000
-ato <- 3160000
-alTrack <- AlignmentsTrack(
-  system.file(package = "Gviz", "extdata", "gapped.bam"),
-  isPaired = TRUE)
-# bmt <- BiomartGeneRegionTrack(genome = "hg19", chromosome = "chr12",
-#                               start = afrom, end = ato,
-#                               filter = list(with_refseq_mrna = TRUE),
-#                               stacking = "dense")
-# # We can create a first plot of our read alignments data from a birds eye perspective, say a range of 20,000 nucleotides.
-# 
-# plotTracks(c(bmt, alTrack), from = afrom, to = ato, 
-#            chromosome = "chr12")
-```
-
-
-```{r eval=FALSE, include=FALSE}
-alTrack <- AlignmentsTrack(
-  system.file(package = "Gviz", "extdata", "gapped.bam"), 
-  isPaired = FALSE)
-plotTracks(c(alTrack), from = afrom + 12700, to = afrom + 15200, 
-           chromosome = "chr12")
-```
-
-```{r eval=FALSE, include=FALSE}
-afrom <- 44945200
-ato <- 44947200
-alTrack <- AlignmentsTrack(
-  system.file(package = "Gviz", "extdata", "snps.bam"), isPaired = TRUE)
-plotTracks(alTrack, chromosome = "chr21", from = afrom, to = ato)
-```
-
-
-```{r eval=FALSE, include=FALSE}
-plotTracks(c(alTrack), chromosome = "chr21",
-           from = 44946590, to = 44946660)
-```
-
-```{r}
-alTrack <- AlignmentsTrack(merged_unenriched_2019_bam, isPaired = FALSE)
-plotTracks(c(alTrack), from = 798999, to = 801468, 
-           chromosome = "1")
-```
-
-```{r}
-# alTrack <- AlignmentsTrack(merged_unenriched_2019_bam, isPaired = FALSE)
-plotTracks(c(alTrack), from = 800462, to = 800543, 
-           chromosome = "1")
-```
-
-
 ```{r}
 read_csv("novel_lncrna.csv") ->
   lncrna_df
@@ -125,8 +58,6 @@ for (row in seq(nrow(lncrna_df))){
   end = lncrna_df[[row,"End"]]
   plotTracks(c(all_bam_track), from = start, to = end, chromosome = chrom)
 }
-
-
 ```
 
 
