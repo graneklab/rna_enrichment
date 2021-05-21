@@ -45,10 +45,46 @@ if (!file.exists(all_merged_bam)){
 
 https://bioconductor.org/packages/release/bioc/vignettes/Gviz/inst/doc/Gviz.html#49_AlignmentsTrack
 
+GeneRegionTrack
+
+
+
+# Test Making Read Plots
 ```{r}
 read_csv("novel_lncrna.csv") ->
   lncrna_df
 
+
+lncrna_df
+
+lncrna_gtf=here("2019_analysis/final_all.gtf")
+
+grt = GeneRegionTrack(lncrna_gtf)
+grt
+
+all_bam_track <- AlignmentsTrack(all_merged_bam, isPaired = FALSE)
+chrom = "6"
+start = 499352
+end = 499840
+buf=round((end-start)*0.05)
+buf
+plotTracks(c(grt, all_bam_track), from = start-buf, to = end+buf, chromosome = chrom, transcriptAnnotation = "gene_id", exonAnnotation= "symbol")
+```
+
+# Load Novel lncRNA info
+```{r}
+read_csv("novel_lncrna.csv") ->
+  lncrna_df
+
+lncrna_df %>%
+  mutate(igv_loc=paste0(Chromosome, ":", Start, "-", End))
+```
+
+# Make Read plots for All Novel lncRNA genes
+```{r}
+lncrna_gtf=here("2019_analysis/final_all.gtf")
+
+grt = GeneRegionTrack(lncrna_gtf)
 all_bam_track <- AlignmentsTrack(all_merged_bam, isPaired = FALSE)
 
 lncrna_df
@@ -56,7 +92,9 @@ for (row in seq(nrow(lncrna_df))){
   chrom = lncrna_df[[row,"Chromosome"]]
   start = lncrna_df[[row,"Start"]]
   end = lncrna_df[[row,"End"]]
-  plotTracks(c(all_bam_track), from = start, to = end, chromosome = chrom)
+  # plotTracks(c(all_bam_track), from = start, to = end, chromosome = chrom)
+  buf=round((end-start)*0.2)
+  plotTracks(c(grt, all_bam_track), from = start-buf, to = end+buf, chromosome = chrom, transcriptAnnotation = "gene_id", exonAnnotation= "symbol")
 }
 ```
 
