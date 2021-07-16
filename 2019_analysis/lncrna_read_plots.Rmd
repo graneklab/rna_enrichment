@@ -98,9 +98,25 @@ for (row in seq(nrow(lncrna_df))){
 }
 ```
 
-
 https://bioconductor.org/packages/release/bioc/vignettes/Gviz/inst/doc/Gviz.html#7_Composite_plots_for_multiple_chromosomes
 
-
-
-
+```{r fig.width=8, fig.height=12}  
+ncols = 2
+nrows = nrow(lncrna_df) %/% ncols
+grid.newpage()
+pushViewport(viewport(layout = grid.layout(nrows, ncols)))
+for (gene_i in seq(nrow(lncrna_df))){
+  pushViewport(viewport(layout.pos.col = ((gene_i - 1) %% ncols) + 1,
+                        layout.pos.row = (((gene_i) - 1) %/% ncols) + 1))
+  chrom = lncrna_df[[gene_i,"Chromosome"]]
+  start = lncrna_df[[gene_i,"Start"]]
+  end = lncrna_df[[gene_i,"End"]]
+  # plotTracks(c(all_bam_track), from = start, to = end, chromosome = chrom)
+  buf=round((end-start)*0.2)
+  plotTracks(c(grt, all_bam_track), 
+             from = start-buf, to = end+buf, 
+             chromosome = chrom, 
+             transcriptAnnotation = "gene_id", exonAnnotation= "symbol", add=TRUE)
+  popViewport(1)
+}
+```
