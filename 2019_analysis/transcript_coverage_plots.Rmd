@@ -21,7 +21,7 @@ library(tidyr)
 library(ggplot2)
 library(readr)
 library(Rsamtools)
-
+library(cowplot)
 
 source("../common_config.R")
 
@@ -87,8 +87,8 @@ transcriptCoverageAnalysis <- function(gtf_file, bam_path, target_transcript_ids
     transcript_sm_long
   
   transcript_sm_long %>%
-    ggplot(aes(x=position_5_3,y=depth, group=transcript, fill=transcript)) +
-      geom_area() +
+    ggplot(aes(x=position_5_3,y=depth, group=transcript)) +
+      geom_area(fill="mediumorchid") +
       facet_grid(rows="transcript", scales = "free_y") +
       scale_y_continuous(breaks = scales::pretty_breaks(n = 2)) +
       theme_bw() +
@@ -167,7 +167,8 @@ lost_polya_df %>%
   polya_plot_list
 
 polya_plot_list[[1]]
-polya_plot_list[[2]]
+lost_gene_transcript_coverage_plot=polya_plot_list[[2]]
+lost_gene_transcript_coverage_plot
 polya_plot_list[[3]]
 ```
 
@@ -233,8 +234,21 @@ gffToGRanges(gtf.file, filter = "exon") %>%
   random_gene_count_range_plot_list
 
 random_gene_count_range_plot_list[[1]]
-random_gene_count_range_plot_list[[2]]
+control_transcript_coverage_plot = random_gene_count_range_plot_list[[2]]
+control_transcript_coverage_plot
 random_gene_count_range_plot_list[[3]]
+```
+
+## Combine Lost Protein Coding Gene and Control Plot
+```{r fig.width=8, fig.height=4}  
+plot_grid(lost_gene_transcript_coverage_plot, 
+          control_transcript_coverage_plot, 
+          rows = 2,
+          rel_widths = c(1, 1),
+          labels = c('A', 'B'), 
+          label_size = 10)
+
+ggsave(file.path(fig.dir, "Figure_S7.tiff"), compression = "lzw", width=20, height=20, units = "cm")
 ```
 
 ## Work with a Single Gene
