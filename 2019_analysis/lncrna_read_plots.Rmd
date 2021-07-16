@@ -68,7 +68,10 @@ start = 499352
 end = 499840
 buf=round((end-start)*0.05)
 buf
-plotTracks(c(grt, all_bam_track), from = start-buf, to = end+buf, chromosome = chrom, transcriptAnnotation = "gene_id", exonAnnotation= "symbol")
+plotTracks(c(grt, all_bam_track), 
+           from = start-buf, to = end+buf, chromosome = chrom, 
+           transcriptAnnotation = "gene", showTitle=TRUE,
+           background.title = "darkblue", cex=0.2)
 ```
 
 # Load Novel lncRNA info
@@ -93,14 +96,22 @@ for (row in seq(nrow(lncrna_df))){
   start = lncrna_df[[row,"Start"]]
   end = lncrna_df[[row,"End"]]
   # plotTracks(c(all_bam_track), from = start, to = end, chromosome = chrom)
-  buf=round((end-start)*0.2)
-  plotTracks(c(grt, all_bam_track), from = start-buf, to = end+buf, chromosome = chrom, transcriptAnnotation = "gene_id", exonAnnotation= "symbol")
+  before=200
+  after=100
+  buf=round((end-start)*0.3)
+  all_bam_track <- AlignmentsTrack(all_merged_bam, isPaired = FALSE, name=lncrna_df[[row,"Name"]])
+  plotTracks(c(grt, all_bam_track), from = start-before, to = end+after, chromosome = chrom, transcriptAnnotation = "gene", background.title = "darkblue")
 }
 ```
 
 https://bioconductor.org/packages/release/bioc/vignettes/Gviz/inst/doc/Gviz.html#7_Composite_plots_for_multiple_chromosomes
 
-```{r fig.width=8, fig.height=12}  
+```{r}  
+
+tiff(filename = file.path(fig.dir, "Figure_S8.tiff"),
+     width = 20, height = 30, units = "cm", res=300, pointsize=14,
+     compression = "lzw")
+
 ncols = 2
 nrows = nrow(lncrna_df) %/% ncols
 grid.newpage()
@@ -113,10 +124,15 @@ for (gene_i in seq(nrow(lncrna_df))){
   end = lncrna_df[[gene_i,"End"]]
   # plotTracks(c(all_bam_track), from = start, to = end, chromosome = chrom)
   buf=round((end-start)*0.2)
+  all_bam_track <- AlignmentsTrack(all_merged_bam, isPaired = FALSE, name=lncrna_df[[gene_i,"Name"]])
   plotTracks(c(grt, all_bam_track), 
              from = start-buf, to = end+buf, 
              chromosome = chrom, 
-             transcriptAnnotation = "gene_id", exonAnnotation= "symbol", add=TRUE)
+             add=TRUE,
+             background.title = "darkblue")
   popViewport(1)
 }
+dev.off()
 ```
+
+
