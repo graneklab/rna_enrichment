@@ -113,7 +113,7 @@ tiff(filename = file.path(fig.dir, "Figure_S8.tiff"),
      compression = "lzw")
 
 ncols = 2
-nrows = nrow(lncrna_df) %/% ncols
+nrows = ceiling(nrow(lncrna_df) / ncols)
 grid.newpage()
 pushViewport(viewport(layout = grid.layout(nrows, ncols)))
 for (gene_i in seq(nrow(lncrna_df))){
