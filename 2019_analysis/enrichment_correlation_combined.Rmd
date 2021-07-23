@@ -573,6 +573,43 @@ genes_lost_in_polya %>%
 
 ```
 
+# Look for Mitochondrial Genes in Poly(A) Libraries
+```{r}
+norm_counts_long_noreps %>%
+  left_join(h99_granges, by=c("geneid"="gene_id")) %>%
+  filter(seqnames=="Mt") %>%
+  ggplot(aes(x=gold_mean, y=norm_count, color=gene_biotype)) +
+  geom_point(alpha=0.3) +
+  labs(x = "Average Normalized Count in Unenriched", y= "Normalized Count") +
+  theme_bw() +
+  theme(text=element_text(size=10)) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())  +
+  facet_grid(enrichment_method ~ RNA_sample_num) +
+  geom_abline(size=0.5)
+```
+
+
+```{r fig.width=8, fig.height=8}
+h99_granges %>%
+  select(seqnames, gene_id, gene_biotype) %>%
+  distinct %>%
+  left_join(norm_counts_long_noreps,., by=c("geneid"="gene_id")) %>%
+  mutate(polya_lost = case_when(geneid %in% lost_polya_genes ~ "TRUE",
+                                seqnames=="Mt" ~ "Mt",
+                                TRUE ~ "FALSE")) %>%
+    ggplot(aes(x=gold_mean, y=norm_count, color=polya_lost)) +
+    geom_point(alpha=0.3) +
+    labs(x = "Average Normalized Count in Unenriched", y= "Normalized Count") +
+    theme_bw() +
+    theme(text=element_text(size=10)) +
+    theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())  +
+    facet_grid(enrichment_method ~ RNA_sample_num) +
+    scale_colour_manual(values = c("FALSE"="grey60","TRUE"="red", "Mt"="blue"), guide = FALSE) +
+    geom_abline(size=0.5)
+```
+
+
+
 # SessionInfo
 ```{r}
 sessionInfo()
