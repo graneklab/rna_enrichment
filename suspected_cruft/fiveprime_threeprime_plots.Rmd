@@ -1,5 +1,5 @@
 ---
-title: "Untitled"
+title: "I think this might be cruft"
 output: html_document
 ---
 
@@ -12,11 +12,16 @@ source("../common_config.R")
 
 library(CoverageView)
 library(readr)
+library(dplyr)
 ```
+
+# Working
+
+
 
 # Vingette Demos
 
-```{r}
+```{r eval=FALSE, include=FALSE}
 # get the sample BAM file for chr19
 # H3K4me3_BAM_url="http://www.ebi.ac.uk/~ernesto/H3K4me3.chr19.bam"
 # download.file(H3K4me3_BAM_url,"./H3K4me3.chr19.bam")
@@ -64,14 +69,14 @@ input_list=list(DF_H3K4me3,DF_H3K4me3_ctl)
 draw.heatmap(data=input_list,outfile="H3K4me3cmp_heatmap.png")
 ```
 
-```{r}
+```{r eval=FALSE, include=FALSE}
 H3K4me3_chr19_bed %>%
   read_tsv(col_names = c("chrom", "chromStart", "chromEnd", "name", "score", "strand"))
 ```
 
 
 
-```{r}
+```{r eval=FALSE, include=FALSE}
 H3K4me3_chr19_bed
 ```
 
@@ -94,7 +99,7 @@ H3K4me3_chr19_bed
   
 ## Generating a coverage matrix with 2 BAM files
   
-```{r}
+```{r eval=FALSE, include=FALSE}
 ## Generating a coverage matrix with 2 BAM files
   
 #get 2 BAM test files
@@ -115,12 +120,12 @@ ctl<-CoverageBamFile(ctrlBAMfile,reads_mapped=26713667)
 DF4=cov.matrix(tr=trm,ctl=ctl,coordfile=bedfile,extend=100,normalization="rpm",do="log2ratio",num_cores=2)
 ```
 
-```{r}
+```{r eval=FALSE, include=FALSE}
 draw.heatmap(DF4)
 ```
 
 
-```{r}
+```{r eval=FALSE, include=FALSE}
  
 ## Generating a coverage matrix with a single BAM file
   
@@ -147,28 +152,30 @@ DF2=cov.matrix(tr=trm,coordfile=bedfile,extend=100,normalization="rpm",num_cores
 DF3=cov.matrix(tr=trm,coordfile=bedfile,extend=100,normalization="rpm",bin_width=2,num_cores=2)
 ```
 
-```{r}
+```{r eval=FALSE, include=FALSE}
 draw.heatmap(DF1, "DF1.png")
 ```
 
 ![alt text here](DF1.png)
 
-```{r}
+```{r eval=FALSE, include=FALSE}
 draw.heatmap(DF2, "DF2.png")
 ```
 
 ![alt text here](DF2.png)
 
-```{r}
+```{r eval=FALSE, include=FALSE}
 draw.heatmap(DF3, "DF3.png")
 ```
 
 ![alt text here](DF3.png)
-```{r}
+```{r eval=FALSE, include=FALSE}
 read_tsv(bedfile, col_names = FALSE)
 ```
 
-# Playing with Crypto
+# Works
+
+## CoverageView Example with CNAG_06125
 ```{r}
 starout_2019_dir %>%
   list.files(pattern = "_ReadsPerGene.out.tab$", full.names = TRUE) %>%
@@ -195,110 +202,34 @@ set -u
 grep CNAG_06125 $GTF | egrep -v "start_codon|five_prime_utr|three_prime_utr|CDS" > $DEMO_GTF
 ```
 
+This works, but it makes the plot per exon, so doesn't handle transcripts correctly
 ```{r}
 cov.matrix(mybam, coordfile=demo_gtf,no_windows=100,
            offset=10,num_cores=total_threads,normalization="rpm") ->
   demo_matrix
 draw.heatmap(data=demo_matrix,outfile="demo.png")
 ```
-```{bash}
-cat $DEMO_GTF
-```
 
-```{r}
-mybam
-```
-
-
-
-```{bash}
-read_distribution.py -h
-```
-
-
-###################################################
-### code chunk number 13: example-cov.matrix-histone-2 (eval = FALSE)
-###################################################
-trm<-CoverageBamFile("./H3K4me3.chr19.bam",reads_mapped=864924)
-ctl<-CoverageBamFile("./H3K4me3_Control.chr19.bam",reads_mapped=319369)
-
-
-###################################################
-### code chunk number 14: example-cov.matrix-histone-3
-###################################################
-H3K4me3_chr19_bed<-system.file("extdata","H3K4me3.chr19.bed", package="CoverageView")
-
-
-###################################################
-### code chunk number 15: example-cov.matrix-histone-4 (eval = FALSE)
-###################################################
-DF_H3K4me3<-cov.matrix(trm,coordfile=H3K4me3_chr19_bed,no_windows=100,
-                       offset=10,num_cores=total_threads,normalization="rpm")
-DF_H3K4me3_ctl<-cov.matrix(ctl,coordfile=H3K4me3_chr19_bed,no_windows=100,
-                           offset=10,num_cores=total_threads,normalization="rpm")
-
-input_list=list(DF_H3K4me3,DF_H3K4me3_ctl) 
-draw.profile(data=input_list,ylab="avg coverage",outfile="H3K4me3cmp.png",main="H3K4me3")
-
-
-###################################################
-### code chunk number 18: example-cov.matrix-histone-6
-###################################################
-input_list=list(DF_H3K4me3,DF_H3K4me3_ctl) 
-draw.heatmap(data=input_list,outfile="H3K4me3cmp_heatmap.png")
-
-
-
-
-```{bash}
-
-```
-
-
-
-
-
-
-
-```{r}
+```{r eval=FALSE, include=FALSE}
 import(gtf_with_mito_rrna.file, format="gtf") %>%
   as.data.frame ->
   h99_granges
 ```
 
-
-
-```{bash}
-PicardCommandLine 
-```
-
-```{r}
-source("../coverage_play/CoverageView/R/coord.to.granges.R")
-x = .bed.to.GRanges("../coverage_play/hg19.HouseKeepingGenes.bed")
-
-```
-
-```{r}
-gtf_url
-```
-
-# HERE!!!!
+# RSeQC Figures
+### Download H99 GFF
 ```{r}
 library(R.utils)
 
-release_50_gff_url = "ftp://ftp.ensemblgenomes.org/pub/fungi/release-50/gff3/fungi_basidiomycota1_collection/cryptococcus_neoformans_var_grubii_h99_gca_000149245/Cryptococcus_neoformans_var_grubii_h99_gca_000149245.CNA3.50.gff3.gz"
-
-# release_39_gff_url = "ftp://ftp.ensemblgenomes.org/pub/fungi/release-39/gff3/fungi_basidiomycota1_collection/cryptococcus_neoformans_var_grubii_h99_gca_000149245/Cryptococcus_neoformans_var_grubii_h99_gca_000149245.CNA3.39.gff3.gz"
+# release_50_gff_url = "ftp://ftp.ensemblgenomes.org/pub/fungi/release-50/gff3/fungi_basidiomycota1_collection/cryptococcus_neoformans_var_grubii_h99_gca_000149245/Cryptococcus_neoformans_var_grubii_h99_gca_000149245.CNA3.50.gff3.gz"
 
 release_39_gff_url = "ftp://ftp.ensemblgenomes.org/pub/fungi/release-39/gff3/fungi_basidiomycota1_collection/cryptococcus_neoformans_var_grubii_h99/Cryptococcus_neoformans_var_grubii_h99.CNA3.39.gff3.gz"
- 
-#  Biostats-Mac-06:cryptococcus_neoformans_var_grubii_h99 josh$ pwd
-# /Volumes/ftp.ensemblgenomes.org/pub/fungi/release-39/gff3/fungi_basidiomycota1_collection/cryptococcus_neoformans_var_grubii_h99
-
 
 h99_gff_file="../coverage_play/h99_r39.gff"
-download.file(release_39_gff_url, paste0(h99_gff_file,".gz"))
-gunzip(paste0(h99_gff_file,".gz"))
+
+h99_gff_file %>%
+  dirname %>%
+  dir.create(recursive = TRUE)
 
 h99_CNAG_06125_gff_file="../coverage_play/h99_r39_CNAG_06125.gff"
 mybed="../coverage_play/h99_r39_CNAG_06125.bed"
@@ -310,11 +241,16 @@ Sys.setenv(MYBED=mybed)
 Sys.setenv(FULLBED=full_bed)
 ```
 
+```{r}
+download.file(release_39_gff_url, paste0(h99_gff_file,".gz"))
+gunzip(paste0(h99_gff_file,".gz"))
+```
+
 ```{bash}
 egrep "CNAG_06125|AFR98350" $H99_GFF > $H99_CNAG_06125_GFF
 ```
 
-
+### Convert GFF to BED12
 ```{r}
 library(rtracklayer)
 library(GenomicFeatures)
@@ -339,34 +275,35 @@ makeTxDbFromGFF(h99_gff_file) %>%
   export(full_bed, "BED")
 ```
 
-
-```{bash}
-set -u
-geneBody_coverage.py -h
-```
-
-
+### Plot CNAG_06125 with a single BAM
 ```{bash}
 set -u
 geneBody_coverage.py -r $MYBED -i /workspace/2019_sample_out/enrich_compare_starout/SRR12933729_Aligned.sortedByCoord.out.bam  -o ../coverage_play/r39_CNAG_06125
-geneBody_coverage.py -r "../coverage_play/hack.bed" -i /workspace/2019_sample_out/enrich_compare_starout/SRR12933729_Aligned.sortedByCoord.out.bam  -o ../coverage_play/hack
+```
+
+### Plot CNAG_06125 with all BAMs
+```{bash}
+# geneBody_coverage.py -r "../coverage_play/hack.bed" -i /workspace/2019_sample_out/enrich_compare_starout/SRR12933729_Aligned.sortedByCoord.out.bam  -o ../coverage_play/hack
 geneBody_coverage.py -r $MYBED -i /workspace/2019_sample_out/enrich_compare_starout/  -o ../coverage_play/all_bams_r39_CNAG_06125
 ```
 
-
+### Plot All Genes with all BAMs
 ```{bash}
 set -u
 geneBody_coverage.py -r $FULLBED -i /workspace/2019_sample_out/enrich_compare_starout/  -o ../coverage_play/all_bams_r39_full
 ```
 
 
-
-
-
-
-
-
 ```{bash}
+geneBody_coverage.py -h
+```
+
+
+
+
+
+
+```{bash eval=FALSE, include=FALSE}
 cd ../coverage_play
 gff2bed < blah.gff > blah.bed
 ```
@@ -374,7 +311,7 @@ gff2bed < blah.gff > blah.bed
 mybam
 ```
 
-```{bash}
+```{bash eval=FALSE, include=FALSE}
 set -u
 egrep "CNAG_06125|AFR98350" ../coverage_play/blah.bed > ../coverage_play/CNAG_06125.bed
 
@@ -384,26 +321,21 @@ geneBody_coverage.py -r ../coverage_play/CNAG_06125.bed -i /workspace/2019_sampl
 
 
 
-```{r}
+```{r eval=FALSE, include=FALSE}
 library(rtracklayer)
 library(GenomicFeatures)
 makeTxDbFromGFF(gtf.file) %>%
   asBED
-
-
-
-  my_txdb
-  
 my_txdb %>%
   export("../coverage_play/blah.bed", "BED")
 
-my_txdb %>%
-  export("../coverage_play/blah.bed15", "BED15")
-
-
-
-  asBED ->
-  mybed
+# my_txdb %>%
+#   export("../coverage_play/blah.bed15", "BED15")
+# 
+# 
+# 
+#   asBED ->
+#   mybed
 
 # 
 # 
@@ -415,34 +347,23 @@ my_txdb %>%
 #   asBED
 ```
 
-
-
-```{r}
-my_txdb %>%
-  asBED
-```
-
-```{r}
-read_tsv("../coverage_play/CNAG_06125.bed")
-```
-
-```{bash}
+```{bash eval=FALSE, include=FALSE}
 grep 375937 ../coverage_play/blah.bed > ../coverage_play/CNAG_06125.bed
 ```
 
-```{bash}
+```{bash eval=FALSE, include=FALSE}
 set -u
 # geneBody_coverage.py -r hg19.housekeeping.bed -i test.bam  -o output
 geneBody_coverage.py -r ../coverage_play/CNAG_06125.bed -i /workspace/2019_sample_out/enrich_compare_starout/SRR12933729_Aligned.sortedByCoord.out.bam  -o ../coverage_play/blah_blah
 ```
 
 
-```{bash}
+```{bash eval=FALSE, include=FALSE}
 egrep "CNAG_06125|AFR98350" ../coverage_play/blah.gff | egrep -v "polya_site|five_prime_UTR|three_prime_UTR|CDS" > ../coverage_play/CNAG_06125.gff
 ```
 
 
-```{r}
+```{r eval=FALSE, include=FALSE}
 starout_2019_dir %>%
   list.files(pattern = ".bam$", full.names = TRUE) %>%
   head(1) %>%
@@ -450,17 +371,17 @@ starout_2019_dir %>%
   mybam
 ```
 
-```{bash}
+```{bash eval=FALSE, include=FALSE}
 set -u
 grep CNAG_06125 $GTF | egrep -v "start_codon|five_prime_utr|three_prime_utr|CDS" > $DEMO_GTF
 ```
 
-```{bash}
+```{bash eval=FALSE, include=FALSE}
 cat ../coverage_play/CNAG_06125.gff
 ```
 
 
-```{r}
+```{r eval=FALSE, include=FALSE}
 cov.matrix(mybam, coordfile="../coverage_play/CNAG_06125.gff",no_windows=100,
            offset=10,num_cores=total_threads,normalization="rpm") ->
   demo_matrix

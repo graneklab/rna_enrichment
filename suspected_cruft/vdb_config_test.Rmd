@@ -1,0 +1,185 @@
+---
+title: "Download Data"
+output:
+  html_document:
+    toc: false
+---
+
+```{r}
+source("run_config.R")
+
+# library(GEOquery)
+# library(dplyr)
+# library(rentrez)
+# library(readr)
+library(stringr)
+# library(fs)
+library(R.utils)
+# library(purrr)
+# library(tibble)
+library(tools)
+```
+
+# Download FASTQs from SRA
+## fasterqDump Definition
+```{r}
+fasterqDump = function(accession,
+                       outdir,
+                       tempdir = NULL,
+                       gzip = TRUE,
+                       md5_df = NULL) {
+  # Check if file is downloaded and OK
+  accession %>%
+    path_ext_set("fastq") ->
+    fastq_file
+  
+  fastq_file %>%
+    paste0(".gz") ->
+    fastq_gz_file
+  
+  fastq_gz_file %>%
+    file.path(outdir, .) ->
+    fastq_gz_path
+  
+  fastq_file %>%
+    file.path(outdir, .) ->
+    fastq_path
+  
+  if (gzip == TRUE) {
+    final_path = fastq_gz_path
+  }
+  else {
+    final_path = fastq_path
+  }
+  
+  if(!is.null(md5_df)){
+    final_path %>%
+      basename ->
+      final_file
+    
+    final_path %>%
+      md5sum ->
+      observed_md5
+    
+    md5_df %>%
+      filter(filename == final_file) %>%
+      pull(md5sum) ->
+      true_md5
+    
+    if (file.exists(final_path) && true_md5 == observed_md5){
+      cat("MD5sum match", fastq_gz_path, true_md5, fill = TRUE)
+      return(final_path)
+    }
+  }
+  cat("Need to download", accession, fill = TRUE)
+  fasterq_args =  c(accession, "--outdir", outdir)
+  if (!is.null(tempdir)){
+    # dir.create(tempdir, recursive = TRUE)
+    fasterq_args =  c(fasterq_args, "--temp", tempdir)
+  }
+  system2(command="fasterq-dump",
+          args=fasterq_args,
+          stdout = TRUE,
+          stderr = TRUE) ->
+    std_err_out
+  
+  print(std_err_out)
+  
+  if (gzip == TRUE){
+    if (file.exists(fastq_path)){
+      final_path = gzip(fastq_path)
+    } else {
+      # check for paired reads
+      r1_path = str_replace(fastq_path,".fastq", "_1.fastq")
+      r2_path = str_replace(fastq_path,".fastq", "_2.fastq")
+      final_path = c()
+      if (file.exists(r1_path)){
+        final_path = c(final_path, gzip(r1_path))
+      }
+      if (file.exists(r2_path)){
+        final_path = c(final_path, gzip(r2_path))
+      }
+    }
+  }
+  return(final_path)
+}
+```
+
+```{r}
+play_dir = "/workspace/vdb_config_play"
+fasterqDump(accession="SRR14343065", outdir=play_dir, tempdir="/workspace/tmp")
+list.files(play_dir)
+```
+
+```{r}
+list.files(play_dir, full.names = TRUE) %>%
+  file_delete()
+```
+
+```{r}
+"~/.ncbi/user-settings.mkfg" %>%
+  path_expand ->
+  ncbi_config
+
+file_delete(ncbi_config)
+```
+
+```{bash}
+diff -s ~/.ncbi/user-settings.mkfg   ~/.ncbi/user-settings.mkfg.BACKUP
+```
+
+
+```{bash}
+vdb-config -h
+```
+
+
+
+## Deal with vdb-config
+
+# STOPPED HERE
+  - https://standage.github.io/that-darn-cache-configuring-the-sra-toolkit.html
+  - https://www.biostars.org/p/169617/
+  - https://www.biostars.org/p/210819/
+```{r}
+stop("Deal with vdb-config")
+```
+
+```{bash}
+cat  ~/.ncbi/user-settings.mkfg.BACKUP
+```
+
+
+
+
+
+```{bash}
+
+
+
+
+
+
+
+# vdb-config --restore-defaults
+rm ~/.ncbi/user-settings.mkfg
+# echo "Aexyo" | vdb-config -i
+vdb-config --set "/LIBS/GUID =`uuidgen`"
+vdb-config --set "/repository/user/main/public/root = /workspace/sra_cache" 
+
+cat  ~/.ncbi/user-settings.mkfg
+```
+```
+
+
+```{bash eval=FALSE, include=FALSE}
+cp  ~/.ncbi/user-settings.mkfg   ~/.ncbi/user-settings.mkfg.BACKUP
+chmod a-w ~/.ncbi/user-settings.mkfg.BACKUP
+```
+
+
+
+# SessionInfo
+```{r}
+sessionInfo()
+```
