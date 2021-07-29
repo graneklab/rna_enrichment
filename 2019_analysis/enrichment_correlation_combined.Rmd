@@ -308,7 +308,7 @@ norm_counts_long %>%
 ## Make Sample x Enrichment Facetted Scatter Plot
 
 ```{r}
-makeEnrichmentScatterplot <- function(norm_counts_long, fig_palette, enrich_levels) {
+makeEnrichmentScatterplot <- function(norm_counts_long, fig_palette, enrich_levels, log_scale=TRUE) {
   norm_counts_long %>%
     ggplot(aes(x=gold_mean, y=norm_count, color=enrichment_method)) +
     geom_point(alpha=0.3) +
@@ -318,8 +318,18 @@ makeEnrichmentScatterplot <- function(norm_counts_long, fig_palette, enrich_leve
     theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())  +
     facet_grid(enrichment_method ~ RNA_sample_num) +
     scale_colour_brewer(palette = fig_palette, guide = FALSE, drop=TRUE, limits = enrich_levels) +
-    geom_abline(size=0.5) %>%
+    geom_abline(size=0.5) ->
+    scatterplot
+    
+  if (log_scale==TRUE){
+    scatterplot +
+      scale_y_log10() +
+      scale_x_log10() %>%
     return
+  } else {
+    scatterplot %>%
+      return
+  }
 }
 ```
 
@@ -351,9 +361,18 @@ plotCorrelationValues(unenriched_cor, enriched_cor, dds, fig_palette, enrich_lev
 ggsave(file.path(fig.dir, "Figure_2.tiff"), compression = "lzw", width=15, height=10.71, units = "cm")
 ```
 
-```{r fig.width=8, fig.height=8}  
-makeEnrichmentScatterplot(norm_counts_long_noreps, fig_palette, enrich_levels)
-ggsave(file.path(fig.dir, "Figure_S2.tiff"), compression = "lzw", width=20, height=20, units = "cm")
+```{r fig.width=8, fig.height=16}  
+norm_counts_long_noreps %>%
+  makeEnrichmentScatterplot(fig_palette, enrich_levels, log_scale=FALSE) ->
+  s2_linear_plot
+
+plot_grid(s2_linear_plot,
+          s2_linear_plot + scale_x_log10() + scale_y_log10(), 
+          nrow=2,
+          labels = c('A', 'B'),
+          label_size = 10)
+  
+ggsave(file.path(fig.dir, "Figure_S2.tiff"), compression = "lzw", width=15, height=30, units = "cm")
 ```
 
 For each library per gene read counts were normalized by that library's total reads mapped to annotated genes (excluding rRNA genes and genes that recruit rRNA reads). A "gold standard" per gene read count was calculated as the average normalized count across the six unenriched libraries.  Libraries for each enrichment method applied to each biological replicate are ploted (technical replicates are not shown).  Each point represents a gene with the gold standard count as the x value, and the normalized count from a library as the y value.
@@ -391,12 +410,21 @@ plotCorrelationValues(protein_coding_unenriched_cor,
 ggsave(file.path(fig.dir, "Figure_3.tiff"), compression = "lzw", width=15, height=10.71, units = "cm")
 ```
 
-```{r fig.width=8, fig.height=8}  
+```{r fig.width=8, fig.height=16}  
 norm_counts_long_noreps %>%
   filter(geneid %in% protein_coding_geneids) %>%
-  makeEnrichmentScatterplot(fig_palette, enrich_levels)
-ggsave(file.path(fig.dir, "Figure_S3.tiff"), compression = "lzw", width=20, height=20, units = "cm")
+  makeEnrichmentScatterplot(fig_palette, enrich_levels, log_scale=FALSE) ->
+  s3_linear_plot
+
+plot_grid(s3_linear_plot, 
+          s3_linear_plot + scale_x_log10() + scale_y_log10(), 
+          nrow=2,
+          labels = c('A', 'B'),
+          label_size = 10)
+
+ggsave(file.path(fig.dir, "Figure_S3.tiff"), compression = "lzw", width=15, height=30, units = "cm")
 ```
+
 
 ## ncRNA Genes
 ```{r}
@@ -428,11 +456,19 @@ plotCorrelationValues(ncrna_unenriched_cor,
 ggsave(file.path(fig.dir, "Figure_4.tiff"), compression = "lzw", width=15, height=10.71, units = "cm")
 ```
 
-```{r fig.width=8, fig.height=8}  
+```{r fig.width=8, fig.height=16}  
 norm_counts_long_noreps %>%
   filter(geneid %in% ncrna_geneids) %>%
-  makeEnrichmentScatterplot(fig_palette, enrich_levels)
-ggsave(file.path(fig.dir, "Figure_S4.tiff"), compression = "lzw", width=20, height=20, units = "cm")
+  makeEnrichmentScatterplot(fig_palette, enrich_levels, log_scale=FALSE) ->
+  s4_linear_plot
+
+plot_grid(s4_linear_plot, 
+          s4_linear_plot + scale_x_log10() + scale_y_log10(), 
+          nrow=2,
+          labels = c('A', 'B'),
+          label_size = 10)
+
+ggsave(file.path(fig.dir, "Figure_S4.tiff"), compression = "lzw", width=15, height=30, units = "cm")
 ```
 
 ### Exploring RNaseH ncRNA outlier (CNAG_12993)
@@ -545,8 +581,8 @@ norm_counts_long_noreps_lost_polya %>%
   kable
 ```
 
-#Scatterplot of genes with decreased expression in Poly(A) compared to Unenriched
-```{r fig.width=8, fig.height=8}
+# Scatterplot of genes with decreased expression in Poly(A) compared to Unenriched
+```{r fig.width=8, fig.height=16}  
 norm_counts_long_noreps_lost_polya %>%
     ggplot(aes(x=gold_mean, y=norm_count, color=polya_lost)) +
     geom_point(alpha=0.3) +
@@ -556,10 +592,21 @@ norm_counts_long_noreps_lost_polya %>%
     theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())  +
     facet_grid(enrichment_method ~ RNA_sample_num) +
     scale_colour_manual(values = c("FALSE"="grey60","TRUE"="red"), guide = FALSE) +
-    geom_abline(size=0.5)
+    geom_abline(size=0.5) ->
+  lost_polya_plot
 
-ggsave(file.path(fig.dir, "Figure_S6.tiff"), compression = "lzw", width=20, height=20, units = "cm")
+plot_grid(lost_polya_plot, 
+          lost_polya_plot + scale_x_log10() + scale_y_log10(), 
+          nrow=2,
+          labels = c('A', 'B'),
+          label_size = 10)
+
+ggsave(file.path(fig.dir, "Figure_S6.tiff"), 
+       compression = "lzw", 
+       width=15, height=30, units = "cm")
 ```
+
+
 ```{r}
 import(gtf_with_mito_rrna.file, format = "gtf") %>%
   as.data.frame %>%
