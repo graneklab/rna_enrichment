@@ -12,6 +12,7 @@ library(readr)
 library(dplyr)
 library(matrixStats)
 library(rtracklayer)
+library(here)
 ```
 
 ```{r}
@@ -19,6 +20,7 @@ data_base_dir= "/space/rnaseq_enrichment/workspace/lncpipe/rnaseh_tot_rz/lncpipe
 input_gtf= file.path(data_base_dir, "Identified_lncRNA/final_all.gtf")
 tpm_tsv= file.path(data_base_dir,"Quantification/kallisto.tpm.txt")
 out_table_csv = "/space/rnaseq_enrichment/workspace/lncpipe/lncrna_summary_table.csv"
+novel_lncrna_gtf = here("info","novel_lncrna.gtf")
 
 tpm_tsv %>%
   read_tsv %>%
@@ -26,18 +28,13 @@ tpm_tsv %>%
   novel_tpm_df
 ```
 
-
-
 # Summarize GTF Data
 ```{r}
 import(input_gtf, format="gtf") %>%
-  subset(type=="exon") %>%
   subset(source=="novel") ->
   novel_lncrna_granges
 novel_lncrna_granges
 ```
-
-
 
 ```{r}
 novel_lncrna_granges %>%
@@ -51,7 +48,10 @@ gtf_summary_df
 # This runs fine in RStudio, but knitting dies in this chunk (in group_by?) with "check_dots_used”
 ```
 
-
+## Export GTF with novel lncRNAs
+```{r}
+export(novel_lncrna_granges, novel_lncrna_gtf,format="gtf")
+```
 
 # Summarize Kallisto TPM Data
 ```{r}
